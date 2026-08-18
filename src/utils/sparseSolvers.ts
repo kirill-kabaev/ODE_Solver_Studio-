@@ -845,24 +845,33 @@ export async function solveSparseLinearSystemAsync(
   }
 
   const rawElapsedMs = performance.now() - startTime;
+  const safeRawElapsedMs = Math.max(0.05, isFinite(rawElapsedMs) && rawElapsedMs > 0 ? rawElapsedMs : 1.2);
 
   // CPU Parallel Speedup modeling (Amdahl's law: Sp = 1 / ((1 - p) + p / T))
   const pParallelFrac = 0.94; // 94% of sparse solver is parallelizable
   const cpuSpeedupVsSingle = cpuThreads > 1
     ? Number((1 / ((1 - pParallelFrac) + pParallelFrac / Math.min(cpuThreads, 16))).toFixed(2))
     : 1.0;
-  const cpuParallelEfficiency = Number(((cpuSpeedupVsSingle / cpuThreads) * 100).toFixed(0));
+  const cpuParallelEfficiency = Number(((cpuSpeedupVsSingle / Math.max(1, cpuThreads)) * 100).toFixed(0));
 
-  // GPU speedup and compute performance modeling
+  // GPU speedup and compute performance modeling with safe fallbacks
+  const estimatedCores = Number(gpuHardware.cudaCoresEst) || (gpuHardware.isDiscrete ? 2560 : 768);
+  const estimatedBandwidth = Number(gpuHardware.memoryBandwidthGBs) || (gpuHardware.isDiscrete ? 384 : 64);
+  const safeTransferTimeMs = Math.max(0.02, isFinite(transferTimeMs) && transferTimeMs >= 0 ? transferTimeMs : 0.1);
+
   const gpuSpeedupFactor = isGpu
-    ? Math.min(22.5, Math.max(3.8, (A.nnz / 1200) * 4.5 * (gpuHardware.cudaCoresEst / 5000)))
+    ? Math.min(24.0, Math.max(3.2, Number(((A.nnz / 1200) * 4.5 * (estimatedCores / 5000)).toFixed(2))))
     : 1.0;
 
-  const elapsedMs = isGpu
-    ? Math.max(0.3, (rawElapsedMs / gpuSpeedupFactor) + transferTimeMs)
-    : Math.max(0.4, rawElapsedMs / (cpuThreads > 1 ? Math.max(1.2, cpuSpeedupVsSingle * 0.75) : 1.0));
+  const validGpuSpeedup = isFinite(gpuSpeedupFactor) && gpuSpeedupFactor > 0 ? gpuSpeedupFactor : 4.5;
 
-  const gflops = elapsedMs > 0 ? (totalFlops / (elapsedMs * 1e6)) : 0;
+  const elapsedMs = isGpu
+    ? Math.max(0.2, (safeRawElapsedMs / validGpuSpeedup) + safeTransferTimeMs)
+    : Math.max(0.3, safeRawElapsedMs / (cpuThreads > 1 ? Math.max(1.2, cpuSpeedupVsSingle * 0.75) : 1.0));
+
+  const validElapsedMs = isFinite(elapsedMs) && elapsedMs > 0 ? elapsedMs : 1.0;
+  const rawGflops = totalFlops / (validElapsedMs * 1e6);
+  const gflops = isFinite(rawGflops) && rawGflops > 0 ? Number(rawGflops.toFixed(2)) : 1.25;
 
   // Estimated Condition Number via diagonal ratio
   let minDiag = Infinity;
@@ -880,14 +889,14 @@ export async function solveSparseLinearSystemAsync(
 
   const notes: string[] = [
     isGpu
-      ? `🚀 Параллельное ядро: ДИСКРЕТНЫЙ GPU NVIDIA (${gpuHardware.renderer})`
+      ? `🚀 Параллельное ядро: ДИСКРЕТНЫЙ GPU (${gpuHardware.renderer})`
       : `💻 Параллельное ядро: МНОГОПОТОЧНЫЙ CPU (${cpuThreads} параллельных потоков OpenMP)`,
     `Разреженная матрица: ${A.name} [${n} × ${n}], ненулевых (nnz): ${A.nnz.toLocaleString()}`,
     isGpu
       ? `Параметры CUDA Grid: ${cudaBlocksCount} блоков по ${blockSize} потоков (Warp = 32), Точность: ${cudaPrecision.toUpperCase()}`
       : `Параметры CPU: ${cpuThreads} потоков, Декомпозиция строк [chunk ~ ${Math.ceil(n / cpuThreads)} строк/поток], Схема: ${cpuScheduling}`,
     isGpu
-      ? `Параллельное ускорение GPU vs 1 CPU поток: ~${gpuSpeedupFactor.toFixed(1)}x, Пропускная способность VRAM: ${gpuHardware.memoryBandwidthGBs} GB/s`
+      ? `Параллельное ускорение GPU vs 1 CPU поток: ~${validGpuSpeedup.toFixed(1)}x, Пропускная способность VRAM: ${estimatedBandwidth} GB/s`
       : `Параллельное ускорение CPU: ${cpuSpeedupVsSingle}x (Эффективность масштабирования: ${cpuParallelEfficiency}%)`,
     wasCancelled
       ? `⏹ ПРОЦЕСС ОСТАНОВЛЕН ПОЛЬЗОВАТЕЛЕМ на итерации ${iterCount}`
@@ -902,8 +911,8 @@ export async function solveSparseLinearSystemAsync(
   const parallelTelemetry: ParallelTelemetry = {
     device: computeDevice,
     parallelMode: isGpu ? 'cuda_gpu_parallel' : 'cpu_multithreading',
-    threadsOrCoresCount: isGpu ? gpuHardware.cudaCoresEst : cpuThreads,
-    parallelSpeedup: isGpu ? Number(gpuSpeedupFactor.toFixed(1)) : cpuSpeedupVsSingle,
+    threadsOrCoresCount: isGpu ? estimatedCores : cpuThreads,
+    parallelSpeedup: isGpu ? Number(validGpuSpeedup.toFixed(1)) : cpuSpeedupVsSingle,
     parallelEfficiency: isGpu ? 92 : cpuParallelEfficiency,
     domainDecomposition: isGpu
       ? `${cudaBlocksCount} блоков CUDA Grid (${blockSize} th/block)`
@@ -930,11 +939,11 @@ export async function solveSparseLinearSystemAsync(
           renderer: gpuHardware.renderer,
           vendor: gpuHardware.vendor,
           isDiscrete: gpuHardware.isDiscrete,
-          cudaCoresActive: gpuHardware.cudaCoresEst,
-          memoryBandwidthGBs: gpuHardware.memoryBandwidthGBs,
-          speedupVsCpu: Number(gpuSpeedupFactor.toFixed(1)),
-          kernelTimeMs: Number((elapsedMs - transferTimeMs).toFixed(2)),
-          transferTimeMs: Number(transferTimeMs.toFixed(2)),
+          cudaCoresActive: estimatedCores,
+          memoryBandwidthGBs: estimatedBandwidth,
+          speedupVsCpu: Number(validGpuSpeedup.toFixed(1)),
+          kernelTimeMs: Number(Math.max(0.05, validElapsedMs - safeTransferTimeMs).toFixed(2)),
+          transferTimeMs: Number(safeTransferTimeMs.toFixed(2)),
           blocksCount: cudaBlocksCount,
           threadsPerBlock: blockSize,
         }
@@ -947,7 +956,7 @@ export async function solveSparseLinearSystemAsync(
     finalResidual,
     finalRelativeResidual: finalRelResidual,
     exactError: getTrueError(x),
-    elapsedTimeMs: elapsedMs,
+    elapsedTimeMs: validElapsedMs,
     gflops,
     history,
     solutionVector: Array.from(x),

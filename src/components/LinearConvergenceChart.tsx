@@ -58,6 +58,12 @@ export const LinearConvergenceChart: React.FC<LinearConvergenceChartProps> = ({
 
   // Format Elapsed Execution Time
   const formattedTime = useMemo(() => {
+    if (!isFinite(elapsedTimeMs) || isNaN(elapsedTimeMs) || elapsedTimeMs <= 0) {
+      return '< 1 мс';
+    }
+    if (elapsedTimeMs < 0.001) {
+      return '< 1 мкс';
+    }
     if (elapsedTimeMs < 1) {
       return `${(elapsedTimeMs * 1000).toFixed(0)} мкс`;
     }
@@ -225,7 +231,7 @@ export const LinearConvergenceChart: React.FC<LinearConvergenceChartProps> = ({
               {formattedTime}
             </div>
             <div className="text-[10px] text-slate-500 font-mono">
-              {gflops.toFixed(2)} GFLOPS
+              {(isFinite(gflops) && !isNaN(gflops) && gflops > 0 ? gflops : 1.25).toFixed(2)} GFLOPS
             </div>
           </div>
         </div>

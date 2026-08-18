@@ -212,6 +212,8 @@ export function formatBytes(bytes: number): string {
 }
 
 export function formatSolverTime(ms: number): string {
+  if (!isFinite(ms) || isNaN(ms) || ms <= 0) return '< 1 мс';
+  if (ms < 0.001) return '< 1 мкс';
   if (ms < 1) return `${(ms * 1000).toFixed(0)} мкс`;
   if (ms < 1000) return `${ms.toFixed(1)} мс`;
   return `${(ms / 1000).toFixed(3)} с (${ms.toFixed(0)} мс)`;
