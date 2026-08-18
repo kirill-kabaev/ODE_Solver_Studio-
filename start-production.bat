@@ -1,137 +1,145 @@
 @echo off
 REM ==============================================================================
 REM Студия СЛАУ и Дифференциальных Уравнений (Production Launcher with Auto-Setup)
-REM Автоматическая установка и запуск "всё-в-одном" для Windows 10/11
 REM ==============================================================================
 
-setlocal enabledelayedexpansion
 cd /d "%~dp0"
 chcp 65001 >nul 2>&1
 title Студия СЛАУ и Дифференциальных Уравнений [Production Auto-Setup]
 
 cls
 echo ==============================================================================
-echo 🚀 Инициализация: Студия СЛАУ и Дифференциальных Уравнений
+echo [СТАРТ] Студия СЛАУ и Дифференциальных Уравнений
 echo ==============================================================================
 echo.
 
 REM ------------------------------------------------------------------------------
-REM Шаг 1: Проверка наличия Node.js и npm в системе
+REM Шаг 1: Проверка наличия Node.js и npm
 REM ------------------------------------------------------------------------------
-echo [1/5] Проверка системного окружения (Node.js & npm)...
+echo [1/5] Проверка системного окружения Node.js и npm...
 where node >nul 2>&1
-if %ERRORLEVEL% NEQ 0 (
-    echo.
-    echo ==============================================================================
-    echo ⚠️ [ВНИМАНИЕ] Node.js не обнаружен в вашей операционной системе!
-    echo ==============================================================================
-    echo Для работы приложения требуется среда выполнения Node.js (LTS).
-    echo.
-    where winget >nul 2>&1
-    if !ERRORLEVEL! EQU 0 (
-        echo Обнаружен диспетчер пакетов Windows (winget).
-        echo Попытка автоматической установки Node.js LTS...
-        winget install OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements
-        if !ERRORLEVEL! EQU 0 (
-            echo.
-            echo ✅ Node.js успешно установлен! 
-            echo Пожалуйста, перезапустите этот батник (start-production.bat) для обновления путей PATH.
-            pause
-            exit /b 0
-        )
+if %ERRORLEVEL% NEQ 0 goto :NO_NODE
+
+where npm >nul 2>&1
+if %ERRORLEVEL% NEQ 0 goto :NO_NODE
+
+for /f "tokens=*" %%i in ('node -v') do set NODE_VER=%%i
+for /f "tokens=*" %%i in ('npm -v') do set NPM_VER=%%i
+echo [+] Среда найдена: Node.js %NODE_VER%, npm v%NPM_VER%
+goto :CHECK_ENV
+
+:NO_NODE
+echo.
+echo ==============================================================================
+echo [ВНИМАНИЕ] Node.js не обнаружен в вашей операционной системе!
+echo ==============================================================================
+echo Для работы приложения требуется среда выполнения Node.js (версия LTS).
+echo.
+echo Пробуем автоматическую установку через winget...
+where winget >nul 2>&1
+if %ERRORLEVEL% EQU 0 (
+    winget install OpenJS.NodeJS.LTS --accept-package-agreements --accept-source-agreements
+    if %ERRORLEVEL% EQU 0 (
+        echo.
+        echo [+] Node.js успешно установлен!
+        echo Пожалуйста, перезапустите этот батник (start-production.bat).
+        pause
+        exit /b 0
     )
-    echo Открываем страницу скачивания Node.js в вашем браузере...
-    start https://nodejs.org/
-    echo Пожалуйста, скачайте и установите Node.js (LTS версия), затем перезапустите данный батник.
-    echo.
-    pause
-    exit /b 1
 )
-
-for /f "tokens=*" %%i in ('node -v') do set NODE_VERSION=%%i
-for /f "tokens=*" %%i in ('npm -v') do set NPM_VERSION=%%i
-echo ✅ Среда найдена: Node.js %NODE_VERSION%, npm v%NPM_VERSION%
+echo Открываем официальный сайт Node.js для скачивания...
+start https://nodejs.org/
+echo Пожалуйста, установите Node.js LTS и перезапустите данный батник.
+echo.
+pause
+exit /b 1
 
 REM ------------------------------------------------------------------------------
-REM Шаг 2: Проверка и создание файла конфигурации .env
+REM Шаг 2: Проверка и создание .env
 REM ------------------------------------------------------------------------------
+:CHECK_ENV
 echo.
 echo [2/5] Проверка конфигурационного файла .env...
-if not exist ".env" (
-    echo [ПЕРВЫЙ ЗАПУСК] Файл .env не найден. Создаем базовый .env...
-    if exist ".env.example" (
-        copy /Y ".env.example" ".env" >nul
-    ) else (
-        (
-            echo # Конфигурация API ключей
-            echo GEMINI_API_KEY=
-        ) > ".env"
-    )
-    echo ✅ Файл .env создан. (При необходимости вставьте GEMINI_API_KEY для символьного ИИ-решателя).
+if exist ".env" goto :ENV_OK
+
+echo [*] Создание базового файла .env...
+if exist ".env.example" (
+    copy /Y ".env.example" ".env" >nul
 ) else (
-    echo ✅ Файл .env присутствует.
+    echo GEMINI_API_KEY=>".env"
 )
+echo [+] Файл .env успешно создан.
+goto :CHECK_DEPS
+
+:ENV_OK
+echo [+] Файл .env присутствует.
 
 REM ------------------------------------------------------------------------------
 REM Шаг 3: Автоматическая установка зависимостей при первом запуске
 REM ------------------------------------------------------------------------------
+:CHECK_DEPS
 echo.
-echo [3/5] Проверка пакетов и модулей (node_modules)...
-if not exist "node_modules\" (
-    echo [ПЕРВЫЙ ЗАПУСК] Папка node_modules отсутствует. 
-    echo 📦 Выполняется автоматическая установка всех необходимых библиотек (npm install)...
-    echo Пожалуйста, подождите, это займет около 20-40 секунд...
-    call npm install
-    if !ERRORLEVEL! NEQ 0 (
-        echo.
-        echo ❌ [ОШИБКА] Не удалось установить npm зависимости!
-        echo Проверьте подключение к интернету или права доступа.
-        pause
-        exit /b !ERRORLEVEL!
-    )
-    echo ✅ Все зависимости успешно установлены!
-) else (
-    echo ✅ Все зависимости (node_modules) уже установлены.
+echo [3/5] Проверка установленных пакетов node_modules...
+if exist "node_modules\" goto :DEPS_OK
+
+echo [*] Папка node_modules не найдена.
+echo [*] Выполняется автоматическая установка библиотек (npm install)...
+echo Пожалуйста, подождите...
+call npm install
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo [-] Ошибка при установке npm пакетов!
+    echo Проверьте подключение к сети интернет.
+    pause
+    exit /b %ERRORLEVEL%
 )
+echo [+] Все зависимости успешно установлены!
+goto :CHECK_BUILD
+
+:DEPS_OK
+echo [+] Все зависимости node_modules уже установлены.
 
 REM ------------------------------------------------------------------------------
-REM Шаг 4: Проверка сборки Production-бандла (dist)
+REM Шаг 4: Проверка сборки Production-бандла
 REM ------------------------------------------------------------------------------
+:CHECK_BUILD
 echo.
 echo [4/5] Проверка production-сборки (dist)...
-if not exist "dist\server.cjs" (
-    echo ⚙️ Выполняется компиляция и оптимизация проекта (npm run build)...
-    set NODE_ENV=production
-    call npm run build
-    if !ERRORLEVEL! NEQ 0 (
-        echo.
-        echo ❌ [ОШИБКА] Сборка проекта завершилась с ошибкой!
-        pause
-        exit /b !ERRORLEVEL!
-    )
-    echo ✅ Проект успешно скомпилирован!
-) else (
-    echo ✅ Готовая production-сборка обнаружена.
+if exist "dist\server.cjs" goto :BUILD_OK
+
+echo [*] Выполняется компиляция проекта (npm run build)...
+set NODE_ENV=production
+call npm run build
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo [-] Ошибка компиляции проекта!
+    pause
+    exit /b %ERRORLEVEL%
 )
+echo [+] Проект успешно скомпилирован!
+goto :START_SERVER
+
+:BUILD_OK
+echo [+] Готовая production-сборка обнаружена.
 
 REM ------------------------------------------------------------------------------
-REM Шаг 5: Запуск сервера и открытие приложения в браузере
+REM Шаг 5: Запуск сервера и открытие браузера
 REM ------------------------------------------------------------------------------
+:START_SERVER
 echo.
 echo ==============================================================================
-echo ✨ [5/5] Запуск Production-сервера (npm start)...
-echo 🌐 Адрес приложения: http://localhost:3000
-echo 🚀 Открытие браузера...
+echo [5/5] Запуск Production-сервера...
+echo Сервер доступен по адресу: http://localhost:3000
 echo ==============================================================================
 set NODE_ENV=production
 
-REM Фоновое открытие браузера через 2 секунды после старта
-start /b cmd /c "timeout /t 2 /nobreak >nul & start http://localhost:3000"
+REM Фоновое открытие браузера через 2 секунды
+start "" cmd /c "timeout /t 2 /nobreak >nul & start http://localhost:3000"
 
 call npm start
 if %ERRORLEVEL% NEQ 0 (
     echo.
-    echo ❌ [ОШИБКА] Сервер завершил работу с кодом %ERRORLEVEL%
+    echo [-] Сервер завершил работу с ошибкой %ERRORLEVEL%
     pause
     exit /b %ERRORLEVEL%
 )
