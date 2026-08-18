@@ -1035,9 +1035,9 @@ export const LinearSolverStudio: React.FC = () => {
               <h2 className="text-sm sm:text-base font-bold text-white tracking-wide flex items-center gap-2">
                 <span>3. СХОДИМОСТЬ И ТЕЛЕМЕТРИЯ РЕШЕНИЯ СЛАУ</span>
               </h2>
-              <p className="text-xs text-slate-400">
-                Логарифмическая динамика невязки log₁₀(||r_k|| / ||r_0||), секундомер и производительность вычислений
-              </p>
+              <div className="text-xs text-slate-400">
+                <MathText text="Логарифмическая динамика невязки $\log_{10}(\|r_k\|_2 / \|b\|_2)$, секундомер и производительность вычислений" />
+              </div>
             </div>
           </div>
 
@@ -1054,8 +1054,8 @@ export const LinearSolverStudio: React.FC = () => {
           )}
         </div>
 
-        <div className="p-4 sm:p-6 flex flex-col gap-6">
-          <LinearConvergenceChart result={solverResult} tolerance={tolerance} height={320} />
+        <div className="p-3 sm:p-5 flex flex-col gap-5">
+          <LinearConvergenceChart result={solverResult} tolerance={tolerance} height={580} />
 
           {/* Solution Vector Components Preview */}
           {solverResult && solverResult.solutionVector.length > 0 && (
