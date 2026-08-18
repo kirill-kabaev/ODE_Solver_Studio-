@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    @apply bg-slate-950 text-slate-100 antialiased scroll-smooth;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  body {
+    @apply bg-slate-950 text-slate-100 min-h-screen;
+    font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom sleek scrollbars for windows */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(15, 23, 42, 0.6);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.8);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(14, 165, 233, 0.6);
+}
+
+/* KaTeX custom sizing & contrast */
+.katex {
+  font-size: 1.08em;
+  text-rendering: auto;
+}
+
+.katex-display {
+  margin: 0.5em 0 !important;
+}
