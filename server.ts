@@ -4,6 +4,7 @@ import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
+import { detectSystemGpus } from "./server/hardware";
 
 dotenv.config();
 
@@ -31,6 +32,16 @@ function getAI(): GoogleGenAI {
 
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", time: new Date().toISOString() });
+});
+
+// Real System GPU Hardware Detection Endpoint
+app.get("/api/hardware/gpus", async (req, res) => {
+  try {
+    const gpus = await detectSystemGpus();
+    res.json({ success: true, gpus });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message || "Failed to query system GPUs", gpus: [] });
+  }
 });
 
 // Symbolic ODE Solver API Endpoint

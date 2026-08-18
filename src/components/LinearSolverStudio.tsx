@@ -42,7 +42,7 @@ import {
 } from '../types/sparse';
 import { generateSyntheticSuiteSparseMatrix } from '../utils/matrixMarket';
 import { solveSparseLinearSystemAsync } from '../utils/sparseSolvers';
-import { detectHighPerformanceGPU, NVIDIA_GPU_PRESETS } from '../utils/gpuSolver';
+import { detectHighPerformanceGPU } from '../utils/gpuSolver';
 import {
   detectLocalGpus,
   DetectedGpuDevice,
@@ -588,7 +588,7 @@ export const LinearSolverStudio: React.FC = () => {
               }`}
             >
               <Zap className="w-4 h-4 text-emerald-400 fill-current" />
-              <span>🚀 Дискретный GPU NVIDIA GeForce RTX (CUDA Cores)</span>
+              <span>🚀 Аппаратный GPU ({gpuHardware.modelLabel || 'NVIDIA / AMD / Intel'})</span>
             </button>
 
             {/* CPU Button */}
@@ -607,67 +607,35 @@ export const LinearSolverStudio: React.FC = () => {
           </div>
         </div>
 
-        {/* CUDA Hardware & NVIDIA Model Selection Sub-Bar (When GPU selected) */}
+        {/* Real Hardware GPU Selection & Specifications Sub-Bar (When GPU selected) */}
         {computeDevice === 'cuda_gpu' && (
           <div className="px-5 py-4 bg-emerald-950/20 border-b border-emerald-500/20 flex flex-col gap-3.5 text-xs">
             <div className="flex flex-wrap items-center justify-between gap-3">
-              {/* NVIDIA Model Selector */}
+              {/* Real Local GPU Selector */}
               <div className="flex items-center gap-2.5 flex-wrap">
                 <span className="text-slate-200 font-bold flex items-center gap-1.5">
                   <Server className="w-4 h-4 text-emerald-400" />
-                  Модель видеокарты NVIDIA:
+                  Видеокарта на вашем ПК:
                 </span>
 
-                <select
-                  value={selectedNvidiaModel}
-                  onChange={(e) => setSelectedNvidiaModel(e.target.value)}
-                  className="bg-slate-950 border border-emerald-500/60 rounded-xl px-3 py-1.5 text-xs text-emerald-300 font-medium cursor-pointer shadow-inner font-mono max-w-md"
-                >
-                  {gpuFilterMode === 'only_my_detected' && detectedGpus.length > 0 ? (
-                    <optgroup label="✨ Распознано на вашем компьютере:">
-                      {detectedGpus.map((d) => (
-                        <option key={d.matchedSpec.id} value={d.matchedSpec.id}>
-                          ✅ [Обнаружено на ПК] {d.matchedSpec.name} ({d.matchedSpec.cudaCores.toLocaleString()} CUDA ядер)
-                        </option>
-                      ))}
-                    </optgroup>
-                  ) : (
-                    <>
-                      {detectedGpus.length > 0 && (
-                        <optgroup label="✨ Распознано на вашем компьютере:">
-                          {detectedGpus.map((d) => (
-                            <option key={`detected_${d.matchedSpec.id}`} value={d.matchedSpec.id}>
-                              ✅ [Обнаружено на ПК] {d.matchedSpec.name} ({d.matchedSpec.cudaCores.toLocaleString()} CUDA ядер)
-                            </option>
-                          ))}
-                        </optgroup>
-                      )}
-                      <optgroup label="🌐 Полный каталог видеокарт NVIDIA:">
-                        {KNOWN_NVIDIA_GPUS.map((g) => (
-                          <option key={g.id} value={g.id}>
-                            {g.name} ({g.cudaCores.toLocaleString()} CUDA, {g.bandwidthGBs} GB/s)
-                          </option>
-                        ))}
-                      </optgroup>
-                    </>
-                  )}
-                </select>
-
-                {/* Filter Mode Toggle */}
-                <button
-                  type="button"
-                  onClick={() =>
-                    setGpuFilterMode((prev) =>
-                      prev === 'only_my_detected' ? 'all_nvidia' : 'only_my_detected'
-                    )
-                  }
-                  className="text-[11px] font-mono px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-900 text-slate-300 hover:text-white hover:border-emerald-500/50 transition-all cursor-pointer"
-                  title="Переключить режим фильтрации списка"
-                >
-                  {gpuFilterMode === 'only_my_detected'
-                    ? '📁 Показать всю базу NVIDIA'
-                    : '🎯 Только мои обнаруженные GPU'}
-                </button>
+                {detectedGpus.length > 1 ? (
+                  <select
+                    value={selectedNvidiaModel}
+                    onChange={(e) => setSelectedNvidiaModel(e.target.value)}
+                    className="bg-slate-950 border border-emerald-500/60 rounded-xl px-3 py-1.5 text-xs text-emerald-300 font-medium cursor-pointer shadow-inner font-mono max-w-md"
+                  >
+                    {detectedGpus.map((d) => (
+                      <option key={d.id} value={d.id}>
+                        ✅ {d.matchedSpec.name} ({d.matchedSpec.vramFormatted || (d.matchedSpec.isDiscrete ? 'Дискретная' : 'Интегрированная')})
+                      </option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="px-3 py-1.5 rounded-xl bg-slate-950 border border-emerald-500/40 text-emerald-300 font-mono font-bold flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>{gpuHardware.modelLabel || 'Автоматически распознанный GPU'}</span>
+                  </div>
+                )}
 
                 {/* Rescan Button */}
                 <button
@@ -675,10 +643,10 @@ export const LinearSolverStudio: React.FC = () => {
                   onClick={handleRescanGpus}
                   disabled={isScanningGpus}
                   className="text-[11px] text-cyan-400 hover:text-cyan-300 flex items-center gap-1 cursor-pointer bg-slate-900 px-2.5 py-1 rounded-lg border border-cyan-500/30"
-                  title="Повторно запустить аппаратный сканер WebGL/WebGPU"
+                  title="Повторно опросить ОС и драйверы"
                 >
                   <RotateCcw className={`w-3 h-3 ${isScanningGpus ? 'animate-spin' : ''}`} />
-                  <span>{isScanningGpus ? 'Сканирование...' : 'Пересканировать ПК'}</span>
+                  <span>{isScanningGpus ? 'Опрос ОС...' : 'Обновить'}</span>
                 </button>
 
                 {/* Inspector Modal Button */}
@@ -688,37 +656,36 @@ export const LinearSolverStudio: React.FC = () => {
                   className="text-[11px] text-emerald-400 hover:text-emerald-300 flex items-center gap-1 cursor-pointer bg-emerald-950/40 px-2.5 py-1 rounded-lg border border-emerald-500/40 font-medium"
                 >
                   <Sparkles className="w-3 h-3 text-emerald-400" />
-                  <span>Инспектор ядер и GFLOPS</span>
-                </button>
-
-                <button
-                  onClick={() => setShowNvidiaGuideModal(true)}
-                  className="text-[11px] text-slate-400 hover:text-slate-200 underline flex items-center gap-1 ml-1 cursor-pointer"
-                >
-                  <Info className="w-3 h-3" />
-                  <span>Настройка Windows</span>
+                  <span>Инспектор видеокарт ПК</span>
                 </button>
               </div>
 
               {/* Hardware Quick Metrics Pill */}
               <div className="flex items-center gap-2 text-[11px] font-mono text-slate-300 bg-slate-950/90 px-3 py-1.5 rounded-xl border border-emerald-500/40 shadow-inner">
-                <span className="text-emerald-400 font-bold">{gpuHardware.cudaCoresEst.toLocaleString()} CUDA ядер</span>
+                <span className="text-emerald-400 font-bold">{gpuHardware.vendor || 'GPU'}</span>
                 <span className="text-slate-600">|</span>
-                <span>FP32: <strong className="text-cyan-300">{gpuHardware.fp32TFlops || 40.0} TFLOPS</strong></span>
+                <span>Память: <strong className="text-amber-300">{gpuHardware.vramFormatted || 'Выделенная'}</strong></span>
                 <span className="text-slate-600">|</span>
-                <span>ПСП: <strong className="text-amber-300">{gpuHardware.memoryBandwidthGBs} GB/s</strong></span>
+                <span>Тип: <strong className="text-cyan-300">{gpuHardware.isDiscrete ? 'Дискретная' : 'Интегрированная'}</strong></span>
               </div>
             </div>
 
-            {/* Comprehensive Core Architecture & Flops Breakdown Card */}
+            {/* Comprehensive Real Hardware Specs Card */}
             <div className="p-3.5 rounded-xl bg-slate-950/80 border border-emerald-500/20 flex flex-col gap-3 font-mono">
               <div className="flex items-center justify-between flex-wrap gap-2 text-[11px]">
                 <div className="flex items-center gap-2">
                   <span className="text-slate-400">Архитектура:</span>
                   <strong className="text-slate-200">{gpuHardware.computeCapability}</strong>
+                  {gpuHardware.driverVersion && (
+                    <>
+                      <span className="text-slate-600">•</span>
+                      <span className="text-slate-400">Драйвер:</span>
+                      <strong className="text-slate-200">{gpuHardware.driverVersion}</strong>
+                    </>
+                  )}
                   <span className="text-slate-600">•</span>
-                  <span className="text-slate-400">VRAM:</span>
-                  <strong className="text-amber-300">{gpuHardware.vramGB || 12} GB</strong>
+                  <span className="text-slate-400">Видеопамять:</span>
+                  <strong className="text-amber-300">{gpuHardware.vramFormatted || 'VRAM'}</strong>
                 </div>
 
                 {/* Quick Real GFLOPS Benchmark Button */}
@@ -726,7 +693,7 @@ export const LinearSolverStudio: React.FC = () => {
                   {realtimeMeasuredGflops !== null && (
                     <div className="flex items-center gap-1.5 text-emerald-300 bg-emerald-950/40 px-2.5 py-0.5 rounded-lg border border-emerald-500/30 text-[11px]">
                       <Gauge className="w-3 h-3 text-emerald-400" />
-                      <span>Измерено на ПК: <strong>{realtimeMeasuredGflops.toFixed(1)} GFLOPS</strong></span>
+                      <span>Фактическая скорость на ПК: <strong>{realtimeMeasuredGflops.toFixed(1)} GFLOPS</strong></span>
                     </div>
                   )}
 
@@ -737,47 +704,43 @@ export const LinearSolverStudio: React.FC = () => {
                     className="px-2.5 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-300 border border-emerald-500/50 text-[11px] font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                   >
                     <Zap className={`w-3 h-3 text-amber-400 ${isBenchmarkingGpu ? 'animate-bounce' : ''}`} />
-                    <span>{isBenchmarkingGpu ? 'Тестирование GPU...' : '⚡ Тест GFLOPS на моем GPU'}</span>
+                    <span>{isBenchmarkingGpu ? 'Тестирование GPU...' : '⚡ Измерить реальные GFLOPS'}</span>
                   </button>
                 </div>
               </div>
 
-              {/* Extended Core Distribution Grid ("сколько ядер куда") */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 text-[10px] pt-2 border-t border-slate-800/80">
+              {/* Hardware Parameters Grid */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-[10px] pt-2 border-t border-slate-800/80">
                 <div className="p-2 rounded-lg bg-slate-900/80 border border-slate-800">
-                  <span className="text-slate-500 block text-[9px]">CUDA Ядра</span>
-                  <span className="text-emerald-400 font-bold text-xs">{gpuHardware.cudaCoresEst.toLocaleString()}</span>
-                  <span className="text-slate-500 block text-[8px]">FP32 Shaders</span>
+                  <span className="text-slate-500 block text-[9px]">Производитель</span>
+                  <span className="text-emerald-400 font-bold text-xs">{gpuHardware.vendor}</span>
+                  <span className="text-slate-500 block text-[8px]">{gpuHardware.isDiscrete ? 'Дискретный адаптер' : 'Встроенный адаптер'}</span>
                 </div>
 
                 <div className="p-2 rounded-lg bg-slate-900/80 border border-slate-800">
-                  <span className="text-slate-500 block text-[9px]">SM Блоки</span>
-                  <span className="text-cyan-400 font-bold text-xs">{gpuHardware.smCount || 60} SM</span>
-                  <span className="text-slate-500 block text-[8px]">{gpuHardware.coresPerSm || 128} ядер/SM</span>
+                  <span className="text-slate-500 block text-[9px]">Видеопамять</span>
+                  <span className="text-cyan-400 font-bold text-xs">{gpuHardware.vramFormatted || 'VRAM'}</span>
+                  <span className="text-slate-500 block text-[8px]">Параллельные буферы СЛАУ</span>
                 </div>
 
-                <div className="p-2 rounded-lg bg-slate-900/80 border border-slate-800">
-                  <span className="text-slate-500 block text-[9px]">Tensor Cores</span>
-                  <span className="text-purple-400 font-bold text-xs">{gpuHardware.tensorCores || 240} ядер</span>
-                  <span className="text-slate-500 block text-[8px]">Матричные блоки AI</span>
-                </div>
+                {gpuHardware.cudaCoresEst !== undefined && gpuHardware.cudaCoresEst > 0 ? (
+                  <div className="p-2 rounded-lg bg-slate-900/80 border border-slate-800">
+                    <span className="text-slate-500 block text-[9px]">CUDA ядра</span>
+                    <span className="text-purple-400 font-bold text-xs">{gpuHardware.cudaCoresEst.toLocaleString()}</span>
+                    <span className="text-slate-500 block text-[8px]">Потоковые процессоры</span>
+                  </div>
+                ) : (
+                  <div className="p-2 rounded-lg bg-slate-900/80 border border-slate-800">
+                    <span className="text-slate-500 block text-[9px]">Шейдерные ядра</span>
+                    <span className="text-purple-400 font-bold text-xs">Аппаратные</span>
+                    <span className="text-slate-500 block text-[8px]">Параллельные блоки GPU</span>
+                  </div>
+                )}
 
                 <div className="p-2 rounded-lg bg-slate-900/80 border border-slate-800">
-                  <span className="text-slate-500 block text-[9px]">RT Cores</span>
-                  <span className="text-amber-400 font-bold text-xs">{gpuHardware.rtCores || 60} ядер</span>
-                  <span className="text-slate-500 block text-[8px]">Ray Tracing</span>
-                </div>
-
-                <div className="p-2 rounded-lg bg-slate-900/80 border border-slate-800">
-                  <span className="text-slate-500 block text-[9px]">FP64 GFLOPS</span>
-                  <span className="text-emerald-300 font-bold text-xs">{gpuHardware.fp64GFlops || 626} GF</span>
-                  <span className="text-slate-500 block text-[8px]">Double Precision</span>
-                </div>
-
-                <div className="p-2 rounded-lg bg-slate-900/80 border border-slate-800">
-                  <span className="text-slate-500 block text-[9px]">SpMV Bandwidth</span>
-                  <span className="text-amber-300 font-bold text-xs">{gpuHardware.spmvEffectiveGFlops || 84} GF</span>
-                  <span className="text-slate-500 block text-[8px]">Разреженные СЛАУ</span>
+                  <span className="text-slate-500 block text-[9px]">Вычислительный конвейер</span>
+                  <span className="text-emerald-300 font-bold text-xs">Float32 / Float64</span>
+                  <span className="text-slate-500 block text-[8px]">Прямой SpMV на видеокарте</span>
                 </div>
               </div>
             </div>
