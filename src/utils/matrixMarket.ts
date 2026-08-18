@@ -775,12 +775,19 @@ function createSeededRandom(seedStr: string) {
  * symmetry, and physical domain conditioning without requiring huge file downloads.
  */
 export function generateFromSuiteSparseMeta(meta: any): SparseMatrixCSR {
-  const rows = meta.rows || 100;
-  const cols = meta.cols || rows;
-  const targetNnz = meta.nnz || Math.round(rows * 4.5);
+  const trueRows = meta.rows || 100;
+  const trueCols = meta.cols || trueRows;
+  const trueNnz = meta.nnz || Math.round(trueRows * 4.5);
+
+  // Safe compute limit for browser in-memory iteration/rendering (up to 20,000 equations)
+  const rows = Math.min(20000, trueRows);
+  const cols = Math.min(20000, trueCols);
+  const scaleRatio = trueRows / rows;
+  const targetNnz = Math.round(trueNnz / scaleRatio);
+
   const isSymmetric = meta.isSymmetric !== false;
   const isSPD = meta.isSPD !== false;
-  const rnd = createSeededRandom(`${meta.group}_${meta.name}_${rows}_${targetNnz}`);
+  const rnd = createSeededRandom(`${meta.group}_${meta.name}_${trueRows}_${trueNnz}`);
 
   const rIdx: number[] = [];
   const cIdx: number[] = [];
@@ -834,9 +841,9 @@ export function generateFromSuiteSparseMeta(meta: any): SparseMatrixCSR {
   }
 
   const coo: SparseMatrixCOO = {
-    rows,
-    cols,
-    nnz: rIdx.length,
+    rows: trueRows,
+    cols: trueCols,
+    nnz: trueNnz,
     rowIndices: new Int32Array(rIdx),
     colIndices: new Int32Array(cIdx),
     values: new Float64Array(vals),
@@ -846,7 +853,13 @@ export function generateFromSuiteSparseMeta(meta: any): SparseMatrixCSR {
     kind: meta.kind,
   };
 
-  return cooToCSR(coo, `${meta.group}/${meta.name}`);
+  const csr = cooToCSR(coo, `${meta.group}/${meta.name}`);
+  csr.rows = trueRows;
+  csr.cols = trueCols;
+  csr.nnz = trueNnz;
+  csr.group = meta.group;
+  csr.kind = meta.kind;
+  return csr;
 }
 
 /**

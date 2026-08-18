@@ -461,7 +461,7 @@ export const LinearSolverStudio: React.FC = () => {
               className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 hover:from-cyan-500/30 hover:to-indigo-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-semibold flex items-center gap-2 transition-all cursor-pointer shadow-sm"
             >
               <Database className="w-3.5 h-3.5 text-cyan-400" />
-              <span>Каталог Матриц TAMU (Все размеры: до 70K+)</span>
+              <span>Каталог Матриц TAMU (Все размеры: до 41M+)</span>
             </button>
           </div>
         </div>

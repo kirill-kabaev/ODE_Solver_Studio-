@@ -1,28 +1,20 @@
 import React, { useState, useMemo } from 'react';
 import {
-  Search,
-  Filter,
   Sliders,
   Database,
   Download,
   Upload,
   Check,
-  Globe,
-  Tag,
+  CheckCircle2,
+  Clock,
   ExternalLink,
-  Layers,
   Sparkles,
   Zap,
   ArrowDownWideNarrow,
   ArrowUpNarrowWide,
   ArrowUpDown,
-  ArrowDown,
-  ArrowUp,
   Loader2,
-  Cpu,
   Boxes,
-  HelpCircle,
-  FileCode,
 } from 'lucide-react';
 import { SUITE_SPARSE_CATALOG } from '../data/suiteSparseData';
 import { SuiteSparseMeta, SparseMatrixCSR } from '../types/sparse';
@@ -32,6 +24,7 @@ import {
   generateSyntheticSuiteSparseMatrix,
   loadSuiteSparseMatrixOnDemand,
 } from '../utils/matrixMarket';
+import { MathText } from './MathView';
 
 interface SuiteSparseCatalogModalProps {
   onLoadMatrix: (matrix: SparseMatrixCSR) => void;
@@ -45,17 +38,21 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
   onLoadMatrix,
   onClose,
 }) => {
-  // Search query
-  const [searchQuery, setSearchQuery] = useState<string>('');
+  // Loaded/cached matrices tracking state
+  const [loadedMatrixIds, setLoadedMatrixIds] = useState<Set<string>>(
+    () => new Set(['hb_can_24'])
+  );
 
   // Sorting State
   const [sortKey, setSortKey] = useState<SortKey>('size');
   const [sortOrder, setSortOrder] = useState<SortOrder>('desc'); // Default: от большей к меньшей (Size Desc)
 
-  // Matrix Size Range filter (expanded range up to 70,000+)
-  const [maxSizeLimit, setMaxSizeLimit] = useState<number>(70000);
+  // Matrix Size Range filter (full spectrum without 70,000 limitation)
+  const [maxSizeLimit, setMaxSizeLimit] = useState<number>(Infinity);
   const [minSizeLimit, setMinSizeLimit] = useState<number>(1);
-  const [sizePreset, setSizePreset] = useState<'all' | 'small' | 'medium' | 'large' | 'huge'>('all');
+  const [sizePreset, setSizePreset] = useState<
+    'all' | 'small' | 'medium' | 'large' | 'huge' | 'extreme'
+  >('all');
 
   // Group / Kind filter
   const [selectedKind, setSelectedKind] = useState<string>('all');
@@ -66,10 +63,6 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
 
   // On-demand loading state
   const [loadingMatrixId, setLoadingMatrixId] = useState<string | null>(null);
-
-  // Direct TAMU Matrix Name Import state
-  const [directMatrixInput, setDirectMatrixInput] = useState<string>('');
-  const [directInputError, setDirectInputError] = useState<string | null>(null);
 
   // Synthetic Matrix Generator state
   const [customGenFamily, setCustomGenFamily] = useState<
@@ -107,23 +100,28 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
   }, []);
 
   // Handle Preset Size Switching
-  const handleSizePreset = (preset: 'all' | 'small' | 'medium' | 'large' | 'huge') => {
+  const handleSizePreset = (
+    preset: 'all' | 'small' | 'medium' | 'large' | 'huge' | 'extreme'
+  ) => {
     setSizePreset(preset);
     if (preset === 'all') {
       setMinSizeLimit(1);
-      setMaxSizeLimit(70000);
+      setMaxSizeLimit(Infinity);
     } else if (preset === 'small') {
       setMinSizeLimit(1);
-      setMaxSizeLimit(500);
+      setMaxSizeLimit(1000);
     } else if (preset === 'medium') {
-      setMinSizeLimit(500);
-      setMaxSizeLimit(2000);
-    } else if (preset === 'large') {
-      setMinSizeLimit(2000);
+      setMinSizeLimit(1000);
       setMaxSizeLimit(10000);
-    } else if (preset === 'huge') {
+    } else if (preset === 'large') {
       setMinSizeLimit(10000);
-      setMaxSizeLimit(70000);
+      setMaxSizeLimit(100000);
+    } else if (preset === 'huge') {
+      setMinSizeLimit(100000);
+      setMaxSizeLimit(1000000);
+    } else if (preset === 'extreme') {
+      setMinSizeLimit(1000000);
+      setMaxSizeLimit(Infinity);
     }
   };
 
@@ -153,16 +151,6 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
       // Group filter
       if (selectedGroup !== 'all' && m.group !== selectedGroup) return false;
 
-      // Search query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
-        const matchName = m.name.toLowerCase().includes(q);
-        const matchGroup = m.group.toLowerCase().includes(q);
-        const matchKind = m.kind.toLowerCase().includes(q);
-        const matchDesc = m.description.toLowerCase().includes(q);
-        return matchName || matchGroup || matchKind || matchDesc;
-      }
-
       return true;
     });
 
@@ -182,7 +170,6 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
       return sortOrder === 'desc' ? -comp : comp;
     });
   }, [
-    searchQuery,
     maxSizeLimit,
     minSizeLimit,
     selectedKind,
@@ -193,137 +180,15 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
   ]);
 
   // Load a chosen matrix from catalog on demand
-  const handleSelectMatrixOnDemand = async (meta: SuiteSparseMeta) => {
+  const handleLoadMatrix = async (meta: SuiteSparseMeta) => {
     try {
       setLoadingMatrixId(meta.id);
       const csr = await loadSuiteSparseMatrixOnDemand(meta);
+      setLoadedMatrixIds((prev) => new Set(prev).add(meta.id));
       onLoadMatrix(csr);
       onClose();
     } catch (err: any) {
-      console.error('Error loading matrix on demand:', err);
-    } finally {
-      setLoadingMatrixId(null);
-    }
-  };
-
-  // Direct Import from TAMU Name or URL (e.g. "https://sparse.tamu.edu/HB/bcsstk18", "HB/bcsstk18", "Janna/Flan_1565" or "pwtk")
-  const handleDirectImport = async (overrideInput?: string) => {
-    const rawInput = (overrideInput || directMatrixInput).trim();
-    if (!rawInput) return;
-
-    setDirectInputError(null);
-
-    // Clean up input from full Texas A&M URLs, MM paths, and file extensions
-    let cleaned = rawInput;
-    cleaned = cleaned.replace(/^https?:\/\/sparse\.tamu\.edu\/?/i, '');
-    cleaned = cleaned.replace(/^MM\//i, '');
-    cleaned = cleaned.replace(/\.tar\.gz$/i, '');
-    cleaned = cleaned.replace(/\.mtx$/i, '');
-    cleaned = cleaned.replace(/\.txt$/i, '');
-
-    let group = 'HB';
-    let name = cleaned;
-
-    if (cleaned.includes('/')) {
-      const parts = cleaned.split('/');
-      group = parts[0].trim();
-      name = parts.slice(1).join('/').trim();
-    }
-
-    const lowerName = name.toLowerCase();
-    const lowerGroup = group.toLowerCase();
-
-    // 1. Check if matching in existing catalog
-    const found = SUITE_SPARSE_CATALOG.find(
-      (m) =>
-        (m.name.toLowerCase() === lowerName && m.group.toLowerCase() === lowerGroup) ||
-        `${m.group}/${m.name}`.toLowerCase() === `${lowerGroup}/${lowerName}` ||
-        m.name.toLowerCase() === lowerName ||
-        m.id.toLowerCase() === `hb_${lowerName}` ||
-        m.id.toLowerCase() === lowerName
-    );
-
-    if (found) {
-      handleSelectMatrixOnDemand(found);
-      return;
-    }
-
-    // 2. Otherwise dynamically determine physical domain and characteristics from Texas A&M group
-    try {
-      setLoadingMatrixId('direct_import');
-
-      // Infer domain kind, symmetry and typical dimensions based on TAMU group
-      let inferredKind = 'Structural Problem';
-      let isSym = true;
-      let isSpd = true;
-      let estimatedN = 1200;
-      let estimatedNnz = 9600;
-
-      const gUpper = group.toUpperCase();
-      if (gUpper === 'DAVIS' || gUpper === 'SANDIA' || gUpper === 'GRUND' || gUpper === 'SCHENK_ISE' || gUpper === 'SCHENK') {
-        inferredKind = 'Circuit & Semiconductor';
-        isSym = false;
-        isSpd = false;
-        estimatedN = 2500;
-        estimatedNnz = 18000;
-      } else if (gUpper === 'SNAP' || gUpper === 'PAJEK' || gUpper === 'NEWMAN') {
-        inferredKind = 'Complex Network & Graph';
-        isSym = true;
-        isSpd = true;
-        estimatedN = 3200;
-        estimatedNnz = 24000;
-      } else if (gUpper === 'BAI' || gUpper === 'DRIVCAV' || gUpper === 'LUCIFORA') {
-        inferredKind = 'CFD & Fluid Dynamics';
-        isSym = false;
-        isSpd = false;
-        estimatedN = 2048;
-        estimatedNnz = 14500;
-      } else if (gUpper === 'JANNA') {
-        inferredKind = '3D Geomechanics';
-        isSym = true;
-        isSpd = true;
-        estimatedN = 1565;
-        estimatedNnz = 150000;
-      } else if (gUpper === 'GHS_INDEF') {
-        inferredKind = 'Indefinite Helmholtz / Optimization';
-        isSym = true;
-        isSpd = false;
-        estimatedN = 1800;
-        estimatedNnz = 12000;
-      } else if (gUpper === 'OBERWOLFACH') {
-        inferredKind = 'MEMS Model Order Reduction';
-        isSym = true;
-        isSpd = true;
-        estimatedN = 1693;
-        estimatedNnz = 13500;
-      } else if (gUpper === 'BOEING' || gUpper === 'WILLIAMS' || gUpper === 'POTHEN' || gUpper === 'SIMON') {
-        inferredKind = 'Aerospace Structural FEA';
-        isSym = true;
-        isSpd = true;
-        estimatedN = 3000;
-        estimatedNnz = 35000;
-      }
-
-      const dynamicMeta: SuiteSparseMeta = {
-        id: `tamu_${group.toLowerCase()}_${name.toLowerCase()}`,
-        name: name,
-        group: group,
-        rows: estimatedN,
-        cols: estimatedN,
-        nnz: estimatedNnz,
-        isSymmetric: isSym,
-        isSPD: isSpd,
-        kind: inferredKind,
-        density: (estimatedNnz / (estimatedN * estimatedN)) * 100,
-        description: `Матрица ${group}/${name} из репозитория SuiteSparse Matrix Collection (sparse.tamu.edu).`,
-        downloadUrl: `https://sparse.tamu.edu/MM/${group}/${name}.tar.gz`,
-      };
-
-      const csr = await loadSuiteSparseMatrixOnDemand(dynamicMeta);
-      onLoadMatrix(csr);
-      onClose();
-    } catch (err: any) {
-      setDirectInputError(`Ошибка загрузки матрицы: ${err.message}`);
+      setUploadError(`Ошибка загрузки матрицы: ${err.message}`);
     } finally {
       setLoadingMatrixId(null);
     }
@@ -387,14 +252,13 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
                 <ExternalLink className="w-3.5 h-3.5" />
               </a>
             </h3>
-            <p className="text-xs text-slate-400">
-              Мировой эталонный репозиторий матриц всех размеров (до 70,000+ DoF и 1.6M+ ненулевых элементов).
-              Загрузка выполняется по мере потребности (On-Demand).
-            </p>
+            <div className="text-xs text-slate-400">
+              <MathText text="Мировой эталонный репозиторий матриц полного спектра (от $N = 24$ до $N = 41\,291\,594$ и $\text{NNZ} \ge 1.15\times 10^9$). Без ограничений по размерности." />
+            </div>
           </div>
         </div>
 
-        {/* Action Buttons: Direct Import & File Upload */}
+        {/* Action Buttons: Direct File Upload */}
         <div className="flex items-center gap-2 flex-wrap">
           <label className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 text-xs font-semibold text-cyan-300 cursor-pointer transition-all shadow-md">
             <Upload className="w-4 h-4 text-cyan-400" />
@@ -415,120 +279,38 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
         </div>
       )}
 
-      {/* Direct Search & URL/Name Quick Import Bar */}
-      <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col gap-2.5">
-        <div className="flex items-center gap-2 flex-wrap">
-          <FileCode className="w-4 h-4 text-cyan-400 shrink-0" />
-          <span className="text-xs text-slate-300 font-medium whitespace-nowrap">
-            Прямая загрузка по названию или URL с sparse.tamu.edu:
-          </span>
-          <input
-            type="text"
-            value={directMatrixInput}
-            onChange={(e) => setDirectMatrixInput(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleDirectImport()}
-            placeholder="Например: https://sparse.tamu.edu/HB/bcsstk18, Janna/Flan_1565, SNAP/amazon0302, nos7..."
-            className="flex-1 min-w-[240px] px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
-          />
-          <button
-            onClick={() => handleDirectImport()}
-            disabled={!directMatrixInput.trim() || loadingMatrixId !== null}
-            className="px-3.5 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-slate-950 font-bold text-xs cursor-pointer transition-all flex items-center gap-1.5 shadow-md"
-          >
-            {loadingMatrixId === 'direct_import' ? (
-              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-            ) : (
-              <Download className="w-3.5 h-3.5" />
-            )}
-            <span>Загрузить</span>
-          </button>
-        </div>
-
-        {/* Popular TAMU Matrix Chips */}
-        <div className="flex items-center gap-1.5 flex-wrap pt-1 text-[11px] border-t border-slate-800/60">
-          <span className="text-slate-500 text-[10px] uppercase tracking-wider font-semibold">Популярные TAMU:</span>
-          {[
-            'HB/can_24',
-            'HB/bcsstk01',
-            'HB/bcsstk18',
-            'HB/nos7',
-            'HB/pores_1',
-            'Bai/rdb2048',
-            'Boeing/crystk03',
-            'Boeing/pwtk',
-            'Davis/circuit5M',
-            'Janna/Flan_1565',
-            'SNAP/amazon0302',
-            'GHS_indef/helm2d03',
-            'Sandia/ASIC_320k',
-            'Newman/karate',
-            'Oberwolfach/gyro',
-            'Williams/webbase-1M',
-          ].map((chip) => (
-            <button
-              key={chip}
-              onClick={() => {
-                setDirectMatrixInput(chip);
-                handleDirectImport(chip);
-              }}
-              className="px-2 py-0.5 rounded-lg bg-slate-900 hover:bg-cyan-950 hover:text-cyan-300 border border-slate-800 hover:border-cyan-500/50 text-[10px] text-slate-300 font-mono transition-colors cursor-pointer"
-            >
-              {chip}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {directInputError && (
-        <div className="p-2.5 rounded-xl bg-rose-950/80 border border-rose-500 text-rose-300 text-xs">
-          {directInputError}
-        </div>
-      )}
-
       {/* ========================================================================= */}
       {/* 2. DEDICATED SORTING & FILTER TOOLBAR                                     */}
       {/* ========================================================================= */}
       <div className="p-4 rounded-2xl bg-slate-950/90 border border-slate-800 flex flex-col gap-4 shadow-lg">
-        {/* Row 1: Search, Kind filter, Group filter, Symmetry filter */}
+        {/* Row 1: Kind filter, Group filter, Symmetry filter */}
         <div className="flex items-center justify-between gap-3 flex-wrap">
-          {/* Search Input */}
-          <div className="relative flex-1 min-w-[220px]">
-            <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Поиск по имени (bcsstk...), группе (HB, Sandia, Boeing...), описанию..."
-              className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 transition-colors"
-            />
-          </div>
-
           {/* Group Filter */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs text-slate-400">Группа:</span>
+          <div className="flex items-center gap-1.5 flex-1 min-w-[200px]">
+            <span className="text-xs text-slate-400 whitespace-nowrap">Группа TAMU:</span>
             <select
               value={selectedGroup}
               onChange={(e) => setSelectedGroup(e.target.value)}
-              className="bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer"
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer"
             >
-              <option value="all">Все группы SuiteSparse</option>
+              <option value="all">Все группы SuiteSparse (HB, Sandia, Boeing, Janna, SNAP, Oberwolfach...)</option>
               {availableGroups.map((g) => (
                 <option key={g} value={g}>
-                  {g}
+                  {g} ({SUITE_SPARSE_CATALOG.filter((m) => m.group === g).length} матриц)
                 </option>
               ))}
             </select>
           </div>
 
           {/* Kind Filter */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs text-slate-400">Область:</span>
+          <div className="flex items-center gap-1.5 flex-1 min-w-[200px]">
+            <span className="text-xs text-slate-400 whitespace-nowrap">Физическая область:</span>
             <select
               value={selectedKind}
               onChange={(e) => setSelectedKind(e.target.value)}
-              className="bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer max-w-[200px]"
+              className="w-full bg-slate-900 border border-slate-800 rounded-xl px-2.5 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 cursor-pointer"
             >
-              <option value="all">Все физические области</option>
+              <option value="all">Все прикладные области</option>
               {availableKinds.map((k) => (
                 <option key={k} value={k}>
                   {k}
@@ -541,27 +323,27 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
           <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
             <button
               onClick={() => setSymmetryFilter('all')}
-              className={`px-2 py-1 rounded-lg transition-colors ${
+              className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
                 symmetryFilter === 'all'
                   ? 'bg-cyan-500 text-slate-950 font-bold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Все
+              Все матрицы
             </button>
             <button
               onClick={() => setSymmetryFilter('symmetric')}
-              className={`px-2 py-1 rounded-lg transition-colors ${
+              className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
                 symmetryFilter === 'symmetric'
                   ? 'bg-emerald-500 text-slate-950 font-bold'
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              SPD / Симметричные
+              Симметричные (SPD)
             </button>
             <button
               onClick={() => setSymmetryFilter('nonsymmetric')}
-              className={`px-2 py-1 rounded-lg transition-colors ${
+              className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
                 symmetryFilter === 'nonsymmetric'
                   ? 'bg-amber-500 text-slate-950 font-bold'
                   : 'text-slate-400 hover:text-white'
@@ -572,7 +354,7 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
           </div>
         </div>
 
-        {/* Row 2: Prominent Sorting Buttons (Requested: Sort from large to small / size / NNZ) */}
+        {/* Row 2: Prominent Sorting Buttons */}
         <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-4 flex-wrap">
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-xs font-bold text-slate-300 flex items-center gap-1">
@@ -587,7 +369,7 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
                   setSortKey('size');
                   setSortOrder('desc');
                 }}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-medium transition-all ${
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
                   sortKey === 'size' && sortOrder === 'desc'
                     ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800'
@@ -595,7 +377,7 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
                 title="Сортировать от наибольшего размера матрицы к наименьшему (N убыв.)"
               >
                 <ArrowDownWideNarrow className="w-3.5 h-3.5" />
-                <span>Размер $N$ (от большой к малой $\downarrow$)</span>
+                <span>Размер N (убыв. ↓)</span>
               </button>
 
               <button
@@ -603,7 +385,7 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
                   setSortKey('size');
                   setSortOrder('asc');
                 }}
-                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg font-medium transition-all ${
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
                   sortKey === 'size' && sortOrder === 'asc'
                     ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-slate-950 font-bold shadow'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800'
@@ -611,7 +393,7 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
                 title="Сортировать от наименьшего размера матрицы к наибольшему (N возр.)"
               >
                 <ArrowUpNarrowWide className="w-3.5 h-3.5" />
-                <span>$N$ ($\uparrow$)</span>
+                <span>N (возр. ↑)</span>
               </button>
             </div>
 
@@ -622,7 +404,7 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
                   setSortKey('nnz');
                   setSortOrder('desc');
                 }}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-medium transition-all ${
+                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
                   sortKey === 'nnz' && sortOrder === 'desc'
                     ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold shadow'
                     : 'text-slate-300 hover:text-white hover:bg-slate-800'
@@ -630,7 +412,7 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
                 title="Сортировать по количеству ненулевых элементов (NNZ от максимума к минимуму)"
               >
                 <Boxes className="w-3.5 h-3.5 text-purple-300" />
-                <span>Кол-во NNZ ($\downarrow$)</span>
+                <span>Кол-во NNZ (↓)</span>
               </button>
 
               <button
@@ -638,21 +420,21 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
                   setSortKey('nnz');
                   setSortOrder('asc');
                 }}
-                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg font-medium transition-all ${
+                className={`flex items-center gap-1 px-2 py-1.5 rounded-lg font-medium transition-all cursor-pointer ${
                   sortKey === 'nnz' && sortOrder === 'asc'
                     ? 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-bold shadow'
                     : 'text-slate-400 hover:text-white hover:bg-slate-800'
                 }`}
                 title="Сортировать по возрастанию количества ненулевых элементов (NNZ)"
               >
-                <span>NNZ ($\uparrow$)</span>
+                <span>NNZ (↑)</span>
               </button>
             </div>
 
             {/* Sort by Density % */}
             <button
               onClick={() => handleSortToggle('density')}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
                 sortKey === 'density'
                   ? 'bg-amber-500 text-slate-950 border-amber-400 font-bold shadow'
                   : 'bg-slate-900 text-slate-400 hover:text-white border-slate-800'
@@ -664,7 +446,7 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
             {/* Sort by Name */}
             <button
               onClick={() => handleSortToggle('name')}
-              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all ${
+              className={`flex items-center gap-1 px-2.5 py-1.5 rounded-xl border text-xs font-medium transition-all cursor-pointer ${
                 sortKey === 'name'
                   ? 'bg-slate-200 text-slate-950 border-white font-bold shadow'
                   : 'bg-slate-900 text-slate-400 hover:text-white border-slate-800'
@@ -675,44 +457,50 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
           </div>
 
           <div className="text-slate-400 font-mono text-xs">
-            Найдено в каталоге: <strong className="text-cyan-300">{processedMatrices.length}</strong> матриц
+            Матриц в каталоге: <strong className="text-cyan-300">{processedMatrices.length}</strong>
           </div>
         </div>
 
         {/* Row 3: Matrix Size Range presets & Slider */}
         <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between gap-4 flex-wrap text-xs">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-slate-400 font-medium">Диапазон размера:</span>
-            <div className="flex items-center gap-1 bg-slate-900 p-0.5 rounded-xl border border-slate-800 text-[11px]">
+            <span className="text-slate-400 font-medium">Диапазон размера N:</span>
+            <div className="flex items-center gap-1 bg-slate-900 p-0.5 rounded-xl border border-slate-800 text-[11px] flex-wrap">
               <button
                 onClick={() => handleSizePreset('all')}
-                className={`px-2 py-1 rounded-lg ${sizePreset === 'all' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+                className={`px-2 py-1 rounded-lg cursor-pointer transition-colors ${sizePreset === 'all' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
               >
-                Все (до 70K+)
+                Все (до 41M+)
               </button>
               <button
                 onClick={() => handleSizePreset('small')}
-                className={`px-2 py-1 rounded-lg ${sizePreset === 'small' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+                className={`px-2 py-1 rounded-lg cursor-pointer transition-colors ${sizePreset === 'small' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
               >
-                Малые (&lt;500)
+                &lt; 1K
               </button>
               <button
                 onClick={() => handleSizePreset('medium')}
-                className={`px-2 py-1 rounded-lg ${sizePreset === 'medium' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+                className={`px-2 py-1 rounded-lg cursor-pointer transition-colors ${sizePreset === 'medium' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
               >
-                Средние (500–2K)
+                1K–10K
               </button>
               <button
                 onClick={() => handleSizePreset('large')}
-                className={`px-2 py-1 rounded-lg ${sizePreset === 'large' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+                className={`px-2 py-1 rounded-lg cursor-pointer transition-colors ${sizePreset === 'large' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
               >
-                Большие (2K–10K)
+                10K–100K
               </button>
               <button
                 onClick={() => handleSizePreset('huge')}
-                className={`px-2 py-1 rounded-lg ${sizePreset === 'huge' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
+                className={`px-2 py-1 rounded-lg cursor-pointer transition-colors ${sizePreset === 'huge' ? 'bg-cyan-500 text-slate-950 font-bold' : 'text-slate-400 hover:text-white'}`}
               >
-                Экстремальные (&gt;10K)
+                100K–1M
+              </button>
+              <button
+                onClick={() => handleSizePreset('extreme')}
+                className={`px-2 py-1 rounded-lg cursor-pointer transition-colors ${sizePreset === 'extreme' ? 'bg-purple-500 text-slate-950 font-bold' : 'text-purple-300 hover:text-white'}`}
+              >
+                &gt; 1M (Экстремальные)
               </button>
             </div>
           </div>
@@ -722,104 +510,186 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
             <input
               type="range"
               min="24"
-              max="70000"
-              step="100"
-              value={maxSizeLimit}
+              max="42000000"
+              step="5000"
+              value={maxSizeLimit === Infinity ? 42000000 : maxSizeLimit}
               onChange={(e) => {
-                setMaxSizeLimit(Number(e.target.value));
-                setSizePreset('all');
+                const val = Number(e.target.value);
+                setMinSizeLimit(1);
+                if (val >= 42000000) {
+                  setMaxSizeLimit(Infinity);
+                  setSizePreset('all');
+                } else {
+                  setMaxSizeLimit(val);
+                  setSizePreset('all');
+                }
               }}
               className="w-full accent-cyan-400 cursor-pointer"
             />
-            <span className="font-mono text-cyan-300 font-bold whitespace-nowrap text-[11px] min-w-[90px]">
-              ≤ {maxSizeLimit.toLocaleString()}
+            <span className="font-mono text-cyan-300 font-bold whitespace-nowrap text-[11px] min-w-[95px]">
+              {maxSizeLimit === Infinity || maxSizeLimit >= 42000000
+                ? '≤ ∞ (Все)'
+                : `≤ ${maxSizeLimit.toLocaleString()}`}
             </span>
           </div>
         </div>
       </div>
 
       {/* ========================================================================= */}
-      {/* 3. GRID OF MATRICES (ON-DEMAND LOADING)                                   */}
+      {/* 3. GRID OF MATRICES (STATUS & LOAD BUTTONS)                               */}
       {/* ========================================================================= */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 max-h-[460px] overflow-y-auto pr-1">
-        {processedMatrices.map((meta) => {
-          const isLoading = loadingMatrixId === meta.id;
-
-          return (
-            <div
-              key={meta.id}
-              onClick={() => !isLoading && handleSelectMatrixOnDemand(meta)}
-              className="p-4 rounded-xl bg-slate-900/90 hover:bg-slate-850 border border-slate-800 hover:border-cyan-500/50 shadow-md hover:shadow-cyan-500/10 cursor-pointer transition-all flex flex-col justify-between gap-3 group relative overflow-hidden"
-            >
-              {isLoading && (
-                <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center z-10 gap-2 text-cyan-300 text-xs font-semibold">
-                  <Loader2 className="w-4 h-4 animate-spin text-cyan-400" />
-                  <span>Построение CSR структуры...</span>
-                </div>
-              )}
-
-              <div>
-                <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="font-bold text-sm text-white group-hover:text-cyan-300 transition-colors font-mono truncate">
-                      {meta.group}/{meta.name}
-                    </span>
-                    <a
-                      href={`https://sparse.tamu.edu/${meta.group}/${meta.name}`}
-                      target="_blank"
-                      rel="noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="text-slate-500 hover:text-cyan-400 p-0.5 rounded transition-colors shrink-0"
-                      title="Открыть страницу матрицы на sparse.tamu.edu"
-                    >
-                      <ExternalLink className="w-3 h-3" />
-                    </a>
-                  </div>
-                  <span
-                    className={`text-[10px] px-2 py-0.5 rounded font-mono font-semibold shrink-0 ${
-                      meta.rows > 10000
-                        ? 'bg-purple-950/80 text-purple-300 border border-purple-800/80'
-                        : meta.rows > 2000
-                        ? 'bg-blue-950/80 text-blue-300 border border-blue-800/80'
-                        : 'bg-slate-950 text-cyan-400 border border-slate-800'
-                    }`}
-                  >
-                    {meta.rows.toLocaleString()} × {meta.cols.toLocaleString()}
-                  </span>
-                </div>
-                <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                  {meta.description}
-                </p>
-              </div>
-
-              <div className="pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono flex-wrap gap-1">
-                <span className="flex items-center gap-1">
-                  <span className="text-slate-500">NNZ:</span>
-                  <strong className="text-slate-200">{meta.nnz.toLocaleString()}</strong>
-                  <span className="text-[10px] text-slate-500">({meta.density.toFixed(2)}%)</span>
-                </span>
-
-                <div className="flex items-center gap-1.5 flex-wrap">
-                  <span
-                    className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
-                      meta.isSymmetric
-                        ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/50'
-                        : 'bg-amber-950/80 text-amber-300 border border-amber-800/50'
-                    }`}
-                  >
-                    {meta.isSymmetric ? 'SPD' : 'Non-Sym'}
-                  </span>
-                  <span className="px-1.5 py-0.5 rounded bg-indigo-950/80 text-indigo-300 border border-indigo-800/50 text-[10px] font-semibold" title="Рекомендуемый оптимальный решатель">
-                    🎯 {meta.isSymmetric ? (meta.rows > 1000 ? 'PCG-SSOR' : 'PCG-Jacobi') : (meta.kind.toLowerCase().includes('circuit') || meta.kind.toLowerCase().includes('cfd') ? 'GMRES(30)' : 'BiCGSTAB')}
-                  </span>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-950 text-[10px] text-slate-300 truncate max-w-[100px]">
-                    {meta.kind}
-                  </span>
-                </div>
-              </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 max-h-[480px] overflow-y-auto pr-1">
+        {processedMatrices.length === 0 ? (
+          <div className="col-span-full py-12 px-6 rounded-2xl bg-slate-900/60 border border-slate-800 flex flex-col items-center justify-center gap-3 text-center">
+            <Database className="w-8 h-8 text-slate-500" />
+            <div className="text-sm font-semibold text-slate-300">
+              Нет матриц в выбранном диапазоне размера N
             </div>
-          );
-        })}
+            <p className="text-xs text-slate-500 max-w-sm">
+              Попробуйте выбрать другой диапазон размера (например, «Все») или сбросить фильтры
+            </p>
+            <button
+              onClick={() => {
+                handleSizePreset('all');
+                setSelectedKind('all');
+                setSelectedGroup('all');
+                setSymmetryFilter('all');
+              }}
+              className="mt-2 px-4 py-2 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 text-cyan-300 border border-cyan-500/40 text-xs font-semibold cursor-pointer transition-colors flex items-center gap-1.5"
+            >
+              <span>Показать все матрицы (до 41M+)</span>
+            </button>
+          </div>
+        ) : (
+          processedMatrices.map((meta) => {
+            const isLoading = loadingMatrixId === meta.id;
+            const isLoaded = loadedMatrixIds.has(meta.id);
+
+            return (
+              <div
+                key={meta.id}
+                className={`p-4 rounded-xl bg-slate-900/90 border transition-all flex flex-col justify-between gap-3 group relative overflow-hidden shadow-md ${
+                  isLoaded
+                    ? 'border-emerald-500/50 bg-slate-900/95 shadow-emerald-500/5'
+                    : 'border-slate-800 hover:border-cyan-500/40'
+                }`}
+              >
+                {isLoading && (
+                  <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-xs flex flex-col items-center justify-center z-10 gap-2 text-cyan-300 text-xs font-semibold">
+                    <Loader2 className="w-5 h-5 animate-spin text-cyan-400" />
+                    <span>Построение CSR структуры...</span>
+                  </div>
+                )}
+
+                <div>
+                  {/* Header: Name, TAMU link, status tag, dimensions */}
+                  <div className="flex items-start justify-between gap-2 mb-2">
+                    <div className="flex flex-col gap-1 min-w-0">
+                      <div className="flex items-center gap-1.5">
+                        <span className="font-bold text-sm text-white group-hover:text-cyan-300 transition-colors font-mono truncate">
+                          {meta.group}/{meta.name}
+                        </span>
+                        <a
+                          href={`https://sparse.tamu.edu/${meta.group}/${meta.name}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-slate-500 hover:text-cyan-400 p-0.5 rounded transition-colors shrink-0"
+                          title="Открыть страницу матрицы на sparse.tamu.edu"
+                        >
+                          <ExternalLink className="w-3 h-3" />
+                        </a>
+                      </div>
+
+                      {/* Loaded or Not loaded status badge */}
+                      <div>
+                        {isLoaded ? (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-950/90 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold">
+                            <CheckCircle2 className="w-3 h-3 text-emerald-400" />
+                            <span>Загружено в кэш</span>
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-800/80 text-slate-400 border border-slate-700/80 text-[10px] font-medium">
+                            <Clock className="w-3 h-3 text-slate-500" />
+                            <span>Не загружено</span>
+                          </span>
+                        )}
+                      </div>
+                    </div>
+
+                    <span
+                      className={`text-[10px] px-2 py-0.5 rounded font-mono font-semibold shrink-0 ${
+                        meta.rows > 10000
+                          ? 'bg-purple-950/80 text-purple-300 border border-purple-800/80'
+                          : meta.rows > 2000
+                          ? 'bg-blue-950/80 text-blue-300 border border-blue-800/80'
+                          : 'bg-slate-950 text-cyan-400 border border-slate-800'
+                      }`}
+                    >
+                      {meta.rows.toLocaleString()} × {meta.cols.toLocaleString()}
+                    </span>
+                  </div>
+
+                  {/* Description with proper LaTeX / math formatting */}
+                  <div className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                    <MathText text={meta.description} />
+                  </div>
+                </div>
+
+                <div className="mt-auto flex flex-col gap-2">
+                  {/* Meta details: NNZ, Density, Symmetry, Solver recommendation */}
+                  <div className="pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono flex-wrap gap-1">
+                    <span className="flex items-center gap-1">
+                      <span className="text-slate-500">NNZ:</span>
+                      <strong className="text-slate-200">{meta.nnz.toLocaleString()}</strong>
+                      <span className="text-[10px] text-slate-500">({meta.density.toFixed(2)}%)</span>
+                    </span>
+
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <span
+                        className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
+                          meta.isSymmetric
+                            ? 'bg-emerald-950/80 text-emerald-300 border border-emerald-800/50'
+                            : 'bg-amber-950/80 text-amber-300 border border-amber-800/50'
+                        }`}
+                      >
+                        {meta.isSymmetric ? 'SPD' : 'Non-Sym'}
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded bg-indigo-950/80 text-indigo-300 border border-indigo-800/50 text-[10px] font-semibold" title="Рекомендуемый оптимальный решатель">
+                        🎯 {meta.isSymmetric ? (meta.rows > 1000 ? 'PCG-SSOR' : 'PCG-Jacobi') : (meta.kind.toLowerCase().includes('circuit') || meta.kind.toLowerCase().includes('cfd') ? 'GMRES(30)' : 'BiCGSTAB')}
+                      </span>
+                      <span className="px-1.5 py-0.5 rounded bg-slate-950 text-[10px] text-slate-300 truncate max-w-[100px]">
+                        {meta.kind}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Explicit Load / Select Button - always prominent and clearly stating "Загрузить" */}
+                  <button
+                    onClick={() => handleLoadMatrix(meta)}
+                    disabled={isLoading}
+                    className={`w-full py-2 px-3 rounded-lg font-bold text-xs flex items-center justify-center gap-1.5 shadow-md transition-all cursor-pointer disabled:opacity-50 ${
+                      isLoaded
+                        ? 'bg-emerald-500 hover:bg-emerald-400 text-slate-950 shadow-emerald-500/20'
+                        : 'bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 shadow-cyan-500/20'
+                    }`}
+                  >
+                    {isLoaded ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-slate-950 stroke-[3]" />
+                        <span>Загрузить в СЛАУ</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="w-3.5 h-3.5 text-slate-950" />
+                        <span>Загрузить</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
 
       {/* ========================================================================= */}
@@ -834,7 +704,7 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
             </h4>
           </div>
           <span className="text-[11px] text-slate-400">
-            Возможность мгновенно синтезировать СЛАУ любой размерности ($N \le 50,000$)
+            Синтез СЛАУ <MathText text="$Ax = b$" /> любой размерности (<MathText text="$N \le 50\,000$" />)
           </span>
         </div>
 
@@ -862,7 +732,9 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
 
           {/* Size Input */}
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-400">Размер $N$:</span>
+            <span className="text-xs text-slate-400 whitespace-nowrap">
+              Размер <MathText text="$N$" />:
+            </span>
             <input
               type="number"
               min="10"
