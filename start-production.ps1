@@ -3,6 +3,7 @@
 # Включает: npm install -> npm run build -> npm start
 # ==============================================================================
 
+Set-Location $PSScriptRoot
 $OutputEncoding = [System.Text.Encoding]::UTF8
 [Console]::OutputEncoding = [System.Text.Encoding]::UTF8
 

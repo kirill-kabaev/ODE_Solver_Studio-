@@ -4,6 +4,7 @@ REM ODE Solver Studio - Production Launcher (Windows)
 REM Steps: npm install -> npm run build -> npm start
 REM ==============================================================================
 
+cd /d "%~dp0"
 chcp 65001 >nul 2>&1
 title ODE Solver Studio [Production]
 

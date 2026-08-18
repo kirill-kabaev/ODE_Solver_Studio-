@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
@@ -269,10 +270,22 @@ async function setupViteOrStatic() {
     });
     app.use(vite.middlewares);
   } else {
-    const distPath = path.join(process.cwd(), "dist");
+    // In production bundled dist/server.cjs, __dirname is already the dist folder
+    // Or if run directly from workspace root, use process.cwd()/dist
+    const distPath = fs.existsSync(path.join(__dirname, "index.html"))
+      ? __dirname
+      : path.join(process.cwd(), "dist");
+
+    console.log(`[Production] Serving static files from: ${distPath}`);
     app.use(express.static(distPath));
+
     app.get("*", (req, res) => {
-      res.sendFile(path.join(distPath, "index.html"));
+      const indexPath = path.join(distPath, "index.html");
+      if (fs.existsSync(indexPath)) {
+        res.sendFile(indexPath);
+      } else {
+        res.status(404).send("Error: dist/index.html not found. Please run 'npm run build' first.");
+      }
     });
   }
 
