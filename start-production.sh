@@ -1,22 +1,49 @@
 #!/bin/bash
 # ==============================================================================
-# Быстрый запускатор проекта в режиме PRODUCTION (Linux / macOS)
-# Включает: npm install -> npm run build -> npm start
+# Студия СЛАУ и Дифференциальных Уравнений (Linux / macOS Auto-Setup)
 # ==============================================================================
 
-set -e # Прерывать выполнение при ошибке
+set -e
+
+cd "$(dirname "$0")"
 
 echo ""
-echo "🚀 [1/3] Установка зависимостей (npm install)..."
-npm install
-
-echo ""
-echo "⚙️  [2/3] Сборка клиентской части и сервера (npm run build)..."
-NODE_ENV=production npm run build
-
-echo ""
-echo "✨ [3/3] Запуск сервера в режиме Production (npm start)..."
-echo "🌐 Приложение будет доступно по адресу: http://localhost:3000"
+echo "=============================================================================="
+echo "🚀 Инициализация Студии СЛАУ и Дифференциальных Уравнений"
+echo "=============================================================================="
 echo ""
 
+# 1. Проверка Node.js
+if ! command -v node &> /dev/null; then
+    echo "❌ Node.js не найден. Пожалуйста, установите Node.js (https://nodejs.org/)"
+    exit 1
+fi
+
+echo "✅ Найден Node.js: $(node -v)"
+
+# 2. Проверка .env
+if [ ! -f ".env" ]; then
+    if [ -f ".env.example" ]; then
+        cp .env.example .env
+    else
+        echo "GEMINI_API_KEY=" > .env
+    fi
+    echo "✅ Файл .env создан."
+fi
+
+# 3. Проверка node_modules
+if [ ! -d "node_modules" ]; then
+    echo "📦 [ПЕРВЫЙ ЗАПУСК] Установка npm зависимостей..."
+    npm install
+fi
+
+# 4. Проверка сборки
+if [ ! -f "dist/server.cjs" ]; then
+    echo "⚙️ Сборка проекта (npm run build)..."
+    NODE_ENV=production npm run build
+fi
+
+# 5. Запуск
+echo ""
+echo "✨ Запуск сервера на http://localhost:3000..."
 NODE_ENV=production npm start

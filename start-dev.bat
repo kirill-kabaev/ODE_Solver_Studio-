@@ -1,38 +1,81 @@
 @echo off
 REM ==============================================================================
-REM ODE Solver Studio - Development Launcher (Windows)
-REM Steps: npm install -> npm run dev
+REM Студия СЛАУ и Дифференциальных Уравнений (Dev Launcher with Auto-Setup)
+REM Режим быстрой разработки для Windows 10/11
 REM ==============================================================================
 
+setlocal enabledelayedexpansion
 cd /d "%~dp0"
 chcp 65001 >nul 2>&1
-title ODE Solver Studio [Development Mode]
+title Студия СЛАУ и Дифференциальных Уравнений [Dev Mode]
 
+cls
+echo ==============================================================================
+echo 🛠️ Запуск в режиме разработки (Dev Server)
+echo ==============================================================================
 echo.
-echo ==============================================================================
-echo [1/2] Checking dependencies (npm install)...
-echo ==============================================================================
-call npm install
+
+REM ------------------------------------------------------------------------------
+REM Шаг 1: Проверка Node.js
+REM ------------------------------------------------------------------------------
+echo [1/4] Проверка Node.js и npm...
+where node >nul 2>&1
 if %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] Failed to install npm dependencies!
+    echo ⚠️ Node.js не найден в системе. Открываем сайт для установки...
+    start https://nodejs.org/
     pause
-    exit /b %ERRORLEVEL%
+    exit /b 1
 )
 
+REM ------------------------------------------------------------------------------
+REM Шаг 2: Проверка .env
+REM ------------------------------------------------------------------------------
+echo.
+echo [2/4] Проверка файла .env...
+if not exist ".env" (
+    if exist ".env.example" (
+        copy /Y ".env.example" ".env" >nul
+    ) else (
+        echo GEMINI_API_KEY= > ".env"
+    )
+    echo ✅ Файл .env создан.
+) else (
+    echo ✅ Файл .env найден.
+)
+
+REM ------------------------------------------------------------------------------
+REM Шаг 3: Проверка node_modules
+REM ------------------------------------------------------------------------------
+echo.
+echo [3/4] Проверка зависимостей...
+if not exist "node_modules\" (
+    echo [ПЕРВЫЙ ЗАПУСК] Установка npm зависимостей...
+    call npm install
+    if !ERRORLEVEL! NEQ 0 (
+        echo ❌ Ошибка установки зависимостей.
+        pause
+        exit /b !ERRORLEVEL!
+    )
+) else (
+    echo ✅ Зависимости установлены.
+)
+
+REM ------------------------------------------------------------------------------
+REM Шаг 4: Запуск сервера разработки
+REM ------------------------------------------------------------------------------
 echo.
 echo ==============================================================================
-echo [2/2] Starting Development Server (npm run dev)...
-echo Application URL: http://localhost:3000
-echo Opening http://localhost:3000 in your browser...
+echo ✨ [4/4] Запуск Dev Server (npm run dev)...
+echo 🌐 http://localhost:3000
 echo ==============================================================================
 
-REM Launch browser in background after 2 seconds
 start /b cmd /c "timeout /t 2 /nobreak >nul & start http://localhost:3000"
 
 call npm run dev
 if %ERRORLEVEL% NEQ 0 (
-    echo [ERROR] Server exited with error code %ERRORLEVEL%
+    echo ❌ Ошибка при выполнении npm run dev
     pause
     exit /b %ERRORLEVEL%
 )
+
 pause
