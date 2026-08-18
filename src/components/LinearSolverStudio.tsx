@@ -56,14 +56,38 @@ import { LinearConvergenceChart } from './LinearConvergenceChart';
 import { SuiteSparseCatalogModal } from './SuiteSparseCatalogModal';
 import { LinearSolutionHistory } from './LinearSolutionHistory';
 import { NvidiaGpuInspectorModal } from './NvidiaGpuInspectorModal';
+import { MatrixSolverRecommendationCard } from './MatrixSolverRecommendationCard';
+import { recommendOptimalSolver } from '../utils/matrixRecommender';
+import { MatrixSolverRecommendation } from '../types/sparse';
 
 const STORAGE_LINEAR_HISTORY_KEY = 'linear_solver_history_v1';
+const STORAGE_AUTO_APPLY_KEY = 'linear_solver_auto_apply_v1';
 
 export const LinearSolverStudio: React.FC = () => {
   // Active loaded matrix (Default: 2D Poisson Grid N=400 or structural)
   const [matrix, setMatrix] = useState<SparseMatrixCSR>(() => {
     return generateSyntheticSuiteSparseMatrix('poisson2d', 400);
   });
+
+  // Auto-apply recommendation toggle state (enabled by default)
+  const [autoApplyRecommendation, setAutoApplyRecommendation] = useState<boolean>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_AUTO_APPLY_KEY);
+      if (saved !== null) return JSON.parse(saved);
+    } catch {}
+    return true;
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(STORAGE_AUTO_APPLY_KEY, JSON.stringify(autoApplyRecommendation));
+    } catch {}
+  }, [autoApplyRecommendation]);
+
+  // Solver Recommendation for active matrix
+  const solverRecommendation = useMemo<MatrixSolverRecommendation>(() => {
+    return recommendOptimalSolver(matrix);
+  }, [matrix]);
 
   // History State for Linear Systems
   const [linearHistory, setLinearHistory] = useState<LinearSolverHistoryRecord[]>(() => {
@@ -190,6 +214,29 @@ export const LinearSolverStudio: React.FC = () => {
       setSolverType('bicgstab');
     }
   }, [matrix.isSymmetric, solverType]);
+
+  // Apply recommendation handler
+  const handleApplyRecommendation = (rec = solverRecommendation) => {
+    setSolverType(rec.recommendedSolver);
+    setComputeDevice(rec.recommendedDevice);
+    if (rec.recommendedTolerance) setTolerance(rec.recommendedTolerance);
+    if (rec.recommendedMaxIterations) setMaxIterations(rec.recommendedMaxIterations);
+    if (rec.recommendedOmega) setSorOmega(rec.recommendedOmega);
+    if (rec.recommendedGmresRestart) setGmresRestart(rec.recommendedGmresRestart);
+  };
+
+  // Sync recommendation on matrix change if auto-apply is enabled
+  useEffect(() => {
+    if (autoApplyRecommendation) {
+      const rec = recommendOptimalSolver(matrix);
+      setSolverType(rec.recommendedSolver);
+      setComputeDevice(rec.recommendedDevice);
+      if (rec.recommendedTolerance) setTolerance(rec.recommendedTolerance);
+      if (rec.recommendedMaxIterations) setMaxIterations(rec.recommendedMaxIterations);
+      if (rec.recommendedOmega) setSorOmega(rec.recommendedOmega);
+      if (rec.recommendedGmresRestart) setGmresRestart(rec.recommendedGmresRestart);
+    }
+  }, [matrix.name, matrix.rows, matrix.nnz, autoApplyRecommendation]);
 
   // Clean up timer on unmount
   useEffect(() => {
@@ -415,6 +462,20 @@ export const LinearSolverStudio: React.FC = () => {
           {/* Sparsity Pattern Canvas Visualizer */}
           <SparseMatrixVisualizer matrix={matrix} height={460} />
         </div>
+      </section>
+
+      {/* ========================================================================= */}
+      {/* 1.5. AUTOMATIC MATRIX PROPERTY ANALYSIS & SOLVER RECOMMENDATION SYSTEM      */}
+      {/* ========================================================================= */}
+      <section id="matrix-recommendation-section" className="scroll-mt-20">
+        <MatrixSolverRecommendationCard
+          recommendation={solverRecommendation}
+          currentSolver={solverType}
+          currentDevice={computeDevice}
+          autoApplyRecommendation={autoApplyRecommendation}
+          onToggleAutoApply={setAutoApplyRecommendation}
+          onApplyRecommendation={() => handleApplyRecommendation(solverRecommendation)}
+        />
       </section>
 
       {/* ========================================================================= */}

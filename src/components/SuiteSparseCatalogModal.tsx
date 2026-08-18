@@ -681,7 +681,7 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
                   <span className="text-[10px] text-slate-500">({meta.density.toFixed(2)}%)</span>
                 </span>
 
-                <div className="flex items-center gap-1.5">
+                <div className="flex items-center gap-1.5 flex-wrap">
                   <span
                     className={`px-1.5 py-0.5 rounded text-[10px] font-semibold ${
                       meta.isSymmetric
@@ -691,7 +691,10 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
                   >
                     {meta.isSymmetric ? 'SPD' : 'Non-Sym'}
                   </span>
-                  <span className="px-1.5 py-0.5 rounded bg-slate-950 text-[10px] text-slate-300 truncate max-w-[120px]">
+                  <span className="px-1.5 py-0.5 rounded bg-indigo-950/80 text-indigo-300 border border-indigo-800/50 text-[10px] font-semibold" title="Рекомендуемый оптимальный решатель">
+                    🎯 {meta.isSymmetric ? (meta.rows > 1000 ? 'PCG-SSOR' : 'PCG-Jacobi') : (meta.kind.toLowerCase().includes('circuit') || meta.kind.toLowerCase().includes('cfd') ? 'GMRES(30)' : 'BiCGSTAB')}
+                  </span>
+                  <span className="px-1.5 py-0.5 rounded bg-slate-950 text-[10px] text-slate-300 truncate max-w-[100px]">
                     {meta.kind}
                   </span>
                 </div>
