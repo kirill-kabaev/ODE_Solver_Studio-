@@ -35,6 +35,7 @@ import {
   MatrixComplexityMetrics,
 } from '../types/sparse';
 import { getMatrixPhysicalDomain, computeMatrixComplexity, formatSolverTime } from '../utils/matrixPhysics';
+import { MathView, MathText } from './MathView';
 
 interface LinearSolutionHistoryProps {
   history: LinearSolverHistoryRecord[];
@@ -212,21 +213,21 @@ export const LinearSolutionHistory: React.FC<LinearSolutionHistoryProps> = ({
                 <div className="p-3 rounded-lg bg-slate-900 border border-slate-800 flex flex-col gap-1.5 font-mono text-xs">
                   <span className="text-[11px] text-slate-400">Определяющее уравнение / Закон сохранения:</span>
                   <div className="text-sm font-semibold text-emerald-300 overflow-x-auto py-1">
-                    {activePhysics.governingEquation}
+                    <MathView math={activePhysics.governingEquation} block className="text-sm text-emerald-300" />
                   </div>
                 </div>
 
-                <p className="text-xs text-slate-300 leading-relaxed">
-                  <strong>Физическая суть:</strong> {activePhysics.description}
-                </p>
+                <div className="text-xs text-slate-300 leading-relaxed">
+                  <strong className="text-slate-200">Физическая суть:</strong> <MathText text={activePhysics.description} />
+                </div>
 
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  <strong>Структурная интерпретация:</strong> {activePhysics.physicalSignificance}
-                </p>
+                <div className="text-xs text-slate-400 leading-relaxed">
+                  <strong className="text-slate-300">Структурная интерпретация:</strong> <MathText text={activePhysics.physicalSignificance} />
+                </div>
 
                 <div className="pt-2 border-t border-slate-800/80 text-xs text-slate-300 flex items-start gap-2">
                   <span className="font-semibold text-indigo-300 shrink-0">Применение в инженерии:</span>
-                  <span>{activePhysics.practicalApplication}</span>
+                  <span><MathText text={activePhysics.practicalApplication} /></span>
                 </div>
               </div>
 
@@ -254,9 +255,9 @@ export const LinearSolutionHistory: React.FC<LinearSolutionHistoryProps> = ({
                     </span>
                   </div>
 
-                  <p className="text-xs text-slate-400 leading-relaxed pt-1">
-                    {activeComplexity.difficultyExplanation}
-                  </p>
+                  <div className="text-xs text-slate-400 leading-relaxed pt-1">
+                    <MathText text={activeComplexity.difficultyExplanation} />
+                  </div>
                 </div>
 
                 {/* Quick metrics */}
@@ -674,14 +675,14 @@ export const LinearSolutionHistory: React.FC<LinearSolutionHistoryProps> = ({
                               <BookOpen className="w-3.5 h-3.5" />
                               Физическое моделирование: {rec.physicalDomain.title}
                             </span>
-                            <div className="p-2 rounded bg-slate-950 border border-slate-800 font-mono text-[11px] text-emerald-300">
-                              {rec.physicalDomain.governingEquation}
+                            <div className="p-2 rounded bg-slate-950 border border-slate-800 overflow-x-auto">
+                              <MathView math={rec.physicalDomain.governingEquation} block className="text-xs text-emerald-300" />
                             </div>
-                            <p className="text-slate-300 text-[11px] leading-relaxed">
-                              {rec.physicalDomain.description}
-                            </p>
+                            <div className="text-slate-300 text-[11px] leading-relaxed">
+                              <MathText text={rec.physicalDomain.description} />
+                            </div>
                             <div className="text-[11px] text-slate-400">
-                              <strong>Применение:</strong> {rec.physicalDomain.practicalApplication}
+                              <strong className="text-slate-300">Применение:</strong> <MathText text={rec.physicalDomain.practicalApplication} />
                             </div>
                           </div>
 
@@ -717,7 +718,7 @@ export const LinearSolutionHistory: React.FC<LinearSolutionHistoryProps> = ({
                           <div className="p-3.5 rounded-xl bg-slate-900 border border-slate-800/80 flex flex-col gap-2">
                             <div className="flex items-center justify-between text-[11px] text-slate-400">
                               <span className="font-semibold text-slate-200">
-                                График сходимости относительной невязки $||r_k||_2 / ||b||_2$ (Шагов: {rec.historySample.length})
+                                <MathText text="График сходимости относительной невязки $\|r_k\|_2 / \|b\|_2$" /> (Шагов: {rec.historySample.length})
                               </span>
                               <span className="font-mono text-emerald-400">
                                 Старт: {rec.historySample[0].relativeResidual.toExponential(2)} → Финиш: {rec.finalRelativeResidual.toExponential(2)}

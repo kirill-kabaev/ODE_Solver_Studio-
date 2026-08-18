@@ -58,6 +58,7 @@ import { LinearSolutionHistory } from './LinearSolutionHistory';
 import { NvidiaGpuInspectorModal } from './NvidiaGpuInspectorModal';
 import { MatrixSolverRecommendationCard } from './MatrixSolverRecommendationCard';
 import { recommendOptimalSolver } from '../utils/matrixRecommender';
+import { MathText } from './MathView';
 import { MatrixSolverRecommendation } from '../types/sparse';
 
 const STORAGE_LINEAR_HISTORY_KEY = 'linear_solver_history_v1';
@@ -916,15 +917,15 @@ export const LinearSolverStudio: React.FC = () => {
             <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-400">
               {solverType.startsWith('cg') || solverType.startsWith('pcg') ? (
                 <span>
-                  <strong>Метод сопряженных градиентов (CG):</strong> параллельные умножения матрицы на вектор ($A \cdot p$) и редукции скалярных произведений на {computeDevice === 'cuda_gpu' ? 'CUDA-ядрах NVIDIA GPU' : 'CPU'}.
+                  <strong>Метод сопряженных градиентов (CG):</strong> <MathText text={`параллельные умножения матрицы на вектор ($A \\cdot p$) и редукции скалярных произведений на ${computeDevice === 'cuda_gpu' ? 'CUDA-ядрах NVIDIA GPU' : 'CPU'}.`} />
                 </span>
               ) : solverType === 'bicgstab' || solverType === 'gmres' ? (
                 <span>
-                  <strong>{solverType.toUpperCase()}:</strong> оптимизирован для разреженных несимметричных систем на {computeDevice === 'cuda_gpu' ? 'видеокарте NVIDIA GeForce RTX' : 'процессоре'}.
+                  <strong>{solverType.toUpperCase()}:</strong> <MathText text={`оптимизирован для разреженных несимметричных систем на ${computeDevice === 'cuda_gpu' ? 'видеокарте NVIDIA GeForce RTX' : 'процессоре'}.`} />
                 </span>
               ) : (
                 <span>
-                  <strong>Стационарный метод:</strong> пошаговое расщепление матрицы $A = D - L - U$.
+                  <strong>Стационарный метод:</strong> <MathText text="пошаговое расщепление матрицы $A = D - L - U$." />
                 </span>
               )}
             </div>
@@ -933,7 +934,7 @@ export const LinearSolverStudio: React.FC = () => {
           {/* Column 2: Right-Hand Side Vector b */}
           <div className="flex flex-col gap-3">
             <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-              Вектор правой части $b$:
+              <MathText text="Вектор правой части $b$:" />
             </label>
             <select
               value={rhsType}
@@ -949,7 +950,7 @@ export const LinearSolverStudio: React.FC = () => {
             </select>
 
             <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-400">
-              При выборе <em>b = A * [1, ..., 1]ᵀ</em> решатель автоматически вычисляет не только невязку $\|Ax - b\|$, но и истинную ошибку $\|x_k - x^*\|$.
+              <MathText text="При выборе $b = A \cdot \mathbf{1}$ решатель автоматически вычисляет не только невязку $\|Ax - b\|_2$, но и истинную ошибку $\|x_k - x^*\|_2$." />
             </div>
           </div>
 
@@ -957,7 +958,7 @@ export const LinearSolverStudio: React.FC = () => {
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                Точность ($\varepsilon$):
+                <MathText text="Точность ($\varepsilon$):" />
               </label>
               <select
                 value={tolerance}
@@ -989,7 +990,7 @@ export const LinearSolverStudio: React.FC = () => {
             {/* SOR parameter if SOR chosen */}
             {solverType === 'sor' && (
               <div className="flex items-center justify-between pt-1 border-t border-slate-800">
-                <span className="text-xs text-slate-400">Параметр релаксации $\omega$:</span>
+                <span className="text-xs text-slate-400"><MathText text="Параметр релаксации $\omega$:" /></span>
                 <input
                   type="number"
                   min="0.1"
@@ -1005,7 +1006,7 @@ export const LinearSolverStudio: React.FC = () => {
             {/* GMRES restart parameter */}
             {solverType === 'gmres' && (
               <div className="flex items-center justify-between pt-1 border-t border-slate-800">
-                <span className="text-xs text-slate-400">Размерность Krylov $m$:</span>
+                <span className="text-xs text-slate-400"><MathText text="Размерность Крылова $m$:" /></span>
                 <input
                   type="number"
                   min="5"
@@ -1061,7 +1062,7 @@ export const LinearSolverStudio: React.FC = () => {
             <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col gap-3">
               <div className="flex items-center justify-between text-xs text-slate-400 flex-wrap gap-2">
                 <span className="font-bold text-slate-200">
-                  Вектор решения $x = [x_1, x_2, \dots, x_N]^T$ ($N = {solverResult.solutionVector.length}$)
+                  <MathText text={`Вектор решения $x = [x_1, x_2, \\dots, x_N]^T$ ($N = ${solverResult.solutionVector.length}$)`} />
                 </span>
                 <div className="flex items-center gap-4 text-xs font-mono">
                   <span className="text-slate-400">

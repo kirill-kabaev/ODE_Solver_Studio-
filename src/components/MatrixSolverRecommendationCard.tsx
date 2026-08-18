@@ -18,6 +18,7 @@ import {
   Gauge
 } from 'lucide-react';
 import { MatrixSolverRecommendation, LinearSolverType, ComputeDevice } from '../types/sparse';
+import { MathText } from './MathView';
 
 interface MatrixSolverRecommendationCardProps {
   recommendation: MatrixSolverRecommendation;
@@ -120,9 +121,9 @@ export const MatrixSolverRecommendationCard: React.FC<MatrixSolverRecommendation
               </span>
             </div>
 
-            <p className="text-xs text-slate-300 leading-relaxed max-w-2xl mt-0.5">
-              {recommendation.performanceBenefit}
-            </p>
+            <div className="text-xs text-slate-300 leading-relaxed max-w-2xl mt-0.5">
+              <MathText text={recommendation.performanceBenefit} />
+            </div>
           </div>
         </div>
 
@@ -216,9 +217,9 @@ export const MatrixSolverRecommendationCard: React.FC<MatrixSolverRecommendation
           <Sliders className="w-3.5 h-3.5 text-cyan-400" />
           Научно-математическое обоснование выбора алгоритма:
         </span>
-        <p className="text-slate-300 font-sans">
-          {recommendation.mathematicalJustification}
-        </p>
+        <div className="text-slate-300 font-sans">
+          <MathText text={recommendation.mathematicalJustification} />
+        </div>
 
         <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between flex-wrap gap-2 text-[11px] text-slate-400 font-mono">
           <div className="flex items-center gap-2">
@@ -298,9 +299,9 @@ export const MatrixSolverRecommendationCard: React.FC<MatrixSolverRecommendation
                     )}
                   </div>
 
-                  <p className="text-[11px] text-slate-400 leading-relaxed font-sans">
-                    {item.explanation}
-                  </p>
+                  <div className="text-[11px] text-slate-400 leading-relaxed font-sans">
+                    <MathText text={item.explanation} />
+                  </div>
 
                   {isSelected && (
                     <div className="text-[10px] font-mono font-bold text-cyan-400 pt-1 border-t border-slate-800">
@@ -316,3 +317,4 @@ export const MatrixSolverRecommendationCard: React.FC<MatrixSolverRecommendation
     </div>
   );
 };
+

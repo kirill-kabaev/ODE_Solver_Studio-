@@ -38,6 +38,7 @@ import { PresetCatalogWindow } from './components/PresetCatalogWindow';
 import { HistoryWindow } from './components/HistoryWindow';
 import { LinearSolverStudio } from './components/LinearSolverStudio';
 import { VerticalPageScroller } from './components/VerticalPageScroller';
+import { MathText } from './components/MathView';
 import { analyzeDifferentialEquation } from './utils/preAnalyzer';
 import { solveLocallyCPU } from './utils/cpuSolver';
 import { solveLocallyGPU } from './utils/gpuSolver';
@@ -827,7 +828,7 @@ export default function App() {
             <div className="p-4 border-b border-slate-800 flex items-center justify-between shrink-0 bg-slate-950/60">
               <div className="flex items-center gap-2">
                 <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                <h3 className="text-base font-bold text-white">Символьная Проверка Тождества ($LHS \equiv RHS$)</h3>
+                <h3 className="text-base font-bold text-white"><MathText text="Символьная Проверка Тождества ($LHS \equiv RHS$)" /></h3>
               </div>
               <button
                 onClick={() => setShowVerificationModal(false)}

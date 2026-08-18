@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { SparseMatrixCSR, GershgorinDisk } from '../types/sparse';
 import { computeGershgorinDisks } from '../utils/matrixMarket';
+import { MathText } from './MathView';
 
 interface SparseMatrixVisualizerProps {
   matrix: SparseMatrixCSR;
@@ -413,7 +414,7 @@ export const SparseMatrixVisualizer: React.FC<SparseMatrixVisualizerProps> = ({
         {viewTab === 'profile' && (
           <div className="w-full h-full p-6 flex flex-col justify-between bg-slate-950">
             <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
-              <span>Распределение плотности ненулевых элементов ($nnz$) по строкам матрицы</span>
+              <span><MathText text="Распределение плотности ненулевых элементов ($nnz$) по строкам матрицы" /></span>
               <span className="font-mono text-cyan-400">
                 Макс в строке: {Math.max(...rowProfile)} | Среднее: {(matrix.nnz / matrix.rows).toFixed(1)}
               </span>
@@ -449,7 +450,7 @@ export const SparseMatrixVisualizer: React.FC<SparseMatrixVisualizerProps> = ({
             <div className="flex items-center justify-between text-xs text-slate-400 mb-2">
               <span className="flex items-center gap-1.5">
                 <CircleDot className="w-3.5 h-3.5 text-emerald-400" />
-                Спектральные круги Гершгорина на комплексной плоскости ℂ (локализация собственных значений λ)
+                <MathText text="Спектральные круги Гершгорина на комплексной плоскости $\mathbb{C}$ (локализация собственных значений $\lambda$)" />
               </span>
               <span className="text-[11px] font-mono text-emerald-400">
                 {matrix.isDiagonallyDominant ? '✓ Диагональное преобладание (Обратима)' : 'Общий спектр'}
@@ -496,8 +497,8 @@ export const SparseMatrixVisualizer: React.FC<SparseMatrixVisualizerProps> = ({
                 })()}
               </svg>
             </div>
-            <div className="text-center text-[10px] text-slate-500 font-mono mt-1">
-              Каждый диск: |z - a_ii| ≤ Σ |a_ij|. Все собственные значения лежат внутри объединения кругов Гершгорина.
+            <div className="text-center text-[10px] text-slate-400 mt-1">
+              <MathText text="Каждый диск: $|z - a_{ii}| \le \sum_{j \neq i} |a_{ij}|$. Все собственные значения $\lambda$ лежат внутри объединения кругов Гершгорина." />
             </div>
           </div>
         )}
