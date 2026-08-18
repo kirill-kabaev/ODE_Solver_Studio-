@@ -38,6 +38,7 @@ import { PresetCatalogWindow } from './components/PresetCatalogWindow';
 import { HistoryWindow } from './components/HistoryWindow';
 import { LinearSolverStudio } from './components/LinearSolverStudio';
 import { VerticalPageScroller } from './components/VerticalPageScroller';
+import { StartupSplashLoader } from './components/StartupSplashLoader';
 import { MathText } from './components/MathView';
 import { analyzeDifferentialEquation } from './utils/preAnalyzer';
 import { solveLocallyCPU } from './utils/cpuSolver';
@@ -74,6 +75,8 @@ export default function App() {
   const [showHistoryModal, setShowHistoryModal] = useState<boolean>(false);
   const [showCatalogModal, setShowCatalogModal] = useState<boolean>(false);
   const [showVerificationModal, setShowVerificationModal] = useState<boolean>(false);
+  const [showSplash, setShowSplash] = useState<boolean>(true);
+  const [isReopenedSplash, setIsReopenedSplash] = useState<boolean>(false);
 
   // History State
   const [history, setHistory] = useState<HistoryRecord[]>(() => {
@@ -460,12 +463,34 @@ export default function App() {
         onOpenHistory={() => setShowHistoryModal(true)}
         onOpenCatalog={() => setShowCatalogModal(true)}
         onOpenVerification={() => setShowVerificationModal(true)}
+        onOpenShowcase={() => {
+          setIsReopenedSplash(true);
+          setShowSplash(true);
+        }}
         historyCount={history.length}
         isSolving={isSolving}
         hasSolution={Boolean(solution)}
         engine={engine}
         onChangeEngine={setEngine}
       />
+
+      {/* Futuristic Startup Splash / Interactive Welcome Showcase */}
+      {showSplash && (
+        <StartupSplashLoader
+          isReopened={isReopenedSplash}
+          onClose={() => {
+            setShowSplash(false);
+            setIsReopenedSplash(false);
+          }}
+          onComplete={(selectedMode) => {
+            if (selectedMode) {
+              setStudioMode(selectedMode);
+            }
+            setShowSplash(false);
+            setIsReopenedSplash(false);
+          }}
+        />
+      )}
 
       {/* Global Error Notification */}
       {errorMessage && (
