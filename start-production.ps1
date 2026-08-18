@@ -34,6 +34,11 @@ Write-Host ""
 Write-Host "==============================================================================" -ForegroundColor Green
 Write-Host "✨ [3/3] Запуск сервера в режиме Production (npm start)..." -ForegroundColor Green
 Write-Host "🌐 Приложение доступно по адресу: http://localhost:3000" -ForegroundColor Yellow
+Write-Host "🚀 Открытие приложения в браузере..." -ForegroundColor Cyan
 Write-Host "==============================================================================" -ForegroundColor Green
 $env:NODE_ENV = "production"
+
+# Фоновое открытие вкладки браузера через 2 секунды после инициализации сервера
+Start-Job -ScriptBlock { Start-Sleep -Seconds 2; Start-Process "http://localhost:3000" } | Out-Null
+
 npm start

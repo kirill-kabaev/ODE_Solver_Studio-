@@ -23,7 +23,12 @@ echo.
 echo ==============================================================================
 echo [2/2] Starting Development Server (npm run dev)...
 echo Application URL: http://localhost:3000
+echo Opening http://localhost:3000 in your browser...
 echo ==============================================================================
+
+REM Launch browser in background after 2 seconds
+start /b cmd /c "timeout /t 2 /nobreak >nul & start http://localhost:3000"
+
 call npm run dev
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Server exited with error code %ERRORLEVEL%

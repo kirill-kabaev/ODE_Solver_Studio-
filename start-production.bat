@@ -41,8 +41,13 @@ echo.
 echo ==============================================================================
 echo [3/3] Starting Production Server (npm start)...
 echo Application URL: http://localhost:3000
+echo Opening http://localhost:3000 in your browser...
 echo ==============================================================================
 set NODE_ENV=production
+
+REM Launch browser in background after 2 seconds
+start /b cmd /c "timeout /t 2 /nobreak >nul & start http://localhost:3000"
+
 call npm start
 if %ERRORLEVEL% NEQ 0 (
     echo [ERROR] Server stopped with error code %ERRORLEVEL%
