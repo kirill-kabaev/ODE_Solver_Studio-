@@ -206,20 +206,41 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
     }
   };
 
-  // Direct Import from TAMU Name (e.g. "HB/bcsstk18" or "pwtk")
-  const handleDirectImport = async () => {
-    const input = directMatrixInput.trim();
-    if (!input) return;
+  // Direct Import from TAMU Name or URL (e.g. "https://sparse.tamu.edu/HB/bcsstk18", "HB/bcsstk18", "Janna/Flan_1565" or "pwtk")
+  const handleDirectImport = async (overrideInput?: string) => {
+    const rawInput = (overrideInput || directMatrixInput).trim();
+    if (!rawInput) return;
 
     setDirectInputError(null);
-    const lower = input.toLowerCase();
 
-    // Check if matching in existing catalog
+    // Clean up input from full Texas A&M URLs, MM paths, and file extensions
+    let cleaned = rawInput;
+    cleaned = cleaned.replace(/^https?:\/\/sparse\.tamu\.edu\/?/i, '');
+    cleaned = cleaned.replace(/^MM\//i, '');
+    cleaned = cleaned.replace(/\.tar\.gz$/i, '');
+    cleaned = cleaned.replace(/\.mtx$/i, '');
+    cleaned = cleaned.replace(/\.txt$/i, '');
+
+    let group = 'HB';
+    let name = cleaned;
+
+    if (cleaned.includes('/')) {
+      const parts = cleaned.split('/');
+      group = parts[0].trim();
+      name = parts.slice(1).join('/').trim();
+    }
+
+    const lowerName = name.toLowerCase();
+    const lowerGroup = group.toLowerCase();
+
+    // 1. Check if matching in existing catalog
     const found = SUITE_SPARSE_CATALOG.find(
       (m) =>
-        m.name.toLowerCase() === lower ||
-        `${m.group}/${m.name}`.toLowerCase() === lower ||
-        m.id.toLowerCase() === lower
+        (m.name.toLowerCase() === lowerName && m.group.toLowerCase() === lowerGroup) ||
+        `${m.group}/${m.name}`.toLowerCase() === `${lowerGroup}/${lowerName}` ||
+        m.name.toLowerCase() === lowerName ||
+        m.id.toLowerCase() === `hb_${lowerName}` ||
+        m.id.toLowerCase() === lowerName
     );
 
     if (found) {
@@ -227,24 +248,75 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
       return;
     }
 
-    // Otherwise create dynamic metadata and synthesize
+    // 2. Otherwise dynamically determine physical domain and characteristics from Texas A&M group
     try {
       setLoadingMatrixId('direct_import');
-      const parts = input.includes('/') ? input.split('/') : ['Custom', input];
-      const grp = parts[0];
-      const nm = parts[1];
+
+      // Infer domain kind, symmetry and typical dimensions based on TAMU group
+      let inferredKind = 'Structural Problem';
+      let isSym = true;
+      let isSpd = true;
+      let estimatedN = 1200;
+      let estimatedNnz = 9600;
+
+      const gUpper = group.toUpperCase();
+      if (gUpper === 'DAVIS' || gUpper === 'SANDIA' || gUpper === 'GRUND' || gUpper === 'SCHENK_ISE' || gUpper === 'SCHENK') {
+        inferredKind = 'Circuit & Semiconductor';
+        isSym = false;
+        isSpd = false;
+        estimatedN = 2500;
+        estimatedNnz = 18000;
+      } else if (gUpper === 'SNAP' || gUpper === 'PAJEK' || gUpper === 'NEWMAN') {
+        inferredKind = 'Complex Network & Graph';
+        isSym = true;
+        isSpd = true;
+        estimatedN = 3200;
+        estimatedNnz = 24000;
+      } else if (gUpper === 'BAI' || gUpper === 'DRIVCAV' || gUpper === 'LUCIFORA') {
+        inferredKind = 'CFD & Fluid Dynamics';
+        isSym = false;
+        isSpd = false;
+        estimatedN = 2048;
+        estimatedNnz = 14500;
+      } else if (gUpper === 'JANNA') {
+        inferredKind = '3D Geomechanics';
+        isSym = true;
+        isSpd = true;
+        estimatedN = 1565;
+        estimatedNnz = 150000;
+      } else if (gUpper === 'GHS_INDEF') {
+        inferredKind = 'Indefinite Helmholtz / Optimization';
+        isSym = true;
+        isSpd = false;
+        estimatedN = 1800;
+        estimatedNnz = 12000;
+      } else if (gUpper === 'OBERWOLFACH') {
+        inferredKind = 'MEMS Model Order Reduction';
+        isSym = true;
+        isSpd = true;
+        estimatedN = 1693;
+        estimatedNnz = 13500;
+      } else if (gUpper === 'BOEING' || gUpper === 'WILLIAMS' || gUpper === 'POTHEN' || gUpper === 'SIMON') {
+        inferredKind = 'Aerospace Structural FEA';
+        isSym = true;
+        isSpd = true;
+        estimatedN = 3000;
+        estimatedNnz = 35000;
+      }
+
       const dynamicMeta: SuiteSparseMeta = {
-        id: `dyn_${nm.toLowerCase()}`,
-        name: nm,
-        group: grp,
-        rows: 1500,
-        cols: 1500,
-        nnz: 12000,
-        isSymmetric: true,
-        isSPD: true,
-        kind: 'Direct Texas A&M Import',
-        density: 0.53,
-        description: `Динамически импортированная матрица ${grp}/${nm} из репозитория sparse.tamu.edu`,
+        id: `tamu_${group.toLowerCase()}_${name.toLowerCase()}`,
+        name: name,
+        group: group,
+        rows: estimatedN,
+        cols: estimatedN,
+        nnz: estimatedNnz,
+        isSymmetric: isSym,
+        isSPD: isSpd,
+        kind: inferredKind,
+        density: (estimatedNnz / (estimatedN * estimatedN)) * 100,
+        description: `Матрица ${group}/${name} из репозитория SuiteSparse Matrix Collection (sparse.tamu.edu).`,
+        downloadUrl: `https://sparse.tamu.edu/MM/${group}/${name}.tar.gz`,
       };
 
       const csr = await loadSuiteSparseMatrixOnDemand(dynamicMeta);
@@ -344,24 +416,24 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
       )}
 
       {/* Direct Search & URL/Name Quick Import Bar */}
-      <div className="p-3 rounded-2xl bg-slate-950/70 border border-slate-800 flex items-center justify-between gap-3 flex-wrap">
-        <div className="flex items-center gap-2 flex-1 min-w-[280px]">
+      <div className="p-3.5 rounded-2xl bg-slate-950/70 border border-slate-800 flex flex-col gap-2.5">
+        <div className="flex items-center gap-2 flex-wrap">
           <FileCode className="w-4 h-4 text-cyan-400 shrink-0" />
           <span className="text-xs text-slate-300 font-medium whitespace-nowrap">
-            Прямая загрузка по названию / группе с sparse.tamu.edu:
+            Прямая загрузка по названию или URL с sparse.tamu.edu:
           </span>
           <input
             type="text"
             value={directMatrixInput}
             onChange={(e) => setDirectMatrixInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleDirectImport()}
-            placeholder="Например: HB/bcsstk18, Boeing/pwtk, Sandia/ASIC_320k..."
-            className="flex-1 px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
+            placeholder="Например: https://sparse.tamu.edu/HB/bcsstk18, Janna/Flan_1565, SNAP/amazon0302, nos7..."
+            className="flex-1 min-w-[240px] px-3 py-1.5 bg-slate-900 border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
           />
           <button
-            onClick={handleDirectImport}
+            onClick={() => handleDirectImport()}
             disabled={!directMatrixInput.trim() || loadingMatrixId !== null}
-            className="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 text-slate-950 font-bold text-xs cursor-pointer transition-all flex items-center gap-1.5"
+            className="px-3.5 py-1.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 disabled:opacity-50 text-slate-950 font-bold text-xs cursor-pointer transition-all flex items-center gap-1.5 shadow-md"
           >
             {loadingMatrixId === 'direct_import' ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin" />
@@ -370,6 +442,40 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
             )}
             <span>Загрузить</span>
           </button>
+        </div>
+
+        {/* Popular TAMU Matrix Chips */}
+        <div className="flex items-center gap-1.5 flex-wrap pt-1 text-[11px] border-t border-slate-800/60">
+          <span className="text-slate-500 text-[10px] uppercase tracking-wider font-semibold">Популярные TAMU:</span>
+          {[
+            'HB/can_24',
+            'HB/bcsstk01',
+            'HB/bcsstk18',
+            'HB/nos7',
+            'HB/pores_1',
+            'Bai/rdb2048',
+            'Boeing/crystk03',
+            'Boeing/pwtk',
+            'Davis/circuit5M',
+            'Janna/Flan_1565',
+            'SNAP/amazon0302',
+            'GHS_indef/helm2d03',
+            'Sandia/ASIC_320k',
+            'Newman/karate',
+            'Oberwolfach/gyro',
+            'Williams/webbase-1M',
+          ].map((chip) => (
+            <button
+              key={chip}
+              onClick={() => {
+                setDirectMatrixInput(chip);
+                handleDirectImport(chip);
+              }}
+              className="px-2 py-0.5 rounded-lg bg-slate-900 hover:bg-cyan-950 hover:text-cyan-300 border border-slate-800 hover:border-cyan-500/50 text-[10px] text-slate-300 font-mono transition-colors cursor-pointer"
+            >
+              {chip}
+            </button>
+          ))}
         </div>
       </div>
 
@@ -654,9 +760,21 @@ export const SuiteSparseCatalogModal: React.FC<SuiteSparseCatalogModalProps> = (
 
               <div>
                 <div className="flex items-center justify-between gap-2 mb-1.5">
-                  <span className="font-bold text-sm text-white group-hover:text-cyan-300 transition-colors font-mono truncate">
-                    {meta.group}/{meta.name}
-                  </span>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <span className="font-bold text-sm text-white group-hover:text-cyan-300 transition-colors font-mono truncate">
+                      {meta.group}/{meta.name}
+                    </span>
+                    <a
+                      href={`https://sparse.tamu.edu/${meta.group}/${meta.name}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="text-slate-500 hover:text-cyan-400 p-0.5 rounded transition-colors shrink-0"
+                      title="Открыть страницу матрицы на sparse.tamu.edu"
+                    >
+                      <ExternalLink className="w-3 h-3" />
+                    </a>
+                  </div>
                   <span
                     className={`text-[10px] px-2 py-0.5 rounded font-mono font-semibold shrink-0 ${
                       meta.rows > 10000
