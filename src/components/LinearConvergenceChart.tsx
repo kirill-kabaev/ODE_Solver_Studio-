@@ -153,8 +153,12 @@ export const LinearConvergenceChart: React.FC<LinearConvergenceChartProps> = ({
     const tolLogVal = Math.log10(Math.max(1e-18, tolerance));
     logVals.push(tolLogVal);
 
-    const minFound = Math.min(...logVals);
-    const maxFound = Math.max(...logVals);
+    let minFound = logVals[0] ?? -16;
+    let maxFound = logVals[0] ?? 0;
+    for (let i = 1; i < logVals.length; i++) {
+      if (logVals[i] < minFound) minFound = logVals[i];
+      if (logVals[i] > maxFound) maxFound = logVals[i];
+    }
 
     // Round min down to even exponent, max up to even exponent
     const minL = Math.floor(minFound / 2) * 2;

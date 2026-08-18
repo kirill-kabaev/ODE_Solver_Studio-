@@ -353,8 +353,8 @@ export const LinearSolverStudio: React.FC = () => {
         timestamp: Date.now(),
         formattedDate: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
         matrixName: matrix.name,
-        matrixSize: matrix.rows,
-        nnz: matrix.nnz,
+        matrixSize: matrix.originalRows || matrix.rows,
+        nnz: matrix.originalNnz || matrix.nnz,
         density: complexityInfo.densityPercent,
         bandwidth: complexityInfo.bandwidth,
         isSymmetric: matrix.isSymmetric,
@@ -1057,48 +1057,59 @@ export const LinearSolverStudio: React.FC = () => {
         <div className="p-3 sm:p-5 flex flex-col gap-5">
           <LinearConvergenceChart result={solverResult} tolerance={tolerance} height={580} />
 
-          {/* Solution Vector Components Preview */}
-          {solverResult && solverResult.solutionVector.length > 0 && (
-            <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col gap-3">
-              <div className="flex items-center justify-between text-xs text-slate-400 flex-wrap gap-2">
-                <span className="font-bold text-slate-200">
-                  <MathText text={`Вектор решения $x = [x_1, x_2, \\dots, x_N]^T$ ($N = ${solverResult.solutionVector.length}$)`} />
-                </span>
-                <div className="flex items-center gap-4 text-xs font-mono">
-                  <span className="text-slate-400">
-                    Мин: <span className="text-cyan-400">{Math.min(...solverResult.solutionVector).toFixed(4)}</span>
-                  </span>
-                  <span className="text-slate-400">
-                    Макс: <span className="text-cyan-400">{Math.max(...solverResult.solutionVector).toFixed(4)}</span>
-                  </span>
-                </div>
-              </div>
+              {/* Solution Vector Components Preview */}
+              {solverResult && solverResult.solutionVector.length > 0 && (() => {
+                const vec = solverResult.solutionVector;
+                let minVal = vec[0] ?? 0;
+                let maxVal = vec[0] ?? 0;
+                for (let i = 1; i < vec.length; i++) {
+                  if (vec[i] < minVal) minVal = vec[i];
+                  if (vec[i] > maxVal) maxVal = vec[i];
+                }
 
-              {/* Mini Sparkline Bar Chart of Solution Components */}
-              <div className="h-16 flex items-end gap-0.5 border-b border-slate-800 pb-1">
-                {(() => {
-                  const vec = solverResult.solutionVector;
-                  const step = Math.max(1, Math.floor(vec.length / 120));
-                  const sampled: number[] = [];
-                  for (let i = 0; i < vec.length; i += step) sampled.push(vec[i]);
+                const step = Math.max(1, Math.floor(vec.length / 120));
+                const sampled: number[] = [];
+                let maxAbs = 1e-12;
+                for (let i = 0; i < vec.length; i += step) {
+                  const val = vec[i];
+                  sampled.push(val);
+                  const absV = Math.abs(val);
+                  if (absV > maxAbs) maxAbs = absV;
+                }
 
-                  const maxAbs = Math.max(...sampled.map(Math.abs), 1e-12);
+                return (
+                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col gap-3">
+                    <div className="flex items-center justify-between text-xs text-slate-400 flex-wrap gap-2">
+                      <span className="font-bold text-slate-200">
+                        <MathText text={`Вектор решения $x = [x_1, x_2, \\dots, x_N]^T$ ($N = ${vec.length}$)`} />
+                      </span>
+                      <div className="flex items-center gap-4 text-xs font-mono">
+                        <span className="text-slate-400">
+                          Мин: <span className="text-cyan-400">{minVal.toFixed(4)}</span>
+                        </span>
+                        <span className="text-slate-400">
+                          Макс: <span className="text-cyan-400">{maxVal.toFixed(4)}</span>
+                        </span>
+                      </div>
+                    </div>
 
-                  return sampled.map((val, idx) => {
-                    const h = (Math.abs(val) / maxAbs) * 100;
-                    return (
-                      <div
-                        key={idx}
-                        className={`flex-1 rounded-t-xs transition-all ${val >= 0 ? 'bg-cyan-500' : 'bg-rose-500'}`}
-                        style={{ height: `${Math.max(4, h)}%` }}
-                        title={`x[${idx * step + 1}] = ${val.toFixed(6)}`}
-                      />
-                    );
-                  });
-                })()}
-              </div>
-            </div>
-          )}
+                    {/* Mini Sparkline Bar Chart of Solution Components */}
+                    <div className="h-16 flex items-end gap-0.5 border-b border-slate-800 pb-1">
+                      {sampled.map((val, idx) => {
+                        const h = (Math.abs(val) / maxAbs) * 100;
+                        return (
+                          <div
+                            key={idx}
+                            className={`flex-1 rounded-t-xs transition-all ${val >= 0 ? 'bg-cyan-500' : 'bg-rose-500'}`}
+                            style={{ height: `${Math.max(4, h)}%` }}
+                            title={`x[${idx * step + 1}] = ${val.toFixed(6)}`}
+                          />
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
         </div>
       </section>
 

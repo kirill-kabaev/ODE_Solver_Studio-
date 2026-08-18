@@ -841,9 +841,9 @@ export function generateFromSuiteSparseMeta(meta: any): SparseMatrixCSR {
   }
 
   const coo: SparseMatrixCOO = {
-    rows: trueRows,
-    cols: trueCols,
-    nnz: trueNnz,
+    rows,
+    cols,
+    nnz: rIdx.length,
     rowIndices: new Int32Array(rIdx),
     colIndices: new Int32Array(cIdx),
     values: new Float64Array(vals),
@@ -854,11 +854,12 @@ export function generateFromSuiteSparseMeta(meta: any): SparseMatrixCSR {
   };
 
   const csr = cooToCSR(coo, `${meta.group}/${meta.name}`);
-  csr.rows = trueRows;
-  csr.cols = trueCols;
-  csr.nnz = trueNnz;
   csr.group = meta.group;
   csr.kind = meta.kind;
+  csr.originalRows = trueRows;
+  csr.originalCols = trueCols;
+  csr.originalNnz = trueNnz;
+  csr.isScaledForBrowser = trueRows > rows;
   return csr;
 }
 

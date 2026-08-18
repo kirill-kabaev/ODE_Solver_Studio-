@@ -25,6 +25,10 @@ export interface SparseMatrixCSR {
   density?: number;
   bandwidth?: number;
   isDiagonallyDominant?: boolean;
+  originalRows?: number;
+  originalCols?: number;
+  originalNnz?: number;
+  isScaledForBrowser?: boolean;
 }
 
 export interface SuiteSparseMeta {

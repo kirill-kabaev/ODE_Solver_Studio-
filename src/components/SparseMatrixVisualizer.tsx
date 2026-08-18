@@ -250,14 +250,21 @@ export const SparseMatrixVisualizer: React.FC<SparseMatrixVisualizerProps> = ({
             <Eye className="w-4 h-4" />
           </div>
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="font-bold text-sm text-white">{matrix.name}</span>
               <span className="text-[11px] px-2 py-0.5 rounded-md bg-cyan-950/80 text-cyan-300 border border-cyan-800/60 font-mono">
-                {matrix.rows} × {matrix.cols}
+                {matrix.originalRows
+                  ? `${matrix.originalRows.toLocaleString()} × ${(matrix.originalCols || matrix.originalRows).toLocaleString()}`
+                  : `${matrix.rows} × ${matrix.cols}`}
               </span>
               <span className="text-[11px] px-2 py-0.5 rounded-md bg-slate-800 text-slate-300 font-mono">
-                nnz: {matrix.nnz.toLocaleString()} ({matrix.density?.toFixed(2)}%)
+                nnz: {(matrix.originalNnz || matrix.nnz).toLocaleString()} ({matrix.density?.toFixed(2)}%)
               </span>
+              {matrix.isScaledForBrowser && (
+                <span className="text-[10px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 font-mono" title="Оптимизировано для мгновенного решения и отрисовки в браузере без переполнения памяти">
+                  Вычислительный срез: {matrix.rows.toLocaleString()}
+                </span>
+              )}
             </div>
           </div>
         </div>
