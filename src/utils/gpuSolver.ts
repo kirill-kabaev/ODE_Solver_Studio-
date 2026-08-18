@@ -18,6 +18,7 @@ export interface GPUInfo {
   warpSize: number;
   computeCapability: string;
   powerPreference: string;
+  modelLabel?: string;
   detectedBrowserGpu?: string;
   isIntelDetected?: boolean;
   spec?: NvidiaGpuSpec;
@@ -93,6 +94,7 @@ export function detectHighPerformanceGPU(selectedModelKey?: string): GPUInfo {
         vendor: 'NVIDIA Corporation',
         isDiscrete: true,
         hasCuda: true,
+        modelLabel: foundSpec.name,
         cudaCoresEst: foundSpec.cudaCores,
         memoryBandwidthGBs: foundSpec.bandwidthGBs,
         warpSize: 32,
@@ -122,6 +124,7 @@ export function detectHighPerformanceGPU(selectedModelKey?: string): GPUInfo {
     vendor: 'NVIDIA Corporation',
     isDiscrete: true,
     hasCuda: true,
+    modelLabel: spec.name,
     cudaCoresEst: spec.cudaCores,
     memoryBandwidthGBs: spec.bandwidthGBs,
     warpSize: 32,
