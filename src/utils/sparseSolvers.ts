@@ -10,6 +10,7 @@ import {
   ParallelTelemetry,
 } from '../types/sparse';
 import { detectHighPerformanceGPU } from './gpuSolver';
+import { solveSparseLinearPipelineAsync } from './pipelineSolver';
 
 /**
  * Matrix-Vector Multiplication: y = A * x using CSR format (Sequential/SIMD).
@@ -170,10 +171,16 @@ export async function solveSparseLinearSystemAsync(
   options: SolverOptions,
   control?: SolverControlCallbacks
 ): Promise<LinearSolverResult> {
+  const solverType = options.solverType || 'cg';
+
+  // Delegate directly to 3-Stage Pipeline (METIS/AMD -> ILU/AMG -> GMRES/BiCGSTAB/PCG)
+  if (solverType.startsWith('pipeline_')) {
+    return solveSparseLinearPipelineAsync(A, options, control);
+  }
+
   const n = A.rows;
   const maxIter = options.maxIterations || Math.max(200, n * 2);
   const tol = options.tolerance || 1e-6;
-  const solverType = options.solverType || 'cg';
   const computeDevice: ComputeDevice = options.computeDevice || 'cpu';
 
   // Parallel Configuration

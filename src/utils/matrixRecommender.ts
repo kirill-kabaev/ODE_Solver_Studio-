@@ -352,6 +352,38 @@ export function recommendOptimalSolver(matrix: SparseMatrixCSR): MatrixSolverRec
         'Простейший параллельный метод, но сходится крайне медленно на жестких сетках (спектральный радиус $\\rho \\to 1$).',
     },
     {
+      solver: 'pipeline_ilu_gmres',
+      name: 'Конвейер: METIS/AMD ⟶ ILU(0) ⟶ GMRES(30)',
+      verdict:
+        !props.isSymmetric || props.hasZeroDiagonal || props.conditionEstimate > 5000
+          ? 'optimal'
+          : 'good_alternative',
+      explanation:
+        'Индустриальный стандарт для гигантских и плохо обусловленных матриц: перенумерация AMD сжимает профиль, ILU(0) строит разреженную факторизацию, а GMRES(30) обеспечивает безупречную сходимость.',
+    },
+    {
+      solver: 'pipeline_amg_bicgstab',
+      name: 'Конвейер: METIS/RCM ⟶ AMG(V-cycle) ⟶ BiCGSTAB',
+      verdict:
+        N >= 800
+          ? 'optimal'
+          : 'good_alternative',
+      explanation:
+        'Алгебраический многосеточный конвейер (AMG): сглаживание высокочастотных компонент ошибки + грубосеточная коррекция обеспечивают $O(N)$ сходимость даже на миллионных сетках.',
+    },
+    {
+      solver: 'pipeline_amg_pcg',
+      name: 'Конвейер: AMD ⟶ AMG ⟶ PCG',
+      verdict:
+        props.isSymmetric && props.isSPD && N >= 500
+          ? 'optimal'
+          : !props.isSymmetric
+          ? 'mathematically_invalid'
+          : 'good_alternative',
+      explanation:
+        'Наивысшая производительность для крупномасштабных симметричных задач Пуассона и механики деформируемого тела.',
+    },
+    {
       solver: 'direct_lu',
       name: 'Прямой ленточный LU-метод',
       verdict:

@@ -61,7 +61,41 @@ export type LinearSolverType =
   | 'jacobi' // Classical Jacobi iteration
   | 'gauss_seidel' // Gauss-Seidel iteration
   | 'sor' // Successive Over-Relaxation
-  | 'direct_lu'; // Banded Direct LU / Gaussian Elimination
+  | 'direct_lu' // Banded Direct LU / Gaussian Elimination
+  | 'pipeline_ilu_gmres' // METIS/AMD -> ILU(0) -> GMRES(30)
+  | 'pipeline_amg_bicgstab' // METIS/RCM -> AMG(V-cycle) -> BiCGSTAB
+  | 'pipeline_amg_pcg' // AMD -> AMG -> PCG (SPD Massive)
+  | 'pipeline_ilu_bicgstab'; // METIS/AMD -> ILU(0) -> BiCGSTAB
+
+export type MatrixOrderingType = 'none' | 'amd' | 'rcm' | 'metis_nd';
+export type PreconditionerType = 'none' | 'jacobi' | 'ssor' | 'ilu0' | 'ilut' | 'amg_vcycle';
+
+export interface PipelineStageTelemetry {
+  ordering: {
+    method: string;
+    timeMs: number;
+    originalBandwidth: number;
+    permutedBandwidth: number;
+    bandwidthReductionPercent: number;
+  };
+  preconditioner: {
+    method: string;
+    setupTimeMs: number;
+    fillInRatio: number;
+    spectralConditioningFactor: number;
+    coarseLevelsCount?: number;
+    gridComplexity?: number;
+    operatorComplexity?: number;
+  };
+  krylovIteration: {
+    solver: string;
+    timeMs: number;
+    iterations: number;
+    avgTimePerIterMs: number;
+    rateOfConvergence: number;
+  };
+  totalPipelineTimeMs: number;
+}
 
 export type RhsType =
   | 'ones' // b = [1, 1, ..., 1]^T
@@ -114,6 +148,10 @@ export interface SolverOptions {
   cpuConfig?: CpuParallelConfig;
   cudaConfig?: CudaKernelConfig;
   nvidiaModelKey?: string;
+  orderingType?: MatrixOrderingType;
+  preconditionerType?: PreconditionerType;
+  iluDropTolerance?: number;
+  amgMaxLevels?: number;
 }
 
 export interface ConvergenceStep {
@@ -163,6 +201,7 @@ export interface LinearSolverResult {
   rhsVector: number[]; // b
   conditionNumberEstimate?: number;
   spectralRadiusEstimate?: number;
+  pipelineTelemetry?: PipelineStageTelemetry;
   notes: string[];
 }
 

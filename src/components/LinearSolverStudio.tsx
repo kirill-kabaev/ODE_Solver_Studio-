@@ -57,6 +57,7 @@ import { SuiteSparseCatalogModal } from './SuiteSparseCatalogModal';
 import { LinearSolutionHistory } from './LinearSolutionHistory';
 import { NvidiaGpuInspectorModal } from './NvidiaGpuInspectorModal';
 import { MatrixSolverRecommendationCard } from './MatrixSolverRecommendationCard';
+import { PipelineStageVisualizer } from './PipelineStageVisualizer';
 import { recommendOptimalSolver } from '../utils/matrixRecommender';
 import { MathText } from './MathView';
 import { MatrixSolverRecommendation } from '../types/sparse';
@@ -895,6 +896,12 @@ export const LinearSolverStudio: React.FC = () => {
               onChange={(e) => setSolverType(e.target.value as LinearSolverType)}
               className="bg-slate-950 border border-slate-800 rounded-xl px-3 py-2.5 text-xs text-white focus:outline-none focus:border-cyan-500 cursor-pointer font-medium"
             >
+              <optgroup label="🚀 Индустриальные 3-х стадийные конвейеры (METIS/AMD ➔ ILU/AMG ➔ Крылов)">
+                <option value="pipeline_ilu_gmres">⚡ METIS/AMD + ILU(0) + GMRES(30) (Универсальный Krylov-конвейер)</option>
+                <option value="pipeline_amg_bicgstab">⚡ METIS/RCM + AMG(V-cycle) + BiCGSTAB (Многосеточный AMG-конвейер)</option>
+                <option value="pipeline_amg_pcg">⚡ AMD + AMG(V-cycle) + PCG (Для огромных SPD систем)</option>
+                <option value="pipeline_ilu_bicgstab">⚡ METIS/AMD + ILU(0) + BiCGSTAB (Стабилизированный ILU-конвейер)</option>
+              </optgroup>
               <optgroup label="Крыловские методы для симметричных SPD матриц">
                 <option value="cg">CG (Conjugate Gradient / Сопряженные градиенты)</option>
                 <option value="pcg_jacobi">PCG-Jacobi (Диагональный предобусловливатель)</option>
@@ -915,7 +922,12 @@ export const LinearSolverStudio: React.FC = () => {
             </select>
 
             <div className="p-3 rounded-xl bg-slate-950/60 border border-slate-800 text-[11px] text-slate-400">
-              {solverType.startsWith('cg') || solverType.startsWith('pcg') ? (
+              {solverType.startsWith('pipeline_') ? (
+                <span>
+                  <strong className="text-cyan-300">3-х стадийный промышленный конвейер:</strong>{' '}
+                  <MathText text="$\\text{METIS/AMD (перенумерация)} \\longrightarrow \\text{ILU/AMG (предобусловливание)} \\longrightarrow \\text{GMRES / BiCGSTAB}$. Сжимает ширину ленты и число обусловленности $\\kappa(M^{-1}A)$." />
+                </span>
+              ) : solverType.startsWith('cg') || solverType.startsWith('pcg') ? (
                 <span>
                   <strong>Метод сопряженных градиентов (CG):</strong> <MathText text={`параллельные умножения матрицы на вектор ($A \\cdot p$) и редукции скалярных произведений на ${computeDevice === 'cuda_gpu' ? 'CUDA-ядрах NVIDIA GPU' : 'CPU'}.`} />
                 </span>
@@ -1055,6 +1067,10 @@ export const LinearSolverStudio: React.FC = () => {
         </div>
 
         <div className="p-3 sm:p-5 flex flex-col gap-5">
+          {solverResult?.pipelineTelemetry && (
+            <PipelineStageVisualizer telemetry={solverResult.pipelineTelemetry} />
+          )}
+
           <LinearConvergenceChart result={solverResult} tolerance={tolerance} height={580} />
 
               {/* Solution Vector Components Preview */}
