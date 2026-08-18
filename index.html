@@ -14,8 +14,31 @@
     <meta property="og:type" content="website" />
     <meta name="twitter:card" content="summary_large_image" />
   </head>
-  <body>
-    <div id="root"></div>
+  <body class="bg-slate-950 text-slate-100">
+    <div id="root">
+      <!-- Fast Pre-Hydration Visual Splash Screen -->
+      <div style="min-height: 100vh; background-color: #020617; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; color: #f8fafc; padding: 1.5rem; text-align: center;">
+        <div style="position: relative; width: 140px; height: 140px; display: flex; align-items: center; justify-content: center; margin-bottom: 2rem;">
+          <div style="position: absolute; inset: 0; border-radius: 9999px; border: 2px solid rgba(6,182,212,0.2);"></div>
+          <div style="position: absolute; inset: 6px; border-radius: 9999px; border: 3px solid transparent; border-top-color: #22d3ee; border-right-color: #6366f1; animation: spin 1.2s linear infinite;"></div>
+          <div style="font-size: 1.75rem; font-weight: 900; color: #38bdf8; font-family: monospace;">⚡</div>
+        </div>
+        <h1 style="font-size: 1.25rem; font-weight: 800; letter-spacing: 0.05em; background: linear-gradient(to right, #67e8f9, #bae6fd, #a5b4fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin: 0 0 0.5rem 0;">
+          МАТЕМАТИЧЕСКАЯ СТУДИЯ
+        </h1>
+        <p style="font-size: 0.85rem; color: #94a3b8; font-family: monospace; margin: 0 0 1.5rem 0;">
+          СЛАУ Сверхбольших Систем & Дифференциальные Уравнения
+        </p>
+        <div style="width: 280px; height: 6px; background: #0f172a; border-radius: 9999px; overflow: hidden; border: 1px solid #1e293b; margin-bottom: 0.75rem;">
+          <div style="width: 60%; height: 100%; background: linear-gradient(90deg, #06b6d4, #6366f1); border-radius: 9999px; animation: pulse 1.5s ease-in-out infinite;"></div>
+        </div>
+        <span style="font-size: 0.75rem; color: #38bdf8; font-family: monospace;">Загрузка компонентов и математических ядер...</span>
+      </div>
+      <style>
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes pulse { 0%, 100% { opacity: 0.6; transform: scaleX(0.7); } 50% { opacity: 1; transform: scaleX(1); } }
+      </style>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
