@@ -878,8 +878,13 @@ export default function App() {
       )}
 
       {/* Footer info */}
-      <footer className="w-full border-t border-slate-800/80 bg-slate-950/80 py-4 px-4 text-center text-xs text-slate-500">
-        <span>Символьный Решатель ДУ • Multi-Engine (CPU / GPU / AI Gemini CAS) • 2D/3D Heatmap & WebGL Visualizer</span>
+      <footer className="w-full border-t border-slate-800/80 bg-slate-950/80 py-4 px-4 text-center text-xs text-slate-400 flex flex-col items-center justify-center gap-1.5">
+        <div className="font-semibold text-slate-300">
+          Computational Mathematics Studio v3.0 PRO • High-Performance Sparse Linear & ODE Computing
+        </div>
+        <div className="text-[11px] text-slate-500 font-mono">
+          © 2026 K. Kabaev (<a href="mailto:k.kabaev94@gmail.com" className="text-cyan-400 hover:underline">k.kabaev94@gmail.com</a>). Все права защищены. Исключительная интеллектуальная собственность автора.
+        </div>
       </footer>
     </div>
   );

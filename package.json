@@ -1,7 +1,10 @@
 {
-  "name": "react-example",
+  "name": "computational-mathematics-studio-pro",
   "private": true,
-  "version": "0.0.0",
+  "version": "3.0.0",
+  "author": "K. Kabaev <k.kabaev94@gmail.com>",
+  "license": "UNLICENSED",
+  "copyright": "Copyright (c) 2026 K. Kabaev. All Rights Reserved. Proprietary & Confidential.",
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
