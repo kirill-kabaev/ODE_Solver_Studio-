@@ -14,6 +14,7 @@ import {
   HelpCircle,
 } from 'lucide-react';
 import { MathText, MathView } from '../MathView';
+import { HandbookTopicId } from '../EngineeringHandbookModal';
 
 export type AirfoilId = 'naca0012' | 'naca4412' | 'supercritical' | 'diamond' | 'ogive';
 
@@ -81,7 +82,9 @@ const AIRFOIL_CATALOG: Record<AirfoilId, AirfoilMetadata> = {
   },
 };
 
-export const CFDWindTunnel: React.FC = () => {
+interface CFDWindTunnelProps {}
+
+export const CFDWindTunnel: React.FC<CFDWindTunnelProps> = () => {
   // Primary Aerodynamic Controls
   const [mach, setMach] = useState<number>(0.72);
   const [alpha, setAlpha] = useState<number>(4.5); // Angle of attack (deg)

@@ -1,6 +1,6 @@
 {
   "name": "Символьный Решатель ДУ (ODE Solver Studio)",
-  "description": "Студия символьного решения дифференциальных уравнений и решатель огромных разреженных линейных систем СЛАУ (Ax = b) с коллекцией Texas A&M SuiteSparse (sparse.tamu.edu) и визуализацией разреженности.",
+  "description": "Студия вычислительной математики и инжиниринга: символьный решатель ДУ, разреженные СЛАУ SuiteSparse (CSR + AMG + Krylov), модуль Аэродинамики и CFD с каталогом инженерных пресетов (NACA 0012, RAE 2822, 3D CRM, волнолеты), потоковым монитором сил и 3D графиками.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

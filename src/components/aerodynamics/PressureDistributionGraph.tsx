@@ -8,9 +8,11 @@ import {
   TrendingUp,
   Sliders,
   CheckCircle2,
+  Info,
 } from 'lucide-react';
 import { MathText, MathView } from '../MathView';
 import { AirfoilId } from './CFDWindTunnel';
+import { HandbookTopicId } from '../EngineeringHandbookModal';
 
 interface PressureDistributionGraphProps {
   mach?: number;

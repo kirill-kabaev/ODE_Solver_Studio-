@@ -10,10 +10,14 @@ import {
   Sparkles,
   GitBranch,
   Terminal,
+  Info,
 } from 'lucide-react';
 import { MathView, MathText } from '../MathView';
+import { HandbookTopicId } from '../EngineeringHandbookModal';
 
-export const CFDSolverArchitecture: React.FC = () => {
+interface CFDSolverArchitectureProps {}
+
+export const CFDSolverArchitecture: React.FC<CFDSolverArchitectureProps> = () => {
   const [activeStage, setActiveStage] = useState<number>(3);
 
   const pipelineStages = [
@@ -76,9 +80,11 @@ export const CFDSolverArchitecture: React.FC = () => {
           </div>
         </div>
 
-        <span className="text-[10px] px-2.5 py-1 rounded-full bg-indigo-950 text-indigo-300 font-mono border border-indigo-800">
-          Собственный код солвера (v3.0 PRO)
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-[10px] px-2.5 py-1 rounded-full bg-indigo-950 text-indigo-300 font-mono border border-indigo-800">
+            Собственный код солвера (v3.0 PRO)
+          </span>
+        </div>
       </div>
 
       {/* Interactive Horizontal Pipeline Stage Steps */}

@@ -21,14 +21,53 @@ import {
   Info,
   Radio,
   FileCode2,
+  BookOpen,
 } from 'lucide-react';
 import { MathText } from './MathView';
 import { AerodynamicsModule } from './aerodynamics/AerodynamicsModule';
+import { EngineeringHandbookModal, HandbookTopicId } from './EngineeringHandbookModal';
 
 export type EngineeringDomain = 'aero' | 'space' | 'eda';
 
 export const EngineeringStudio: React.FC = () => {
   const [activeDomain, setActiveDomain] = useState<EngineeringDomain>('aero');
+  const [activeAeroTab, setActiveAeroTab] = useState<string>('presets');
+  const [isHandbookOpen, setIsHandbookOpen] = useState<boolean>(false);
+  const [handbookTopicId, setHandbookTopicId] = useState<HandbookTopicId>('presets');
+
+  const getActiveTopic = (): { topicId: HandbookTopicId; label: string } => {
+    if (activeDomain === 'space') {
+      return { topicId: 'space_gnc', label: 'Космос & GNC' };
+    }
+    if (activeDomain === 'eda') {
+      return { topicId: 'eda_avionics', label: 'EDA & Авионика' };
+    }
+    // Aero domain:
+    switch (activeAeroTab) {
+      case 'presets':
+        return { topicId: 'presets', label: 'Каталог Пресетов' };
+      case 'status_monitor':
+        return { topicId: 'status_monitor', label: 'Монитор Сил & 3D' };
+      case 'wind_tunnel':
+        return { topicId: 'wind_tunnel', label: 'Аэродинамическая Труба' };
+      case 'flutter':
+        return { topicId: 'flutter', label: 'Флаттер (FSI)' };
+      case '6dof':
+        return { topicId: '6dof', label: 'Динамика 6-DoF' };
+      case 'architecture':
+        return { topicId: 'architecture', label: 'Архитектура Солвера' };
+      default:
+        return { topicId: 'overview', label: 'Обзор' };
+    }
+  };
+
+  const handleOpenCurrentHandbook = () => {
+    const current = getActiveTopic();
+    setHandbookTopicId(current.topicId);
+    setIsHandbookOpen(true);
+  };
+
+  const activeTopicInfo = getActiveTopic();
 
   return (
     <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-4 space-y-6 animate-fadeIn">
@@ -57,12 +96,28 @@ export const EngineeringStudio: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start md:self-auto bg-slate-950/70 p-1.5 rounded-xl border border-slate-800 shrink-0">
-            <div className="flex flex-col text-right pr-2 hidden lg:flex">
-              <span className="text-[10px] text-slate-400 font-mono">Вычислительное Ядро</span>
-              <span className="text-xs font-bold text-cyan-300 font-mono">CSR + AMG + RK4</span>
+          <div className="flex items-center gap-2 self-start md:self-auto shrink-0 flex-wrap">
+            {/* Single Unified Info & Handbook Trigger Button with Active Section Detection */}
+            <button
+              type="button"
+              onClick={handleOpenCurrentHandbook}
+              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:from-cyan-400 hover:to-indigo-400 text-slate-950 font-black text-xs shadow-lg shadow-cyan-950/60 transition-all cursor-pointer border border-cyan-400/40"
+              title={`Открыть научно-технический справочник: ${activeTopicInfo.label}`}
+            >
+              <Info className="w-4 h-4 text-slate-950" />
+              <span>Инфо & Справочник</span>
+              <span className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-slate-950/25 text-[10px] font-mono font-bold tracking-tight">
+                [{activeTopicInfo.label}]
+              </span>
+            </button>
+
+            <div className="flex items-center gap-2 bg-slate-950/70 p-1.5 rounded-xl border border-slate-800">
+              <div className="flex flex-col text-right pr-2 hidden lg:flex">
+                <span className="text-[10px] text-slate-400 font-mono">Вычислительное Ядро</span>
+                <span className="text-xs font-bold text-cyan-300 font-mono">CSR + AMG + RK4</span>
+              </div>
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
             </div>
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
           </div>
         </div>
 
@@ -131,9 +186,20 @@ export const EngineeringStudio: React.FC = () => {
       </div>
 
       {/* Main Active Domain Module */}
-      {activeDomain === 'aero' && <AerodynamicsModule />}
+      {activeDomain === 'aero' && (
+        <AerodynamicsModule
+          onTabChange={(tab) => setActiveAeroTab(tab)}
+        />
+      )}
       {activeDomain === 'space' && <OrbitalGNCModule />}
       {activeDomain === 'eda' && <MicroelectronicsEDAModule />}
+
+      {/* Full Interactive Engineering Handbook Modal */}
+      <EngineeringHandbookModal
+        isOpen={isHandbookOpen}
+        onClose={() => setIsHandbookOpen(false)}
+        initialTopicId={handbookTopicId}
+      />
     </div>
   );
 };
@@ -141,7 +207,11 @@ export const EngineeringStudio: React.FC = () => {
 // ============================================================================
 // 2. КОСМОЛОГИЯ, АСТРОДИНАМИКА И GNC (ОРБИТЫ ЛАМБЕРТА, ТЕПЛОЗАЩИТА, TVC)
 // ============================================================================
-const OrbitalGNCModule: React.FC = () => {
+interface DomainModuleProps {
+  onOpenHandbook?: (topicId: HandbookTopicId) => void;
+}
+
+const OrbitalGNCModule: React.FC<DomainModuleProps> = ({ onOpenHandbook }) => {
   const [mission, setMission] = useState<'earth_mars' | 'earth_moon' | 'gto_geo'>('earth_mars');
   const [gimbalAngle, setGimbalAngle] = useState<number>(2.5); // Thrust vector control angle
   const [kalmanNoise, setKalmanNoise] = useState<number>(0.35);
@@ -268,12 +338,12 @@ const OrbitalGNCModule: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left: Orbital Canvas */}
         <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col gap-4 shadow-xl">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <Rocket className="w-5 h-5 text-indigo-400" />
               <h2 className="text-sm font-bold text-white">Межпланетный Навигатор (Задача Ламберта & GNC)</h2>
             </div>
-            <div className="flex items-center gap-1.5">
+            <div className="flex items-center gap-2">
               <span className="text-[10px] px-2 py-0.5 rounded font-mono font-bold bg-indigo-950 text-indigo-300 border border-indigo-700">
                 Δv Общий: {(missionInfo.deltaV1 + missionInfo.deltaV2).toFixed(1)} км/с
               </span>
@@ -407,7 +477,7 @@ const OrbitalGNCModule: React.FC = () => {
 // ============================================================================
 // 3. МИКРОЭЛЕКТРОНИКА, EDA, ЧИПЫ И АВИОНИКА (PLACE & ROUTE, TMR, RAD-HARD)
 // ============================================================================
-const MicroelectronicsEDAModule: React.FC = () => {
+const MicroelectronicsEDAModule: React.FC<DomainModuleProps> = ({ onOpenHandbook }) => {
   const [coreErrors, setCoreErrors] = useState<[boolean, boolean, boolean]>([false, false, false]);
   const [injectedCount, setInjectedCount] = useState<number>(0);
   const [isOptimizedEDA, setIsOptimizedEDA] = useState<boolean>(true);
@@ -435,17 +505,19 @@ const MicroelectronicsEDAModule: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Left: TMR 3-Core Fault-Tolerant Simulator */}
         <div className="lg:col-span-2 bg-slate-900 border border-slate-800 rounded-2xl p-4 flex flex-col gap-4 shadow-xl">
-          <div className="flex items-center justify-between border-b border-slate-800 pb-3">
+          <div className="flex items-center justify-between border-b border-slate-800 pb-3 flex-wrap gap-2">
             <div className="flex items-center gap-2">
               <ShieldCheck className="w-5 h-5 text-purple-400" />
               <h2 className="text-sm font-bold text-white">Тройное Резервирование Авионики (TMR Fault-Tolerance)</h2>
             </div>
-            <button
-              onClick={handleInjectSEU}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white text-xs font-bold font-mono transition-all cursor-pointer shadow-md"
-            >
-              <Zap className="w-3.5 h-3.5" /> Инжектировать Космическую Частицу (SEU)
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleInjectSEU}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-rose-600 to-amber-600 hover:from-rose-500 hover:to-amber-500 text-white text-xs font-bold font-mono transition-all cursor-pointer shadow-md"
+              >
+                <Zap className="w-3.5 h-3.5" /> Инжектировать SEU
+              </button>
+            </div>
           </div>
 
           {/* 3 Processors Visual Layout */}

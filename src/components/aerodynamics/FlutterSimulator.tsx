@@ -14,8 +14,11 @@ import {
   CheckCircle2,
 } from 'lucide-react';
 import { MathView, MathText } from '../MathView';
+import { HandbookTopicId } from '../EngineeringHandbookModal';
 
-export const FlutterSimulator: React.FC = () => {
+interface FlutterSimulatorProps {}
+
+export const FlutterSimulator: React.FC<FlutterSimulatorProps> = () => {
   // Fluid velocity V (m/s)
   const [velocity, setVelocity] = useState<number>(170); // Flow speed
   const [cgOffset, setCgOffset] = useState<number>(0.05); // Distance between CG and Elastic Axis (m)

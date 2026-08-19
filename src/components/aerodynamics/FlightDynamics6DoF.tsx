@@ -11,10 +11,14 @@ import {
   HelpCircle,
   CheckCircle2,
   Layers,
+  Info,
 } from 'lucide-react';
 import { MathView, MathText } from '../MathView';
+import { HandbookTopicId } from '../EngineeringHandbookModal';
 
-export const FlightDynamics6DoF: React.FC = () => {
+interface FlightDynamics6DoFProps {}
+
+export const FlightDynamics6DoF: React.FC<FlightDynamics6DoFProps> = () => {
   // Flight Dynamics State
   const [pitch, setPitch] = useState<number>(3.5);   // theta (deg)
   const [roll, setRoll] = useState<number>(0.0);     // phi (deg)
