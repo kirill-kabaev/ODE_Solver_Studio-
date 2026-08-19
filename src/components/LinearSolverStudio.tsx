@@ -332,8 +332,12 @@ export const LinearSolverStudio: React.FC = () => {
         },
       });
 
+      const e2eWallTimeMs = Math.max(0.1, performance.now() - startTimeRef.current);
+      res.elapsedTimeMs = e2eWallTimeMs;
+      res.e2eTimeMs = e2eWallTimeMs;
+
       setSolverResult(res);
-      setRunningTimeMs(res.elapsedTimeMs);
+      setRunningTimeMs(e2eWallTimeMs);
 
       // Record to Linear Solution History
       const physicsInfo = getMatrixPhysicalDomain(matrix);
@@ -372,8 +376,9 @@ export const LinearSolverStudio: React.FC = () => {
         cudaBlockSize,
         iterations: res.iterations,
         maxIterations,
-        elapsedTimeMs: res.elapsedTimeMs,
-        formattedTime: formatSolverTime(res.elapsedTimeMs),
+        elapsedTimeMs: e2eWallTimeMs,
+        e2eTimeMs: e2eWallTimeMs,
+        formattedTime: formatSolverTime(e2eWallTimeMs),
         finalResidual: res.finalResidual,
         finalRelativeResidual: res.finalRelativeResidual,
         converged: res.converged,
@@ -429,11 +434,13 @@ export const LinearSolverStudio: React.FC = () => {
     }
   };
 
-  // Solve on initial load, matrix switch, or compute device / thread count switch
-  useEffect(() => {
-    handleSolve();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matrix.name, matrix.rows, computeDevice, selectedNvidiaModel, cpuThreads, cpuScheduling]);
+  // Dedicated handler for manual matrix loading without auto-triggering execution
+  const handleSelectMatrix = (newMatrix: SparseMatrixCSR) => {
+    setMatrix(newMatrix);
+    setSolverResult(null);
+    setRunningTimeMs(0);
+    setCurrentStepIter(0);
+  };
 
   return (
     <div className="flex flex-col gap-8 w-full">
@@ -522,12 +529,18 @@ export const LinearSolverStudio: React.FC = () => {
             ) : solverResult ? (
               <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-slate-300 text-xs font-mono">
                 <Clock className="w-3.5 h-3.5 text-indigo-400" />
-                <span className="text-slate-400">Время:</span>
+                <span className="text-slate-400">E2E Время:</span>
                 <span className="text-cyan-300 font-bold">
                   {formatResultDuration(solverResult.elapsedTimeMs)}
                 </span>
               </div>
-            ) : null}
+            ) : (
+              <div className="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-950/80 border border-slate-800 text-xs font-mono">
+                <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+                <span className="text-slate-300 font-medium">Готова к расчету</span>
+                <span className="text-slate-500">• Нажмите «Решить»</span>
+              </div>
+            )}
 
             {/* If currently solving -> Show Prominent Red STOP Button */}
             {isSolving ? (
@@ -1057,7 +1070,7 @@ export const LinearSolverStudio: React.FC = () => {
             <div className="flex items-center gap-3">
               <div className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 flex items-center gap-2 text-xs font-mono">
                 <Timer className="w-3.5 h-3.5 text-indigo-400" />
-                <span className="text-slate-400">Итоговое время:</span>
+                <span className="text-slate-400">Итоговое E2E Время:</span>
                 <span className="text-indigo-300 font-bold">
                   {formatResultDuration(solverResult.elapsedTimeMs)}
                 </span>
@@ -1164,7 +1177,7 @@ export const LinearSolverStudio: React.FC = () => {
             <div className="p-4 flex-1 overflow-y-auto min-h-[400px]">
               <SuiteSparseCatalogModal
                 onLoadMatrix={(loaded) => {
-                  setMatrix(loaded);
+                  handleSelectMatrix(loaded);
                   setShowCatalogModal(false);
                 }}
                 onClose={() => setShowCatalogModal(false)}

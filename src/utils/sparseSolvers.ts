@@ -852,7 +852,7 @@ export async function solveSparseLinearSystemAsync(
   }
 
   const rawElapsedMs = performance.now() - startTime;
-  const safeRawElapsedMs = Math.max(0.05, isFinite(rawElapsedMs) && rawElapsedMs > 0 ? rawElapsedMs : 1.2);
+  const validElapsedMs = Math.max(0.1, isFinite(rawElapsedMs) && rawElapsedMs > 0 ? Number(rawElapsedMs.toFixed(2)) : 1.0);
 
   // CPU Parallel Speedup modeling (Amdahl's law: Sp = 1 / ((1 - p) + p / T))
   const pParallelFrac = 0.94; // 94% of sparse solver is parallelizable
@@ -871,12 +871,6 @@ export async function solveSparseLinearSystemAsync(
     : 1.0;
 
   const validGpuSpeedup = isFinite(gpuSpeedupFactor) && gpuSpeedupFactor > 0 ? gpuSpeedupFactor : 4.5;
-
-  const elapsedMs = isGpu
-    ? Math.max(0.2, (safeRawElapsedMs / validGpuSpeedup) + safeTransferTimeMs)
-    : Math.max(0.3, safeRawElapsedMs / (cpuThreads > 1 ? Math.max(1.2, cpuSpeedupVsSingle * 0.75) : 1.0));
-
-  const validElapsedMs = isFinite(elapsedMs) && elapsedMs > 0 ? elapsedMs : 1.0;
   const rawGflops = totalFlops / (validElapsedMs * 1e6);
   const gflops = isFinite(rawGflops) && rawGflops > 0 ? Number(rawGflops.toFixed(2)) : 1.25;
 
@@ -964,6 +958,7 @@ export async function solveSparseLinearSystemAsync(
     finalRelativeResidual: finalRelResidual,
     exactError: getTrueError(x),
     elapsedTimeMs: validElapsedMs,
+    e2eTimeMs: validElapsedMs,
     gflops,
     history,
     solutionVector: Array.from(x),

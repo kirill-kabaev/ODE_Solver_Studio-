@@ -336,8 +336,8 @@ export const LinearConvergenceChart: React.FC<LinearConvergenceChartProps> = ({
         <div className="flex items-center gap-3 text-[11px] font-mono">
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-300">
             <Timer className="w-3.5 h-3.5 text-indigo-400" />
-            <span className="text-slate-400">Время:</span>
-            <strong className="text-white">{formattedTime}</strong>
+            <span className="text-slate-400">E2E Время:</span>
+            <strong className="text-white font-bold">{formattedTime}</strong>
           </div>
 
           <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-cyan-500/10 border border-cyan-500/20 text-cyan-300">

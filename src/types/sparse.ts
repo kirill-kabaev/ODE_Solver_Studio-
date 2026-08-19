@@ -195,6 +195,7 @@ export interface LinearSolverResult {
   finalRelativeResidual: number;
   exactError?: number;
   elapsedTimeMs: number;
+  e2eTimeMs?: number;
   gflops: number;
   history: ConvergenceStep[];
   solutionVector: number[]; // x
@@ -300,6 +301,7 @@ export interface LinearSolverHistoryRecord {
   iterations: number;
   maxIterations: number;
   elapsedTimeMs: number;
+  e2eTimeMs?: number;
   formattedTime: string;
   finalResidual: number;
   finalRelativeResidual: number;

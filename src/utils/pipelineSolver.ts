@@ -1068,6 +1068,7 @@ export async function solveSparseLinearPipelineAsync(
     finalRelativeResidual: finalRelResidual,
     exactError: origXExact ? getTrueError(x) : undefined,
     elapsedTimeMs: totalTimeMs,
+    e2eTimeMs: totalTimeMs,
     gflops,
     history,
     solutionVector: Array.from(unpermutedX),
