@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { MathView, MathText } from '../MathView';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
+import { createHardware2DContext } from '../../utils/gpuHardwareEnforcer';
 
 interface FlightDynamics6DoFProps {}
 
@@ -109,7 +110,7 @@ export const FlightDynamics6DoF: React.FC<FlightDynamics6DoFProps> = () => {
   useEffect(() => {
     const canvas = pfdCanvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = createHardware2DContext(canvas);
     if (!ctx) return;
 
     const w = canvas.width;

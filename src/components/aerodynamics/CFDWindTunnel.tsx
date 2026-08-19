@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { MathText, MathView } from '../MathView';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
+import { createHardware2DContext } from '../../utils/gpuHardwareEnforcer';
 
 export type AirfoilId = 'naca0012' | 'naca4412' | 'supercritical' | 'diamond' | 'ogive';
 
@@ -212,7 +213,7 @@ export const CFDWindTunnel: React.FC<CFDWindTunnelProps> = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = createHardware2DContext(canvas);
     if (!ctx) return;
 
     let animId: number;

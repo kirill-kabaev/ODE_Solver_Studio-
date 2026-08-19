@@ -24,6 +24,7 @@ import {
 } from 'lucide-react';
 import { MathView, MathText } from '../MathView';
 import { WingGeometryEditor, ExtendedWingGeometryConfig, DEFAULT_WING_GEOMETRY } from './WingGeometryEditor';
+import { createHardware2DContext } from '../../utils/gpuHardwareEnforcer';
 
 // ==========================================
 // 3D VLM GEOMETRIC DATA STRUCTURES & TYPES
@@ -904,7 +905,7 @@ export const VortexLatticeModule: React.FC = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = createHardware2DContext(canvas);
     if (!ctx) return;
 
     let animId: number;
@@ -1753,7 +1754,7 @@ const SectionalGraphCanvas: React.FC<SectionalGraphCanvasProps> = ({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = createHardware2DContext(canvas);
     if (!ctx) return;
 
     const w = canvas.width;

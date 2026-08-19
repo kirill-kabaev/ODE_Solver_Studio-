@@ -7,6 +7,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Play, Pause, RotateCcw, Eye, Layers, Wind, Disc, Compass } from 'lucide-react';
 import { RotorBEMResults, RotorGeometryConfig, FlowOperatingCondition } from './bemTypes';
+import { createHardware2DContext } from '../../../utils/gpuHardwareEnforcer';
 
 interface Rotor3DVisualizerProps {
   config: RotorGeometryConfig;
@@ -100,7 +101,7 @@ export const Rotor3DVisualizer: React.FC<Rotor3DVisualizerProps> = ({
     const render = () => {
       const canvas = canvasRef.current;
       if (!canvas) return;
-      const ctx = canvas.getContext('2d');
+      const ctx = createHardware2DContext(canvas);
       if (!ctx) return;
 
       const w = canvas.width;

@@ -26,6 +26,7 @@ import {
 import { MathText } from './MathView';
 import { AerodynamicsModule } from './aerodynamics/AerodynamicsModule';
 import { EngineeringHandbookModal, HandbookTopicId } from './EngineeringHandbookModal';
+import { NvidiaHardwareEnforcerBar } from './NvidiaHardwareEnforcerBar';
 
 export type EngineeringDomain = 'aero' | 'space' | 'eda';
 
@@ -190,6 +191,9 @@ export const EngineeringStudio: React.FC = () => {
           </button>
         </div>
       </div>
+
+      {/* GPU Hardware Acceleration & Discrete NVIDIA Enforcer Bar */}
+      <NvidiaHardwareEnforcerBar />
 
       {/* Main Active Domain Module */}
       {activeDomain === 'aero' && (

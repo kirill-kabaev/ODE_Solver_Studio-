@@ -15,6 +15,7 @@ import {
 } from 'lucide-react';
 import { MathView, MathText } from '../MathView';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
+import { createHardware2DContext } from '../../utils/gpuHardwareEnforcer';
 
 interface FlutterSimulatorProps {}
 
@@ -75,7 +76,7 @@ export const FlutterSimulator: React.FC<FlutterSimulatorProps> = () => {
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext('2d');
+    const ctx = createHardware2DContext(canvas);
     if (!ctx) return;
 
     let animId: number;
