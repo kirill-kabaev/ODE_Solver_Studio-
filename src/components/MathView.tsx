@@ -54,8 +54,23 @@ export const MathText: React.FC<MathTextProps> = ({ text, className = '' }) => {
   const segments = useMemo<TextSegment[]>(() => {
     if (!text || typeof text !== 'string') return [];
 
-    // Check if text has any math markers
-    if (!text.includes('$') && !text.includes('\\(') && !text.includes('\\[') && !text.includes('\\nabla')) {
+    const trimmed = text.trim();
+
+    // Check if the entire string is a raw LaTeX expression (starts with \ or contains typical LaTeX commands without $)
+    const isPureLatex = (
+      !trimmed.includes('$') &&
+      !trimmed.includes('\\(') &&
+      !trimmed.includes('\\[') &&
+      (/\\(mathbf|frac|partial|nabla|ddot|dot|boldsymbol|sqrt|int|sum|times|cdot|alpha|beta|gamma|theta|rho|sigma|tau|mu|Delta|omega|text|hat|vec|pm)/.test(trimmed))
+    );
+
+    if (isPureLatex) {
+      return [{ type: 'block-math', content: trimmed }];
+    }
+
+    // Check if text has any math markers or LaTeX backslash commands
+    const hasMath = text.includes('$') || text.includes('\\(') || text.includes('\\[') || text.includes('\\');
+    if (!hasMath) {
       return [{ type: 'text', content: text }];
     }
 
