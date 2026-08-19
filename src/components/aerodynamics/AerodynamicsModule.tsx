@@ -11,7 +11,9 @@ import {
   Info,
   Box,
   BookOpen,
+  Grid,
 } from 'lucide-react';
+import { VortexLatticeModule } from './VortexLatticeModule';
 import { CFDWindTunnel } from './CFDWindTunnel';
 import { PressureDistributionGraph } from './PressureDistributionGraph';
 import { FlutterSimulator } from './FlutterSimulator';
@@ -22,7 +24,7 @@ import { Full3DPlotViewer, Aerodynamic3DData } from './Full3DPlotViewer';
 import { EngineeringPresetCatalog, EngineeringPreset, ENGINEERING_PRESETS } from './EngineeringPresetCatalog';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
 
-export type AeroSubTab = 'presets' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
+export type AeroSubTab = 'presets' | 'vlm' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
 
 interface AerodynamicsModuleProps {
   onTabChange?: (tab: AeroSubTab) => void;
@@ -99,6 +101,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
 
         <button
           type="button"
+          onClick={() => handleTabSelect('vlm')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'vlm'
+              ? 'bg-gradient-to-r from-indigo-500 via-cyan-500 to-emerald-400 text-slate-950 shadow-md font-black'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+          }`}
+        >
+          <Grid className="w-4 h-4 text-cyan-400" />
+          <span>1. 3D Метод Вихревой Решетки (VLM)</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => handleTabSelect('status_monitor')}
           className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'status_monitor'
@@ -107,7 +122,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           }`}
         >
           <Activity className="w-4 h-4" />
-          <span>1. Монитор Сил ($L, D, M_y$) & 3D График</span>
+          <span>2. Монитор Сил ($L, D, M_y$) & 3D График</span>
         </button>
 
         <button
@@ -120,7 +135,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           }`}
         >
           <Wind className="w-4 h-4" />
-          <span>2. Аэродинамическая Труба ($C_p$)</span>
+          <span>3. Аэродинамическая Труба ($C_p$)</span>
         </button>
 
         <button
@@ -133,7 +148,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
-          <span>3. Флаттер (FSI)</span>
+          <span>4. Флаттер (FSI)</span>
         </button>
 
         <button
@@ -146,7 +161,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           }`}
         >
           <Compass className="w-4 h-4" />
-          <span>4. Динамика 6-DoF</span>
+          <span>5. Динамика 6-DoF</span>
         </button>
 
         <button
@@ -159,7 +174,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           }`}
         >
           <Cpu className="w-4 h-4" />
-          <span>5. Архитектура Солвера</span>
+          <span>6. Архитектура Солвера</span>
         </button>
       </div>
 
@@ -169,6 +184,11 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           onApplyPreset={handleApplyPreset}
           activePresetId={selectedPreset.id}
         />
+      )}
+
+      {/* Sub-tab: 3D Vortex Lattice Method (VLM) */}
+      {activeTab === 'vlm' && (
+        <VortexLatticeModule />
       )}
 
       {/* Sub-tab 1: Real-time Status Monitor & Full 3D Plot */}

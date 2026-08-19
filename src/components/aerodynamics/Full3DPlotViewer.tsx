@@ -46,12 +46,12 @@ export const Full3DPlotViewer: React.FC<Full3DPlotViewerProps> = ({
 }) => {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // 3D Viewport Controls
-  const [rotX, setRotX] = useState<number>(22); // Pitch (deg)
-  const [rotY, setRotY] = useState<number>(-35); // Yaw (deg)
-  const [zoom, setZoom] = useState<number>(1.15);
-  const [isDragging, setIsDragging] = useState<boolean>(false);
-  const [dragStart, setDragStart] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  // 3D Viewport Controls in Refs for 60fps canvas rendering without React re-render loops
+  const rotXRef = useRef<number>(22); // Pitch (deg)
+  const rotYRef = useRef<number>(-35); // Yaw (deg)
+  const zoomRef = useRef<number>(1.15);
+  const isDraggingRef = useRef<boolean>(false);
+  const dragStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
   // 3D Visualization Layer Toggles
   const [showSurfaceMesh, setShowSurfaceMesh] = useState<boolean>(true);
@@ -62,6 +62,10 @@ export const Full3DPlotViewer: React.FC<Full3DPlotViewerProps> = ({
   const [slicePosition, setSlicePosition] = useState<number>(0.5); // 0 to 1 along span
   const [colorScheme, setColorScheme] = useState<'pressure' | 'velocity' | 'mach'>('pressure');
   const [autoRotate, setAutoRotate] = useState<boolean>(true);
+  const autoRotateRef = useRef<boolean>(autoRotate);
+  useEffect(() => {
+    autoRotateRef.current = autoRotate;
+  }, [autoRotate]);
 
   // Fallback defaults if data is not yet computed
   const effectiveMach = data?.mach ?? 0.82;
@@ -73,25 +77,27 @@ export const Full3DPlotViewer: React.FC<Full3DPlotViewerProps> = ({
 
   // Mouse drag handlers for 3D orbital rotation
   const handleMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    setIsDragging(true);
-    setDragStart({ x: e.clientX, y: e.clientY });
+    isDraggingRef.current = true;
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
     setAutoRotate(false);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
-    if (!isDragging) return;
-    const dx = e.clientX - dragStart.x;
-    const dy = e.clientY - dragStart.y;
-    setRotY((prev) => (prev + dx * 0.5) % 360);
-    setRotX((prev) => Math.max(-85, Math.min(85, prev + dy * 0.5)));
-    setDragStart({ x: e.clientX, y: e.clientY });
+    if (!isDraggingRef.current) return;
+    const dx = e.clientX - dragStartRef.current.x;
+    const dy = e.clientY - dragStartRef.current.y;
+    rotYRef.current = (rotYRef.current + dx * 0.5) % 360;
+    rotXRef.current = Math.max(-85, Math.min(85, rotXRef.current + dy * 0.5));
+    dragStartRef.current = { x: e.clientX, y: e.clientY };
   };
 
-  const handleMouseUp = () => setIsDragging(false);
+  const handleMouseUp = () => {
+    isDraggingRef.current = false;
+  };
 
   const handleWheel = (e: React.WheelEvent<HTMLCanvasElement>) => {
     e.preventDefault();
-    setZoom((prev) => Math.max(0.6, Math.min(2.8, prev - e.deltaY * 0.0012)));
+    zoomRef.current = Math.max(0.6, Math.min(2.8, zoomRef.current - e.deltaY * 0.0012));
   };
 
   // 3D Canvas Rendering Engine
@@ -106,8 +112,8 @@ export const Full3DPlotViewer: React.FC<Full3DPlotViewerProps> = ({
 
     const render = () => {
       time += 0.025;
-      if (autoRotate && !isDragging) {
-        setRotY((prev) => (prev + 0.25) % 360);
+      if (autoRotateRef.current && !isDraggingRef.current) {
+        rotYRef.current = (rotYRef.current + 0.25) % 360;
       }
 
       const w = canvas.width;
@@ -120,8 +126,8 @@ export const Full3DPlotViewer: React.FC<Full3DPlotViewerProps> = ({
       ctx.fillRect(0, 0, w, h);
 
       // Coordinate System 3D Projections
-      const radX = (rotX * Math.PI) / 180;
-      const radY = (rotY * Math.PI) / 180;
+      const radX = (rotXRef.current * Math.PI) / 180;
+      const radY = (rotYRef.current * Math.PI) / 180;
       const alphaRad = (effectiveAlpha * Math.PI) / 180;
 
       // 3D Transform Projection Function
@@ -149,7 +155,7 @@ export const Full3DPlotViewer: React.FC<Full3DPlotViewerProps> = ({
 
         // Perspective camera
         const distance = 420;
-        const scale = (distance / (distance + z2)) * zoom;
+        const scale = (distance / (distance + z2)) * zoomRef.current;
         const screenX = cx + x2 * scale;
         const screenY = cy - y2 * scale;
 
@@ -480,9 +486,6 @@ export const Full3DPlotViewer: React.FC<Full3DPlotViewerProps> = ({
     render();
     return () => cancelAnimationFrame(animId);
   }, [
-    rotX,
-    rotY,
-    zoom,
     showSurfaceMesh,
     showWireframe,
     showStreamlines3D,
@@ -490,8 +493,6 @@ export const Full3DPlotViewer: React.FC<Full3DPlotViewerProps> = ({
     showSlicePlane,
     slicePosition,
     colorScheme,
-    autoRotate,
-    isDragging,
     effectiveMach,
     effectiveAlpha,
     effectiveCl,
@@ -537,9 +538,9 @@ export const Full3DPlotViewer: React.FC<Full3DPlotViewerProps> = ({
           <button
             type="button"
             onClick={() => {
-              setRotX(22);
-              setRotY(-35);
-              setZoom(1.15);
+              rotXRef.current = 22;
+              rotYRef.current = -35;
+              zoomRef.current = 1.15;
             }}
             className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-colors cursor-pointer border border-slate-700"
             title="Сбросить 3D камеру к базовой проекции"

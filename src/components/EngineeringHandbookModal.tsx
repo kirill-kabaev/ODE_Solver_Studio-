@@ -22,12 +22,14 @@ import {
   ChevronRight,
   BarChart2,
   Share2,
+  Grid,
 } from 'lucide-react';
 import { MathText, MathView } from './MathView';
 
 export type HandbookTopicId =
   | 'overview'
   | 'presets'
+  | 'vlm'
   | 'status_monitor'
   | 'wind_tunnel'
   | 'flutter'
@@ -143,6 +145,56 @@ export const HANDBOOK_TOPICS: HandbookTopic[] = [
     references: [
       { authors: 'Abbott, I. H., & Von Doenhoff, A. E.', year: '1959', title: 'Theory of Wing Sections', publisher: 'Dover Publications' },
       { authors: 'Harris, C. D.', year: '1981', title: 'NASA Supercritical Airfoils', publisher: 'NASA TP-1901' },
+    ],
+  },
+  {
+    id: 'vlm',
+    title: '3D Метод Вихревой Решетки (VLM)',
+    category: 'aero',
+    categoryLabel: 'Аэродинамика',
+    icon: Grid,
+    badge: '3D Vortex Lattice Method',
+    summary: 'Численный расчет обтекания пространственного крыла 3D методом подковообразных вихрей Хорсшу на основе закона Био-Савара и решения СЛАУ потенциального течения.',
+    purpose: 'Позволяет рассчитывать трехмерные эффекты крыла конечного размаха: индуктивное сопротивление $C_{Di}$, скос потока $w(y)$, влияние стреловидности $\\Lambda$, геометрической крутки (washout), сужения $\\lambda$ и законцовок (winglets).',
+    uiWalkthrough: {
+      title: 'Интерфейс 3D VLM Солвера',
+      description: 'Включает 3D интерактивный холст сетки крыла с вихревыми нитями, панель геометрических параметров крыла и 2D эпюры распределения нагрузок по размаху.',
+      controls: [
+        { name: 'Каталог пресетов крыльев', type: 'Buttons', role: 'Быстрая загрузка геометрий (NASA CRM, Supermarine Spitfire, Планер AR=18, Concorde Delta, Су-47).' },
+        { name: 'Угол атаки ($\\alpha$)', type: 'Slider (-4° ... +16°)', role: 'Управляет углом между хордой и вектором набегающего потока $V_\\infty$.' },
+        { name: 'Размах (b) и Сужение ($\\lambda$)', type: 'Sliders', role: 'Задают удлинение $AR = b^2/S$ и отношение концевой хорды к корневой $\\lambda = c_{tip}/c_{root}$.' },
+        { name: 'Стреловидность ($\\Lambda$) и Крутка ($\\theta$)', type: 'Sliders', role: 'Управляют перераспределением циркуляции от корня к законцовкам.' },
+        { name: 'Тумблер «Винглеты / Законцовки»', type: 'Toggle', role: 'Включает концевые аэродинамические поверхности, ослабляющие вихревой жгут.' },
+      ],
+      readouts: [
+        { name: 'Коэффициент $C_L$', unit: 'б/р', interpretation: 'Полная подъемная сила крыла: $L = C_L \\cdot q_\\infty S$.' },
+        { name: 'Индуктивное сопротивление $C_{Di}$', unit: 'б/р', interpretation: 'Сопротивление, вызванное скосом потока и сходящими с законцовок вихрями.' },
+        { name: 'Коэффициент Освальда $e$', unit: 'б/р (0...1.0)', interpretation: 'Аэродинамическое совершенство формы крыла. Для эллиптического крыла $e = 1.0$.' },
+        { name: 'Эпюра $c_l(y) \\cdot c(y)$', unit: 'График', interpretation: 'Сравнение фактической циркуляции с теоретической эллиптической кривой Прандтля.' },
+      ],
+    },
+    mathematics: {
+      governingEquationLatex: '\\mathbf{A} \\vec{\\Gamma} = \\vec{b}, \\quad A_{ij} = \\vec{v}_{ind, ij} \\cdot \\vec{n}_i, \\quad b_i = -\\vec{V}_\\infty \\cdot \\vec{n}_i, \\quad C_{Di} = \\frac{C_L^2}{\\pi AR e}',
+      description: 'Решение уравнения Лапласа $\\nabla^2 \\Phi = 0$ через дискретизацию срединной поверхности крыла на вихревые четырехугольные панели.',
+      derivationSteps: [
+        'Размещение присоединенного вихря: на $1/4$ местной хорды панели ($x_{1/4}$).',
+        'Размещение контрольной точки (collocation point): на $3/4$ местной хорды ($x_{3/4}$, $y_{mid}$), где ставится граничное условие непротекания $(\\vec{V}_\\infty + \\vec{v}_{ind}) \\cdot \\vec{n} = 0$.',
+        'Индуцированная скорость от отрезка вихря (Закон Био-Савара): $\\vec{v} = \\frac{\\Gamma}{4\\pi} \\frac{\\vec{r}_1 \\times \\vec{r}_2}{|\\vec{r}_1 \\times \\vec{r}_2|^2} \\left[ \\vec{r}_0 \\cdot \\left(\\frac{\\vec{r}_1}{r_1} - \\frac{\\vec{r}_2}{r_2}\\right) \\right]$.',
+        'Свободные вихревые нити: продолжаются от концов присоединенного вихря в бесконечность по направлению потока $+X$.',
+        'Теорема Жуковского: вычисление локальной силы $\\Delta \\vec{F}_i = \\rho_\\infty \\vec{V}_\\infty \\times \\vec{\\Gamma}_i \\Delta \\vec{l}_i$.',
+      ],
+      boundaryConditions: [
+        'Граничное условие непротекания: $\\vec{v}_{total} \\cdot \\vec{n} = 0$ в каждой контрольной точке.',
+        'Условие Кутты-Жуковского: сход вихревой пелены с задней кромки крыла.',
+      ],
+    },
+    physicalSignificance: [
+      'Теорема Прандтля: минимум индуктивного сопротивления достигается при эллиптическом законе циркуляции $\\Gamma(y) = \\Gamma_0 \\sqrt{1 - (2y/b)^2}$ и постоянном скосе $w(y) = \\text{const}$.',
+      'Геометрическая крутка (washout) позволяет избежать преждевременного концевого срыва крыла при маневрах и сваливании, сохраняя управляемость по элеронам.',
+    ],
+    references: [
+      { authors: 'Katz, J., & Plotkin, A.', year: '2001', title: 'Low-Speed Aerodynamics: From Wing Theory to Panel Methods', publisher: 'Cambridge University Press' },
+      { authors: 'Bertin, J. J., & Cummings, R. M.', year: '2013', title: 'Aerodynamics for Engineers (6th Edition)', publisher: 'Pearson' },
     ],
   },
   {

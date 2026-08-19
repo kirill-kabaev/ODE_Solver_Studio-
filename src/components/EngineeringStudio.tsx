@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Rocket,
   Wind,
@@ -35,6 +35,10 @@ export const EngineeringStudio: React.FC = () => {
   const [isHandbookOpen, setIsHandbookOpen] = useState<boolean>(false);
   const [handbookTopicId, setHandbookTopicId] = useState<HandbookTopicId>('presets');
 
+  const handleAeroTabChange = useCallback((tab: string) => {
+    setActiveAeroTab((prev) => (prev !== tab ? tab : prev));
+  }, []);
+
   const getActiveTopic = (): { topicId: HandbookTopicId; label: string } => {
     if (activeDomain === 'space') {
       return { topicId: 'space_gnc', label: 'Космос & GNC' };
@@ -46,6 +50,8 @@ export const EngineeringStudio: React.FC = () => {
     switch (activeAeroTab) {
       case 'presets':
         return { topicId: 'presets', label: 'Каталог Пресетов' };
+      case 'vlm':
+        return { topicId: 'vlm', label: '3D Метод Вихревой Решетки (VLM)' };
       case 'status_monitor':
         return { topicId: 'status_monitor', label: 'Монитор Сил & 3D' };
       case 'wind_tunnel':
@@ -188,7 +194,7 @@ export const EngineeringStudio: React.FC = () => {
       {/* Main Active Domain Module */}
       {activeDomain === 'aero' && (
         <AerodynamicsModule
-          onTabChange={(tab) => setActiveAeroTab(tab)}
+          onTabChange={handleAeroTabChange}
         />
       )}
       {activeDomain === 'space' && <OrbitalGNCModule />}
