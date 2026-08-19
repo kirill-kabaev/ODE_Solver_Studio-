@@ -25,10 +25,12 @@ import {
 import {
   getHighPerformanceWebGpuDevice,
   runWebGpuParallelBenchmark,
+  runParallelScalingSuite,
   startContinuousGpuCompute,
   detectExactRendererDetails,
   HardwareGpuStatus,
   ParallelComputeResult,
+  ParallelVerificationSuiteResult,
   ContinuousComputeStats,
   ExactRendererDetails,
 } from '../utils/gpuHardwareEnforcer';
@@ -39,9 +41,12 @@ export const NvidiaHardwareEnforcerBar: React.FC = () => {
   const [gpuInfo, setGpuInfo] = useState<GPUInfo | null>(null);
   const [exactRenderer, setExactRenderer] = useState<ExactRendererDetails | null>(null);
   const [isInstructionOpen, setIsInstructionOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'taskmanager' | 'windows' | 'nvidia' | 'flags'>('taskmanager');
+  const [activeTab, setActiveTab] = useState<'parallelism' | 'taskmanager' | 'windows' | 'nvidia' | 'flags'>('parallelism');
   const [isBenchmarkRunning, setIsBenchmarkRunning] = useState(false);
   const [benchmarkResult, setBenchmarkResult] = useState<ParallelComputeResult | null>(null);
+  const [parallelSuiteResult, setParallelSuiteResult] = useState<ParallelVerificationSuiteResult | null>(null);
+  const [isSuiteRunning, setIsSuiteRunning] = useState<boolean>(false);
+  const [suiteProgressMsg, setSuiteProgressMsg] = useState<string>('');
   const [fps, setFps] = useState<number>(60);
 
   // Continuous GPU compute stream state
@@ -127,6 +132,23 @@ export const NvidiaHardwareEnforcerBar: React.FC = () => {
       console.error(err);
     } finally {
       setIsBenchmarkRunning(false);
+    }
+  };
+
+  const handleRunSuite = async () => {
+    setIsSuiteRunning(true);
+    setSuiteProgressMsg('Инициализация параллельных ядер NVIDIA GPU...');
+    try {
+      const result = await runParallelScalingSuite((step, total, msg) => {
+        setSuiteProgressMsg(`[${step}/${total}] ${msg}`);
+      });
+      setParallelSuiteResult(result);
+      setSuiteProgressMsg('');
+    } catch (err) {
+      console.error('Parallel suite error:', err);
+      setSuiteProgressMsg('Ошибка при выполнении теста');
+    } finally {
+      setIsSuiteRunning(false);
     }
   };
 
@@ -232,12 +254,28 @@ export const NvidiaHardwareEnforcerBar: React.FC = () => {
 
           <button
             type="button"
-            onClick={() => setIsInstructionOpen(true)}
+            onClick={() => {
+              setActiveTab('parallelism');
+              setIsInstructionOpen(true);
+            }}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-cyan-950/80 hover:bg-cyan-900/80 text-cyan-300 border border-cyan-700/70 font-bold transition-all cursor-pointer shadow-sm active:scale-95"
+            title="Открыть анализ мультипараллельности и ускорения (CPU vs NVIDIA GPU)"
+          >
+            <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Тест Параллельности (CPU vs GPU)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => {
+              setActiveTab('taskmanager');
+              setIsInstructionOpen(true);
+            }}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-slate-300 hover:text-white border border-slate-700 font-bold transition-all cursor-pointer shadow-sm active:scale-95"
             title="Инструкция: почему в Диспетчере задач может быть 0% и как настроить графики Compute/CUDA"
           >
             <HelpCircle className="w-3.5 h-3.5 text-emerald-400" />
-            <span>Почему 0% в Диспетчере?</span>
+            <span>Диагностика GPU</span>
           </button>
         </div>
       </div>
@@ -360,6 +398,19 @@ export const NvidiaHardwareEnforcerBar: React.FC = () => {
             <div className="flex items-center gap-1 px-6 pt-3 border-b border-slate-800 bg-slate-950/40 overflow-x-auto text-xs font-mono">
               <button
                 type="button"
+                onClick={() => setActiveTab('parallelism')}
+                className={`px-3 py-2 border-b-2 font-bold transition-all cursor-pointer whitespace-nowrap flex items-center gap-1.5 ${
+                  activeTab === 'parallelism'
+                    ? 'border-cyan-400 text-cyan-300'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                <Cpu className="w-3.5 h-3.5 text-cyan-400" />
+                <span>1. Тест Мультипараллельности (CPU vs GPU)</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => setActiveTab('taskmanager')}
                 className={`px-3 py-2 border-b-2 font-bold transition-all cursor-pointer whitespace-nowrap ${
                   activeTab === 'taskmanager'
@@ -367,7 +418,7 @@ export const NvidiaHardwareEnforcerBar: React.FC = () => {
                     : 'border-transparent text-slate-400 hover:text-slate-200'
                 }`}
               >
-                1. Графики в Диспетчере задач (Compute vs 3D)
+                2. Диспетчер задач (Compute vs 3D)
               </button>
 
               <button
@@ -379,7 +430,7 @@ export const NvidiaHardwareEnforcerBar: React.FC = () => {
                     : 'border-transparent text-slate-400 hover:text-slate-200'
                 }`}
               >
-                2. Настройки Windows
+                3. Настройки Windows
               </button>
 
               <button
@@ -391,7 +442,7 @@ export const NvidiaHardwareEnforcerBar: React.FC = () => {
                     : 'border-transparent text-slate-400 hover:text-slate-200'
                 }`}
               >
-                3. Панель NVIDIA
+                4. Панель NVIDIA
               </button>
 
               <button
@@ -403,12 +454,170 @@ export const NvidiaHardwareEnforcerBar: React.FC = () => {
                     : 'border-transparent text-slate-400 hover:text-slate-200'
                 }`}
               >
-                4. Флаги браузера
+                5. Флаги браузера
               </button>
             </div>
 
             {/* Modal Body */}
             <div className="p-6 space-y-5 overflow-y-auto text-xs text-slate-300 font-mono leading-relaxed">
+              {/* Tab 0: Comprehensive Multi-Parallelism Analysis Suite */}
+              {activeTab === 'parallelism' && (
+                <div className="space-y-5">
+                  <div className="bg-cyan-950/30 border border-cyan-500/40 rounded-xl p-4 space-y-2">
+                    <div className="flex items-center justify-between flex-wrap gap-2">
+                      <div className="flex items-center gap-2 text-cyan-300 font-bold text-sm">
+                        <Zap className="w-4 h-4 text-cyan-400" />
+                        <span>Научная верификация параллельности: Закон Амдала и Масштабирование</span>
+                      </div>
+                      <span className="px-2 py-0.5 rounded bg-cyan-900/60 text-cyan-200 text-[10px] font-bold">
+                        SIMT Архитектура (256 потоков/Workgroup)
+                      </span>
+                    </div>
+                    <p className="text-slate-300 text-xs">
+                      Видеокарта NVIDIA выполняет вычисления не последовательно, как процессор, а параллельно распределяет миллионы элементов по потоковым мультипроцессорам (<strong>Streaming Multiprocessors, SM</strong>) в виде варпов по 32 потока. Чем больше массив данных, тем выше раскрывается параллельное преимущество GPU.
+                    </p>
+                  </div>
+
+                  {/* Trigger suite button */}
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-slate-950/70 border border-slate-800 flex-wrap gap-3">
+                    <div>
+                      <span className="text-white font-bold block text-xs">
+                        Полный тест масштабирования (от 65 тыс. до 2.1 млн параллельных потоков)
+                      </span>
+                      <span className="text-slate-400 text-[11px]">
+                        Сравнит точное время исполнения идентичных матричных формул на CPU (1 поток) и NVIDIA GPU.
+                      </span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handleRunSuite}
+                      disabled={isSuiteRunning}
+                      className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-slate-950 font-black text-xs transition-all cursor-pointer shadow-lg shadow-cyan-950/60 active:scale-95 disabled:opacity-50"
+                    >
+                      {isSuiteRunning ? (
+                        <>
+                          <RefreshCw className="w-4 h-4 animate-spin" />
+                          <span>{suiteProgressMsg || 'Вычисление...'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4 fill-slate-950" />
+                          <span>Запустить тест параллельности</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  {/* Suite Results Section if Available */}
+                  {parallelSuiteResult && (
+                    <div className="space-y-4 animate-fadeIn">
+                      {/* Top Metric Cards */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div className="p-3 rounded-xl bg-emerald-950/40 border border-emerald-500/40 text-center">
+                          <span className="text-[10px] text-slate-400 font-bold block">Пиковое ускорение</span>
+                          <span className="text-xl font-black text-emerald-400">
+                            {parallelSuiteResult.peakSpeedup.toFixed(1)}x
+                          </span>
+                          <span className="text-[9px] text-emerald-300 block">быстрее процессора</span>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-cyan-950/40 border border-cyan-500/40 text-center">
+                          <span className="text-[10px] text-slate-400 font-bold block">Пиковая мощность</span>
+                          <span className="text-xl font-black text-cyan-300">
+                            {parallelSuiteResult.peakGflops.toFixed(1)}
+                          </span>
+                          <span className="text-[9px] text-cyan-400 block">GFLOPS</span>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-center">
+                          <span className="text-[10px] text-slate-400 font-bold block">Варп-эффективность</span>
+                          <span className="text-xl font-black text-white">
+                            {parallelSuiteResult.warpEfficiency}%
+                          </span>
+                          <span className="text-[9px] text-slate-400 block">32 потока/варп</span>
+                        </div>
+
+                        <div className="p-3 rounded-xl bg-slate-950/70 border border-slate-800 text-center">
+                          <span className="text-[10px] text-slate-400 font-bold block">Всего потоков</span>
+                          <span className="text-xl font-black text-purple-300">
+                            {(parallelSuiteResult.totalThreadsTested / 1e6).toFixed(2)}M
+                          </span>
+                          <span className="text-[9px] text-purple-400 block">обработано</span>
+                        </div>
+                      </div>
+
+                      {/* Detailed Data Table */}
+                      <div className="overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/70">
+                        <table className="w-full text-[11px] text-left text-slate-300">
+                          <thead className="bg-slate-900/90 text-slate-400 text-[10px] border-b border-slate-800">
+                            <tr>
+                              <th className="p-2.5">Размер задачи</th>
+                              <th className="p-2.5">Workgroups (x256)</th>
+                              <th className="p-2.5">Время CPU</th>
+                              <th className="p-2.5">Время NVIDIA GPU</th>
+                              <th className="p-2.5">Ускорение</th>
+                              <th className="p-2.5">GFLOPS</th>
+                              <th className="p-2.5">Пропускная VRAM</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-800/60 font-mono">
+                            {parallelSuiteResult.dataPoints.map((dp, i) => (
+                              <tr key={i} className="hover:bg-slate-900/50 transition-colors">
+                                <td className="p-2.5 font-bold text-white">{dp.label}</td>
+                                <td className="p-2.5 text-cyan-300">{dp.workgroups.toLocaleString()} WGs</td>
+                                <td className="p-2.5 text-amber-300">{dp.cpuTimeMs} мс</td>
+                                <td className="p-2.5 text-emerald-400 font-bold">{dp.gpuTimeMs} мс</td>
+                                <td className="p-2.5">
+                                  <span className="px-1.5 py-0.5 rounded bg-emerald-950 text-emerald-300 font-bold border border-emerald-700/60">
+                                    {dp.speedupFactor}x
+                                  </span>
+                                </td>
+                                <td className="p-2.5 text-cyan-300">{dp.gpuGflops}</td>
+                                <td className="p-2.5 text-purple-300">{dp.bandwidthGBs} ГБ/с</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      {/* Verdict Banner */}
+                      <div className="p-3 rounded-xl bg-emerald-950/30 border border-emerald-500/40 text-emerald-300 flex items-center gap-2 text-xs">
+                        <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                        <span>{parallelSuiteResult.verdict}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Architecture Explanation Card */}
+                  <div className="bg-slate-950/70 border border-slate-800 rounded-xl p-4 space-y-3">
+                    <h4 className="text-white font-bold text-xs flex items-center gap-1.5">
+                      <Layers className="w-4 h-4 text-emerald-400" />
+                      <span>3 Ключевых фактора максимальной параллельной эффективности NVIDIA:</span>
+                    </h4>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-[11px] text-slate-300">
+                      <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 space-y-1">
+                        <strong className="text-cyan-300 block font-bold">1. Размер Workgroup = 256</strong>
+                        <p className="text-slate-400 text-[10px]">
+                          Кратность 32 гарантирует, что каждый аппаратный Warp NVIDIA заполнен на 100% без холостых тактов (No Warp Divergence).
+                        </p>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 space-y-1">
+                        <strong className="text-emerald-400 block font-bold">2. Коалесцированная VRAM</strong>
+                        <p className="text-slate-400 text-[10px]">
+                          Соседние потоки считывают смежные 32-битные числа, объединяя 32 запроса в одну 128-байтную транзакцию шины памяти.
+                        </p>
+                      </div>
+                      <div className="p-2.5 rounded-lg bg-slate-900/80 border border-slate-800 space-y-1">
+                        <strong className="text-purple-300 block font-bold">3. Массивная утилизация SM</strong>
+                        <p className="text-slate-400 text-[10px]">
+                          При больших сетках (CFD / вихри VLM) на GPU одновременно отправляются тысячи блоков, полностью загружая все ядра CUDA.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
               {/* Tab 1: Task Manager Explanation */}
               {activeTab === 'taskmanager' && (
                 <div className="space-y-4">
