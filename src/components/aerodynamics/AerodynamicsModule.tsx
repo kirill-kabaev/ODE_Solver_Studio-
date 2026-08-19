@@ -12,8 +12,10 @@ import {
   Box,
   BookOpen,
   Grid,
+  Disc,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
+import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
 import { CFDWindTunnel } from './CFDWindTunnel';
 import { PressureDistributionGraph } from './PressureDistributionGraph';
 import { FlutterSimulator } from './FlutterSimulator';
@@ -24,7 +26,7 @@ import { Full3DPlotViewer, Aerodynamic3DData } from './Full3DPlotViewer';
 import { EngineeringPresetCatalog, EngineeringPreset, ENGINEERING_PRESETS } from './EngineeringPresetCatalog';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
 
-export type AeroSubTab = 'presets' | 'vlm' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
+export type AeroSubTab = 'presets' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
 
 interface AerodynamicsModuleProps {
   onTabChange?: (tab: AeroSubTab) => void;
@@ -114,6 +116,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
 
         <button
           type="button"
+          onClick={() => handleTabSelect('bem')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'bem'
+              ? 'bg-gradient-to-r from-cyan-400 via-indigo-500 to-purple-500 text-slate-950 shadow-md font-black'
+              : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+          }`}
+        >
+          <Disc className="w-4 h-4 text-cyan-300" />
+          <span>2. BEM: Винты, Импеллеры & Дроны</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => handleTabSelect('status_monitor')}
           className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'status_monitor'
@@ -122,7 +137,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           }`}
         >
           <Activity className="w-4 h-4" />
-          <span>2. Монитор Сил ($L, D, M_y$) & 3D График</span>
+          <span>3. Монитор Сил ($L, D, M_y$) & 3D График</span>
         </button>
 
         <button
@@ -135,7 +150,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           }`}
         >
           <Wind className="w-4 h-4" />
-          <span>3. Аэродинамическая Труба ($C_p$)</span>
+          <span>4. Аэродинамическая Труба ($C_p$)</span>
         </button>
 
         <button
@@ -148,7 +163,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           }`}
         >
           <AlertTriangle className="w-4 h-4" />
-          <span>4. Флаттер (FSI)</span>
+          <span>5. Флаттер (FSI)</span>
         </button>
 
         <button
@@ -161,7 +176,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           }`}
         >
           <Compass className="w-4 h-4" />
-          <span>5. Динамика 6-DoF</span>
+          <span>6. Динамика 6-DoF</span>
         </button>
 
         <button
@@ -174,7 +189,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           }`}
         >
           <Cpu className="w-4 h-4" />
-          <span>6. Архитектура Солвера</span>
+          <span>7. Архитектура Солвера</span>
         </button>
       </div>
 
@@ -189,6 +204,11 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
       {/* Sub-tab: 3D Vortex Lattice Method (VLM) */}
       {activeTab === 'vlm' && (
         <VortexLatticeModule />
+      )}
+
+      {/* Sub-tab: Blade Element Momentum Theory (BEM) */}
+      {activeTab === 'bem' && (
+        <BladeElementMomentumModule />
       )}
 
       {/* Sub-tab 1: Real-time Status Monitor & Full 3D Plot */}
