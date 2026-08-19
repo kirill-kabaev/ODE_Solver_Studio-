@@ -35,10 +35,16 @@ export const VerticalPageScroller: React.FC<VerticalPageScrollerProps> = ({
         { id: 'steps-section', num: '3', title: '3. Пошаговый вывод', shortTitle: 'Шаги' },
         { id: 'graph-section', num: '4', title: '4. Интерактивный 2D/3D график', shortTitle: 'График' },
       ]
-    : [
+    : studioMode === 'sparse_linear'
+    ? [
         { id: 'sparse-matrix-section', num: '1', title: '1. Разреженная матрица TAMU', shortTitle: 'Матрица TAMU' },
         { id: 'sparse-solver-section', num: '2', title: '2. Параметры решателя Ax=b', shortTitle: 'Параметры Ax=b' },
         { id: 'sparse-convergence-section', num: '3', title: '3. Сходимость и телеметрия', shortTitle: 'Сходимость' },
+      ]
+    : [
+        { id: 'aero-section', num: '1', title: '1. Аэродинамика и CFD', shortTitle: 'CFD и 6-DoF' },
+        { id: 'space-section', num: '2', title: '2. Космология и GNC', shortTitle: 'Орбиты и GNC' },
+        { id: 'eda-section', num: '3', title: '3. EDA, Чипы и Авионика', shortTitle: 'Чипы и TMR' },
       ];
 
   // Calculate current scroll progress (0 to 1)

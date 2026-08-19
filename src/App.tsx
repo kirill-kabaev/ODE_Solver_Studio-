@@ -37,6 +37,7 @@ import { VerificationWindow } from './components/VerificationWindow';
 import { PresetCatalogWindow } from './components/PresetCatalogWindow';
 import { HistoryWindow } from './components/HistoryWindow';
 import { LinearSolverStudio } from './components/LinearSolverStudio';
+import { EngineeringStudio } from './components/EngineeringStudio';
 import { VerticalPageScroller } from './components/VerticalPageScroller';
 import { StartupSplashLoader } from './components/StartupSplashLoader';
 import { MathText } from './components/MathView';
@@ -513,7 +514,12 @@ export default function App() {
       {/* Main Single-Column Scrollable Container */}
       <main className="relative z-10 w-full max-w-5xl xl:max-w-6xl mx-auto px-3 sm:px-6 lg:px-8 py-6 flex flex-col gap-8 flex-1">
         
-        {studioMode === 'sparse_linear' ? (
+        {studioMode === 'engineering' ? (
+          /* ========================================================================= */
+          /* РЕЖИМ 3: ПРИКЛАДНОЙ ИНЖЕНЕРНЫЙ МОДУЛЬ (AERODYNAMICS, GNC & EDA CHIPS)    */
+          /* ========================================================================= */
+          <EngineeringStudio />
+        ) : studioMode === 'sparse_linear' ? (
           /* ========================================================================= */
           /* РЕЖИМ 2: РЕШАТЕЛЬ СЛАУ ОГРОМНЫХ СИСТЕМ (TEXAS A&M SUITESPARSE COLLECTION)   */
           /* ========================================================================= */

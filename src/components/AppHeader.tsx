@@ -7,10 +7,11 @@ import {
   Database,
   Calculator,
   Grid,
+  Rocket,
 } from 'lucide-react';
 import { SolverEngine } from '../types';
 
-export type StudioMainMode = 'ode' | 'sparse_linear';
+export type StudioMainMode = 'ode' | 'sparse_linear' | 'engineering';
 
 interface AppHeaderProps {
   studioMode: StudioMainMode;
@@ -92,9 +93,25 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               }`}
             >
               <Grid className="w-3.5 h-3.5" />
-              <span>Решатель СЛАУ (Ax = b)</span>
+              <span>Решатель СЛАУ</span>
               <span className="text-[9px] px-1 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-700/60 font-mono hidden md:inline">
                 SuiteSparse
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => onChangeStudioMode('engineering')}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                studioMode === 'engineering'
+                  ? 'bg-gradient-to-r from-cyan-500 to-indigo-600 text-slate-950 shadow-md'
+                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+              }`}
+            >
+              <Rocket className="w-3.5 h-3.5" />
+              <span>Инжиниринг</span>
+              <span className="text-[9px] px-1 py-0.2 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/60 font-mono hidden lg:inline">
+                CFD • GNC • EDA
               </span>
             </button>
           </div>
