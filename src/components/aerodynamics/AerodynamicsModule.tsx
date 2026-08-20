@@ -13,6 +13,7 @@ import {
   BookOpen,
   Grid,
   Disc,
+  FileText,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
@@ -25,10 +26,11 @@ import { SolverStatusMonitor } from './SolverStatusMonitor';
 import { Full3DPlotViewer, Aerodynamic3DData } from './Full3DPlotViewer';
 import { Interactive3DAeroStudio } from './Interactive3DAeroStudio';
 import { AdvancedAeroSolversLab } from './AdvancedAeroSolversLab';
+import { AeroReportExportStudio } from './AeroReportExportStudio';
 import { EngineeringPresetCatalog, EngineeringPreset, ENGINEERING_PRESETS } from './EngineeringPresetCatalog';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
 
-export type AeroSubTab = 'presets' | 'visual_studio' | 'physics_solvers' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
+export type AeroSubTab = 'presets' | 'visual_studio' | 'physics_solvers' | 'export_report' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
 
 interface AerodynamicsModuleProps {
   onTabChange?: (tab: AeroSubTab) => void;
@@ -127,6 +129,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
         >
           <Cpu className="w-4 h-4 text-indigo-400" />
           <span>⚡ Расширенные Солверы (RANS, Euler, Riemann)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabSelect('export_report')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'export_report'
+              ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 shadow-md font-black ring-1 ring-emerald-400/50'
+              : 'text-emerald-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-emerald-900/50'
+          }`}
+        >
+          <FileText className="w-4 h-4 text-emerald-400" />
+          <span>📊 Экспорт и Отчётность (PDF, VTK, LaTeX)</span>
         </button>
 
         <button
@@ -240,6 +255,11 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
       {/* Sub-tab: Advanced Aero Solvers Lab (Physics & Solvers) */}
       {activeTab === 'physics_solvers' && (
         <AdvancedAeroSolversLab />
+      )}
+
+      {/* Sub-tab: Aero Report & Export Studio */}
+      {activeTab === 'export_report' && (
+        <AeroReportExportStudio />
       )}
 
       {/* Sub-tab: 3D Vortex Lattice Method (VLM) */}
