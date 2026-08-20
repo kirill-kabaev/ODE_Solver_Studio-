@@ -23,10 +23,11 @@ import { FlightDynamics6DoF } from './FlightDynamics6DoF';
 import { CFDSolverArchitecture } from './CFDSolverArchitecture';
 import { SolverStatusMonitor } from './SolverStatusMonitor';
 import { Full3DPlotViewer, Aerodynamic3DData } from './Full3DPlotViewer';
+import { Interactive3DAeroStudio } from './Interactive3DAeroStudio';
 import { EngineeringPresetCatalog, EngineeringPreset, ENGINEERING_PRESETS } from './EngineeringPresetCatalog';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
 
-export type AeroSubTab = 'presets' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
+export type AeroSubTab = 'presets' | 'visual_studio' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
 
 interface AerodynamicsModuleProps {
   onTabChange?: (tab: AeroSubTab) => void;
@@ -99,6 +100,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
         >
           <BookOpen className="w-4 h-4" />
           <span>★ Каталог Пресетов (NASA / AGARD)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabSelect('visual_studio')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'visual_studio'
+              ? 'bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-600 text-slate-950 shadow-md font-black ring-1 ring-cyan-400/50'
+              : 'text-cyan-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-cyan-900/50'
+          }`}
+        >
+          <Sparkles className="w-4 h-4 text-cyan-400" />
+          <span>✦ 3D Визуальная Лаборатория (UX & Срезы)</span>
         </button>
 
         <button
@@ -198,6 +212,14 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
         <EngineeringPresetCatalog
           onApplyPreset={handleApplyPreset}
           activePresetId={selectedPreset.id}
+        />
+      )}
+
+      {/* Sub-tab: 3D Interactive Visual Studio (UX & Cut-Planes) */}
+      {activeTab === 'visual_studio' && (
+        <Interactive3DAeroStudio
+          initialMach={activeMach}
+          initialAlpha={activeAlpha}
         />
       )}
 
