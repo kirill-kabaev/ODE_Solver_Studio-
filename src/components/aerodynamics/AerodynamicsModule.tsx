@@ -24,10 +24,11 @@ import { CFDSolverArchitecture } from './CFDSolverArchitecture';
 import { SolverStatusMonitor } from './SolverStatusMonitor';
 import { Full3DPlotViewer, Aerodynamic3DData } from './Full3DPlotViewer';
 import { Interactive3DAeroStudio } from './Interactive3DAeroStudio';
+import { AdvancedAeroSolversLab } from './AdvancedAeroSolversLab';
 import { EngineeringPresetCatalog, EngineeringPreset, ENGINEERING_PRESETS } from './EngineeringPresetCatalog';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
 
-export type AeroSubTab = 'presets' | 'visual_studio' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
+export type AeroSubTab = 'presets' | 'visual_studio' | 'physics_solvers' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
 
 interface AerodynamicsModuleProps {
   onTabChange?: (tab: AeroSubTab) => void;
@@ -113,6 +114,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
         >
           <Sparkles className="w-4 h-4 text-cyan-400" />
           <span>✦ 3D Визуальная Лаборатория (UX & Срезы)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabSelect('physics_solvers')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'physics_solvers'
+              ? 'bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-600 text-slate-950 shadow-md font-black ring-1 ring-cyan-400/50'
+              : 'text-indigo-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-indigo-900/50'
+          }`}
+        >
+          <Cpu className="w-4 h-4 text-indigo-400" />
+          <span>⚡ Расширенные Солверы (RANS, Euler, Riemann)</span>
         </button>
 
         <button
@@ -221,6 +235,11 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           initialMach={activeMach}
           initialAlpha={activeAlpha}
         />
+      )}
+
+      {/* Sub-tab: Advanced Aero Solvers Lab (Physics & Solvers) */}
+      {activeTab === 'physics_solvers' && (
+        <AdvancedAeroSolversLab />
       )}
 
       {/* Sub-tab: 3D Vortex Lattice Method (VLM) */}
