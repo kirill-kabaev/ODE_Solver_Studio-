@@ -29,6 +29,9 @@ import { MathText, MathView } from './MathView';
 export type HandbookTopicId =
   | 'overview'
   | 'presets'
+  | 'visual_studio'
+  | 'physics_solvers'
+  | 'export_report'
   | 'vlm'
   | 'status_monitor'
   | 'wind_tunnel'
@@ -145,6 +148,151 @@ export const HANDBOOK_TOPICS: HandbookTopic[] = [
     references: [
       { authors: 'Abbott, I. H., & Von Doenhoff, A. E.', year: '1959', title: 'Theory of Wing Sections', publisher: 'Dover Publications' },
       { authors: 'Harris, C. D.', year: '1981', title: 'NASA Supercritical Airfoils', publisher: 'NASA TP-1901' },
+    ],
+  },
+  {
+    id: 'visual_studio',
+    title: '3D Визуальная Лаборатория (UX & Сечения)',
+    category: 'aero',
+    categoryLabel: 'Аэродинамика',
+    icon: Sparkles,
+    badge: '3D CFD Post-Processing',
+    summary: 'Полнофункциональный 3D постпроцессор аэрогидродинамики: секущие плоскости (Cut Planes), $Q$-критерий вихрей, струйная 3D дымовая визуализация (Smoke Streamlines), виртуальный датчик (Probes) и сравнительный сплит-экран (A/B Comparator).',
+    purpose: 'Предоставить инженеру интерактивный визуальный инструментарий исследовательского уровня (аналог ParaView и Tecplot 360) прямо в браузере с аппаратным ускорением для выявления пространственных вихревых жгутов, зон отрыва пограничного слоя и структуры скачков уплотнения.',
+    uiWalkthrough: {
+      title: 'Навигация и Инструменты 3D Лаборатории',
+      description: 'Центральный 3D вьюпорт поддерживает свободную орбитальную камеру, панорамирование и зум. Верхняя панель режимов переключает функциональные инструменты анализа.',
+      controls: [
+        { name: 'Режим «Секущая плоскость (Cut Plane)»', type: 'Mode Selector', role: 'Активирует динамический срез по осям X, Y или Z со слайдером положения среза и выбором цветовой шкалы (Turbo, CoolWarm, Viridis, Jet, Schlieren).' },
+        { name: 'Режим «$Q$-Критерий (Vortex Structures)»', type: 'Mode Selector', role: 'Изоповерхности второго инварианта тензора градиента скорости $Q > 0$ с регулировкой порога изоповерхности.' },
+        { name: 'Режим «Дымовые струи (Smoke/Particles)»', type: 'Mode Selector', role: 'Интерактивная граблина частиц (Rake) с генерацией 3D траекторий частиц с учетом местного поля скоростей.' },
+        { name: 'Режим «Виртуальный Зонд (Probe)»', type: 'Mode Selector', role: 'Перемещаемый 3D датчик полного давления, местного числа Маха, завихренности и динамического напора в точке пространства $(x,y,z)$.' },
+        { name: 'Режим «A/B Компаратор (Split View)»', type: 'Mode Selector', role: 'Сравнительный сплит-экран двух режимов (например, $M=0.78$ vs $M=1.4$ или $\\alpha=2^\\circ$ vs $\\alpha=14^\\circ$) с единой синхронизированной камерой.' },
+        { name: 'Выбор Скалярного Поля', type: 'Dropdown', role: 'Коэффициент давления $C_p$, Скорость $V$, Число Маха $M$, Завихренность $\\omega$, Кинетическая энергия турбулентности TKE.' },
+      ],
+      readouts: [
+        { name: 'Показания зонда $(C_p, M_{loc}, \\omega)$', unit: 'SI / б.р.', interpretation: 'Точечные значения физических величин в фокусе курсора или перекрестия зонда.' },
+        { name: 'Цветовая шкала (Colorbar)', unit: 'Min / Max шкала', interpretation: 'Диапазон скалярной величины с динамической калибровкой легенды.' },
+        { name: 'Число активных частиц', unit: 'шт. (N ~ 400)', interpretation: 'Текущий размер буфера траекторий дымовой визуализации.' },
+      ],
+    },
+    mathematics: {
+      governingEquationLatex: 'Q = \\frac{1}{2} \\left( ||\\boldsymbol{\\Omega}||_F^2 - ||\\mathbf{S}||_F^2 \\right) > 0, \\quad \\frac{d\\vec{x}_p}{dt} = \\vec{V}(\\vec{x}_p, t)',
+      description: '$Q$-критерий Ханта выделения когерентных вихревых ядер и уравнение переноса лагранжевых частиц.',
+      derivationSteps: [
+        'Разложение тензора градиента скорости: $\\nabla \\vec{V} = \\mathbf{S} + \\boldsymbol{\\Omega}$, где $\\mathbf{S} = \\frac{1}{2}(\\nabla \\vec{V} + \\nabla \\vec{V}^T)$ — тензор скоростей деформаций, $\\boldsymbol{\\Omega} = \\frac{1}{2}(\\nabla \\vec{V} - \\nabla \\vec{V}^T)$ — тензор завихренности.',
+        'Изоповерхность $Q > 0$ соответствует областям, где вращательное движение жидкости преобладает над сдвиговыми деформациями (вихревые ядра на законцовках и кромках).',
+        'Интегрирование траекторий частиц методом предиктор-корректор (Хейн / RK2) для построения линий тока и дымовых шлейфов.',
+        'Синтетический градиент плотности (Schlieren): $\\mathcal{I} = ||\\nabla \\rho|| = \\sqrt{(\\partial \\rho / \\partial x)^2 + (\\partial \\rho / \\partial y)^2}$, выявляющий ударные волны и конусы Маха.',
+      ],
+      boundaryConditions: [
+        'Условие непротекания на твердой границе: $\\vec{V} \\cdot \\vec{n} = 0$.',
+        'Свободный сход вихревых жгутов с острых задних и боковых кромок.',
+      ],
+    },
+    physicalSignificance: [
+      'Визуализация $Q$-критерия позволяет обнаружить и оптимизировать концевые вихри крыла, снижая индуцированное сопротивление $C_{Di}$.',
+      'Секущие плоскости (Cut Planes) дают возможность детально изучить толщину пограничного слоя $\\delta(x)$ и положение точки ламинарно-турбулентного перехода.',
+      'A/B компаратор ускоряет валидацию проектных изменений при варьировании геометрических параметров или скоростных режимов полета.',
+    ],
+    references: [
+      { authors: 'Hunt, J. C. R., Wray, A. A., & Moin, P.', year: '1988', title: 'Eddies, stream, and convergence zones in turbulent flows', publisher: 'Center for Turbulence Research Report CTR-S88' },
+      { authors: 'Schlichting, H., & Gersten, K.', year: '2016', title: 'Boundary-Layer Theory (9th ed.)', publisher: 'Springer' },
+    ],
+  },
+  {
+    id: 'physics_solvers',
+    title: 'Расширенные Физические Солверы (RANS, Euler, Riemann)',
+    category: 'aero',
+    categoryLabel: 'Аэродинамика',
+    icon: Cpu,
+    badge: 'CFD Solvers Matrix',
+    summary: 'Многорежимный комплекс аэродинамических солверов: RANS ($k$-$\\omega$ SST & Spalart-Allmaras), Сжимаемый Эйлер (Compressible Euler), Несжимаемый Навье-Стокс (SIMPLE/PISO), Потенциальный Полно-Потенциальный (Full Potential FP3D) и Римановский Решатель Роэ (Roe MUSCL).',
+    purpose: 'Предоставить выбор математической модели, оптимальной для конкретного физического диапазона скоростей — от тихоходных БПЛА до гиперзвуковых аппаратов с разрывными ударными волнами.',
+    uiWalkthrough: {
+      title: 'Интерфейс Панели Солверов',
+      description: 'Позволяет выбирать класс решателя, настраивать параметры схемы дискретизации, число Куранта ($CFL$), модель турбулентности и производить запуск расчетного цикла.',
+      controls: [
+        { name: 'Селектор Архитектуры Солвера', type: 'Solver Cards', role: 'Выбор между RANS $k$-$\\omega$ SST, Euler, Incompressible Navier-Stokes, Full Potential и Riemann Roe.' },
+        { name: 'Число Куранта ($CFL$)', type: 'Slider (0.5 - 20.0)', role: 'Управляет шагом по времени $\\Delta t = CFL \\cdot \\Delta x / (|u| + a)$ для обеспечения устойчивости Куранта-Фридрихса-Леви.' },
+        { name: 'Пространственная Схема (Flux Scheme)', type: 'Selector', role: 'Roe MUSCL (2-й порядок с лимитерами потоков van Leer/minmod), HLLC, Jameson-Schmidt-Turkel (JST).' },
+        { name: 'Модель Турбулентности', type: 'Dropdown', role: '$k$-$\\omega$ SST (Ментер), Spalart-Allmaras (1-уравнение), Ламинарный режим.' },
+      ],
+      readouts: [
+        { name: 'Невязка непрерывности $||R_\\rho||$', unit: 'Log10', interpretation: 'Скорость убывания невязки массы; критерий сходимости $< 10^{-6}$.' },
+        { name: 'Локальное число $y^+$', unit: 'б.р.', interpretation: 'Безразмерное расстояние первой пристеночной ячейки: $y^+ = y u_\\tau / \\nu$. Для $k$-$\\omega$ SST рекомендуется $y^+ \\approx 1$.' },
+        { name: 'Баланс импульса и энергии', unit: '%', interpretation: 'Консервативное сохранение полной энтальпии $H_0 = \\text{const}$.' },
+      ],
+    },
+    mathematics: {
+      governingEquationLatex: '\\frac{\\partial \\mathbf{U}}{\\partial t} + \\nabla \\cdot \\mathbf{F}(\\mathbf{U}) = \\nabla \\cdot \\mathbf{F}_v(\\mathbf{U}) + \\mathbf{S}, \\quad \\mathbf{F}_{\\text{Roe}} = \\frac{1}{2}(\\mathbf{F}_L + \\mathbf{F}_R) - \\frac{1}{2} |\\mathbf{\\tilde{A}}| (\\mathbf{U}_R - \\mathbf{U}_L)',
+      description: 'Консервативная векторная форма уравнений Навье-Стокса с осреднением по Рейнольдсу (RANS) и схема приближенного распада разрыва Роэ.',
+      derivationSteps: [
+        'Вектор консервативных переменных: $\\mathbf{U} = [\\rho, \\rho u, \\rho v, \\rho w, \\rho E, \\rho k, \\rho \\omega]^T$.',
+        'Турбулентная вязкость Буссинеска: $\\mu_t = \\rho k / \\omega$ с лимитером сдвиговых напряжений Ментера $F_2$.',
+        'Реконструкция значений на гранях ячеек методом MUSCL с лимитером ван Лира: $\\mathbf{U}_{L,R} = \\mathbf{U}_i \\pm \\frac{1}{2} \\phi(r) \\Delta \\mathbf{U}$.',
+        'Вычисление матрицы Якоби потока $\\mathbf{\\tilde{A}} = \\partial \\mathbf{F} / \\partial \\mathbf{U}$ на средних по Роэ параметрах $(\\tilde{u}, \\tilde{v}, \\tilde{H})$.',
+      ],
+      boundaryConditions: [
+        'Стенка: $u=v=w=0$, $k=0$, $\\omega_{\\text{wall}} = 10 \\cdot \\frac{6\\nu}{\\beta_1 y_1^2}$.',
+        'Входная граница (Inlet): сверхзвуковой $(\\rho_\\infty, \\vec{u}_\\infty, p_\\infty)$ или дозвуковой с фиксацией полного давления $p_0$ и температуры $T_0$.',
+        'Выходная граница (Outlet): свободное истечение при $M > 1$ или фиксация статического давления $p_{\\text{back}}$ при $M < 1$.',
+      ],
+    },
+    physicalSignificance: [
+      'Схема Роэ второго порядка точности разрешает скачки уплотнения (косые и прямые ударные волны) без паразитных нефизических осцилляций благодаря монотонным TVD-лимитерам.',
+      'Модель Ментера $k$-$\\omega$ SST идеально сочетает точность уравнения Вилкокса в пристеночной зоне с нечувствительностью $k$-$\\varepsilon$ в свободном потоке, надежно предсказывая срыв потока при больших углах атаки $\\alpha$.',
+    ],
+    references: [
+      { authors: 'Roe, P. L.', year: '1981', title: 'Approximate Riemann solvers, parameter vectors, and difference schemes', publisher: 'Journal of Computational Physics, 43(2), 357-372' },
+      { authors: 'Menter, F. R.', year: '1994', title: 'Two-equation eddy-viscosity turbulence models for engineering applications', publisher: 'AIAA Journal, 32(8), 1598-1605' },
+    ],
+  },
+  {
+    id: 'export_report',
+    title: 'Экспорт и Автоматическая Отчётность (PDF, VTK, LaTeX)',
+    category: 'aero',
+    categoryLabel: 'Отчетность & CAE',
+    icon: BarChart2,
+    badge: 'Aero Reports & CAE Export',
+    summary: 'Автоматическая генерация инженерных заключений ГОСТ/AIAA, экспорт расчетных 3D сеток в ParaView Legacy VTK (.vtk/.vtp), таблиц поляр в CSV, научных статей в AMS-LaTeX (.tex) и расчетных кейсов для CFD солвера SU2 (.cfg).',
+    purpose: 'Обеспечить бесшовную интеграцию расчетного комплекса в существующий цикл авиационного проектирования, создание официальной отчетности для сертификации и экспорт данных в сторонние CAE пакеты (ParaView, Tecplot, MATLAB/Simulink, ANSYS).',
+    uiWalkthrough: {
+      title: 'Интерфейс Экспорта и Генерации Отчетов',
+      description: 'Состоит из панели выбора форматов экспорта, генератора официального отчета с предпросмотром и блока интеграции с открытыми солверами.',
+      controls: [
+        { name: 'Кнопка «Экспорт в PDF / Печать»', type: 'Primary Action', role: 'Формирует стандартизированный PDF документ через оптимизированную верстку @media print.' },
+        { name: 'Кнопка «Скачать ParaView VTK (.vtk)»', type: 'Button', role: 'Генерирует 3D полигональную поверхность крыла с распределением скалярных полей ($C_p, M, \\omega$).' },
+        { name: 'Кнопка «Скачать LaTeX (.tex)»', type: 'Button', role: 'Генерирует готовый исходник научной статьи со сводными таблицами booktabs и формулами.' },
+        { name: 'Кнопка «Скачать SU2 Case (.cfg)»', type: 'Button', role: 'Создает рабочий конфигурационный файл для свободного CFD солвера SU2 с граничными условиями RANS SST.' },
+        { name: 'Кнопка «Экспорт CSV & JSON»', type: 'Button', role: 'Скачивание численных массивов $C_p(x/c)$ и поляр $C_L(\\alpha), C_D(\\alpha)$ для MATLAB/Python.' },
+      ],
+      readouts: [
+        { name: 'Инженерный Штамп Отчета', unit: 'Метаданные', interpretation: 'Имя инженера, организация, статус верификации и временная метка.' },
+        { name: 'Сводка Аэродинамических Коэффициентов', unit: 'Таблица', interpretation: 'Значения $C_L, C_D, C_m, K=L/D$, запас статической устойчивости $K_c$, фокус $X_{np}$.' },
+        { name: 'Декомпозиция Лобового Сопротивления', unit: 'График / %', interpretation: 'Разделение $C_D$ на индуктивное ($C_{Di}$), профильное трение ($C_{Df}$) и волновое ($C_{Dw}$).' },
+      ],
+    },
+    mathematics: {
+      governingEquationLatex: 'K_c = -\\frac{\\partial C_m}{\\partial C_L} = \\frac{X_{np} - X_{cg}}{c_{\\text{MAC}}}, \\quad C_D = C_{D0} + C_{D,\\text{wave}} + \\frac{C_L^2}{\\pi AR e}',
+      description: 'Критерий статической продольной устойчивости летательного аппарата и трехчленная декомпозиция коэффициента сопротивления.',
+      derivationSteps: [
+        'Положение нейтральной точки (аэродинамического фокуса крыла): $X_{np} = X_{cg} - c_{\\text{MAC}} \\frac{dC_m/d\\alpha}{dC_L/d\\alpha}$.',
+        'Условие статической устойчивости: запас устойчивости $K_c > 0$ (фокус расположен позади центра тяжести аппарата).',
+        'Формирование структуры данных VTK PolyData: запись вершин `POINTS`, полигонов `POLYGONS` и атрибутов `POINT_DATA` для визуализации в ParaView.',
+      ],
+      boundaryConditions: [
+        'Стандарты оформления документации: ГОСТ 2.105-95 / AIAA Recommended Practice.',
+        'Форматирование числовых данных: IEEE-754 с гарантированной точностью до 6 значащих цифр.',
+      ],
+    },
+    physicalSignificance: [
+      'Автоматический расчет запаса центровки $K_c$ предупреждает инженера о риске продольной неустойчивости самолета при смещении полезной нагрузки.',
+      'Прямой экспорт в открытые форматы (VTK, SU2, CSV) устраняет необходимость ручного переформатирования расчетных сеток и ускоряет междисциплинарный анализ.',
+    ],
+    references: [
+      { authors: 'AIAA Committee on Standards', year: '1998', title: 'Guide for the Verification and Validation of Computational Fluid Dynamics Simulations', publisher: 'AIAA S-071A-1998' },
+      { authors: 'Economon, T. D., et al.', year: '2016', title: 'SU2: An open-source suite for multiphysics simulation and design', publisher: 'AIAA Journal, 54(3), 828-846' },
     ],
   },
   {

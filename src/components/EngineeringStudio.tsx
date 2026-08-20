@@ -51,6 +51,12 @@ export const EngineeringStudio: React.FC = () => {
     switch (activeAeroTab) {
       case 'presets':
         return { topicId: 'presets', label: 'Каталог Пресетов' };
+      case 'visual_studio':
+        return { topicId: 'visual_studio', label: '3D Визуальная Лаборатория' };
+      case 'physics_solvers':
+        return { topicId: 'physics_solvers', label: 'Расширенные Солверы' };
+      case 'export_report':
+        return { topicId: 'export_report', label: 'Экспорт и Отчётность' };
       case 'vlm':
         return { topicId: 'vlm', label: '3D Метод Вихревой Решетки (VLM)' };
       case 'status_monitor':
