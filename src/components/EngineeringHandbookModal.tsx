@@ -28,6 +28,16 @@ import {
   Workflow,
   CheckSquare,
   PlayCircle,
+  Eye,
+  MapPin,
+  FileText,
+  Download,
+  Gauge,
+  Terminal,
+  MousePointer,
+  Maximize2,
+  SlidersHorizontal,
+  FolderGit2,
 } from 'lucide-react';
 import { MathText, MathView } from './MathView';
 
@@ -52,6 +62,36 @@ export interface EngineerWorkflowStep {
   action: string;
   uiTarget: string;
   expectedResult: string;
+}
+
+export interface ParameterDecoderItem {
+  id: string;
+  name: string;
+  symbolLatex: string;
+  category: 'input' | 'aero_output' | 'visual_3d' | 'space' | 'eda';
+  categoryName: string;
+  location: string;
+  meaning: string;
+  howToConfigure: string;
+  howToObtain: string;
+  badge: string;
+}
+
+export interface SOPRecipe {
+  id: string;
+  title: string;
+  tag: string;
+  targetDomain: 'CFD & Аэро' | '3D Лаборатория' | 'Флаттер & Динамика' | 'Космос & GNC' | 'EDA & Авионика' | 'Экспорт & CAE';
+  goal: string;
+  estimatedTime: string;
+  steps: Array<{
+    stepNumber: number;
+    title: string;
+    description: string;
+    whereToClick: string;
+    expectedOutcome: string;
+  }>;
+  proTip: string;
 }
 
 export interface PracticalTip {
@@ -1170,6 +1210,507 @@ export const HANDBOOK_TOPICS: HandbookTopic[] = [
   },
 ];
 
+export const PARAMETER_DECODER_ITEMS: ParameterDecoderItem[] = [
+  // --- Входные параметры ---
+  {
+    id: 'input_alpha',
+    name: 'Угол атаки',
+    symbolLatex: '\\alpha',
+    category: 'input',
+    categoryName: 'Входные Параметры',
+    location: 'Монитор Сил, Аэротруба, VLM крыло (Слайдер)',
+    meaning: 'Угол между хордой аэродинамического профиля / строительной осью крыла и вектором скорости набегающего потока $V_\\infty$.',
+    howToConfigure: 'Для крейсерского полета задавайте $2^\\circ...5^\\circ$. Срыв потока (Stall) наступает при $\\alpha > 12^\\circ...16^\\circ$.',
+    howToObtain: 'Перемещайте ползунок $\\alpha$ в окне «Монитор Сил» или «Аэротруба» $\\to$ значение передается в решатель сетки FVM в реальном времени.',
+    badge: 'Диапазон: -10° ... +25°',
+  },
+  {
+    id: 'input_mach',
+    name: 'Число Маха',
+    symbolLatex: 'M = V / a',
+    category: 'input',
+    categoryName: 'Входные Параметры',
+    location: 'Монитор Сил, Пресеты, Расширенные Солверы (Слайдер)',
+    meaning: 'Отношение истинной скорости полета к местной скорости звука в атмосфере.',
+    howToConfigure: '$M < 0.7$ — несжимаемый дозвук; $0.75 \\le M \\le 1.15$ — трансзвуковой режим с местными скачками; $M > 1.2$ — сверхзвук.',
+    howToObtain: 'Установите желаемое число $M$ ползунком $\\to$ в 3D Лаборатории появится сверхзвуковой карман и конус Маха $\\mu = \\arcsin(1/M)$.',
+    badge: 'Диапазон: M = 0.05 ... 3.50',
+  },
+  {
+    id: 'input_altitude',
+    name: 'Высота полета в атмосфере ISA',
+    symbolLatex: 'H \\quad (\\text{км})',
+    category: 'input',
+    categoryName: 'Входные Параметры',
+    location: 'Монитор Сил, 6-DoF Полет (Слайдер)',
+    meaning: 'Геопотенциальная высота в Международной Стандартной Атмосфере (ГОСТ 4401-81 / ICAO).',
+    howToConfigure: 'Уровень моря: $H=0$ км ($\\rho=1.225$ кг/м³); Крейсерская высота лайнера: $H=10...12$ км; Стратосфера: $H > 20$ км.',
+    howToObtain: 'Слайдер пересчитывает барометрическое давление $p(H)$, плотность $\\rho(H)$ и динамическую вязкость $\\mu(T)$ для вычисления $Re$.',
+    badge: 'Диапазон: 0 ... 30 км',
+  },
+  {
+    id: 'input_cfl',
+    name: 'Число Куранта-Фридрихса-Леви',
+    symbolLatex: 'CFL = \\frac{u \\Delta t}{\\Delta x}',
+    category: 'input',
+    categoryName: 'Входные Параметры',
+    location: 'Расширенные Солверы (Слайдер)',
+    meaning: 'Безразмерный критерий устойчивости численной схемы, определяющий, сколько ячеек сетки информация пересекает за один временной шаг $\\Delta t$.',
+    howToConfigure: 'Для явных схем (Explicit RK4) строго держите $CFL \\le 1.0$. Для неявных предобусловленных схем (LUSGS, GMRES) задавайте $CFL = 5.0...20.0$.',
+    howToObtain: 'Увеличивайте $CFL$ во вкладке солверов для ускорения сходимости. Если невязка начинает расти (NaN/Inf), снизьте $CFL$.',
+    badge: 'Критерий устойчивости',
+  },
+  {
+    id: 'input_yplus',
+    name: 'Параметр пристеночной сетки',
+    symbolLatex: 'y^+ = \\frac{y u_\\tau}{\\nu}',
+    category: 'input',
+    categoryName: 'Входные Параметры',
+    location: 'Расширенные Солверы (Слайдер/Селектор)',
+    meaning: 'Безразмерное расстояние от стенки профиля до первого узла сетки. Определяет разрешение вязкого подслоя.',
+    howToConfigure: 'Для прямого разрешения вязкого подслоя в моделях $k$-$\\omega$ SST цель: $y^+ \\le 1.0$. Для пристеночных функций (Wall Functions): $y^+ \\in [30, 300]$.',
+    howToObtain: 'В блоке «Расширенные солверы» выберите тип пристеночной функции $\\to$ сетка автоматически скорректирует толщину первого слоя $\\Delta y_1$.',
+    badge: 'Турбулентный подслой',
+  },
+  {
+    id: 'input_flutter_stiffness',
+    name: 'Крутильная жесткость крыла',
+    symbolLatex: 'K_\\theta \\quad (\\text{кН}\\cdot\\text{м/рад})',
+    category: 'input',
+    categoryName: 'Входные Параметры',
+    location: 'Аэроупругость & Флаттер (Слайдер)',
+    meaning: 'Жесткость упругой связи профиля крыла на кручение относительно оси жесткости $x_f$.',
+    howToConfigure: 'Уменьшение $K_\\theta$ снижает критическую скорость флаттера $V_{\\text{flutter}}$, приводя к автоколебаниям на меньших скоростях.',
+    howToObtain: 'Регулируйте ползунок $K_\\theta$ во вкладке Флаттера $\\to$ смотрите сдвиг собственных частот $\\omega_h, \\omega_\\theta$ на диаграмме $V-g$.',
+    badge: 'Аэроупругая жесткость',
+  },
+  {
+    id: 'input_cg_pos',
+    name: 'Центровка (Положение Ц.М.)',
+    symbolLatex: 'x_{cg} / c',
+    category: 'input',
+    categoryName: 'Входные Параметры',
+    location: '6-DoF Динамика & Балансировка (Слайдер)',
+    meaning: 'Положение центра тяжести летательного аппарата относительно начала САХ (средней аэродинамической хорды).',
+    howToConfigure: 'Передняя центровка ($x_{cg} < 0.25c$) дает высокую статическую устойчивость ($dC_m/d\\alpha < 0$), но требует отклонения рулей. Задняя ($>0.30c$) — маневренность, но риск неустойчивости.',
+    howToObtain: 'Изменяйте $x_{cg}$ во вкладке «6-DoF Полет» $\\to$ индикатор продольного запаса устойчивости $\\Delta x_{\\text{sm}}$ изменит цвет с зеленого на красный.',
+    badge: 'Устойчивость и центровка',
+  },
+  {
+    id: 'input_ion_flux',
+    name: 'Поток тяжелых ионов космоса',
+    symbolLatex: '\\Phi_{\\text{ion}} \\quad (\\text{ион}/\\text{см}^2\\cdot\\text{с})',
+    category: 'input',
+    categoryName: 'Входные Параметры',
+    location: 'Микроэлектроника & EDA (Слайдер)',
+    meaning: 'Плотность потока галактических космических лучей (ГКЛ) и протонов радиационных поясов Земли (Van Allen Belts).',
+    howToConfigure: 'Фоновая орбита: $10^2 - 10^3$; Солнечная вспышка (SPE): $10^5 - 10^7$ ион/см²·с.',
+    howToObtain: 'Двигайте ползунок потока $\\to$ график генерации сбоев SEU покажет частоту переворота бит в памяти бортового процессора.',
+    badge: 'Радиационная стойкость',
+  },
+
+  // --- Выходные аэродинамические метрики ---
+  {
+    id: 'out_cl',
+    name: 'Коэффициент подъемной силы',
+    symbolLatex: 'C_L = \\frac{L}{\\frac{1}{2}\\rho V_\\infty^2 S}',
+    category: 'aero_output',
+    categoryName: 'Выходные Метрики',
+    location: 'Монитор Сил, 3D Лаборатория, VLM, PDF-Отчет (Табло)',
+    meaning: 'Безразмерный коэффициент, определяющий полную подъемную силу $L$, действующую перпендикулярно вектору набегающего потока.',
+    howToConfigure: 'Зависит от угла $\\alpha$, кривизны профиля и числа Маха $M$. Для NACA 0012 $C_{L\\alpha} \\approx 2\\pi$ рад⁻¹ ($0.11$ град⁻¹).',
+    howToObtain: 'Нажмите «Запустить CFD Солвер» во вкладке «Монитор Сил» $\\to$ значение $C_L$ отобразится крупным шрифтом на зеленом табло и в таблице поляр.',
+    badge: 'Ключевая несущая метрика',
+  },
+  {
+    id: 'out_cd',
+    name: 'Коэффициент полного сопротивления',
+    symbolLatex: 'C_D = C_{D0} + C_{Dw} + C_{Di}',
+    category: 'aero_output',
+    categoryName: 'Выходные Метрики',
+    location: 'Монитор Сил, 3D Лаборатория, VLM (Табло)',
+    meaning: 'Безразмерная аэродинамическая сила торможения потока, складывающаяся из профильного трения, волнового скачка и индуктивного скоса.',
+    howToConfigure: 'Для гладкого профиля NACA 0012 на $M=0.3$ минимальное $C_{D0} \\approx 0.008$. При трансзвуковом скачке $C_D$ резко возрастает в 3-8 раз.',
+    howToObtain: 'Вычисляется интегралом давления и касательных напряжений $\\oint (C_p \\mathbf{n} + c_f \\mathbf{t}) \\cdot \\mathbf{i}_\\infty ds$.',
+    badge: 'Лобовое сопротивление',
+  },
+  {
+    id: 'out_ld',
+    name: 'Аэродинамическое качество',
+    symbolLatex: 'K = L / D = C_L / C_D',
+    category: 'aero_output',
+    categoryName: 'Выходные Метрики',
+    location: 'Монитор Сил, Пресеты NASA, Отчет (Табло)',
+    meaning: 'Показывает, сколько единиц подъемной силы создает профиль/крыло на единицу силы лобового сопротивления.',
+    howToConfigure: 'Высокое качество $K=18...24$ достигается при углах атаки наивыгоднейшего режима $\\alpha = 3^\\circ...4^\\circ$.',
+    howToObtain: 'Индикатор качества находится рядом с $C_L$ и $C_D$. Поляра $C_L(C_D)$ наглядно показывает точку касания луча максимума $(L/D)_{\\max}$.',
+    badge: 'Крейсерская эффективность',
+  },
+  {
+    id: 'out_cm',
+    name: 'Коэффициент момента тангажа',
+    symbolLatex: 'C_m = \\frac{M_z}{\\frac{1}{2}\\rho V_\\infty^2 S c}',
+    category: 'aero_output',
+    categoryName: 'Выходные Метрики',
+    location: 'Монитор Сил, 6-DoF Полет (Табло)',
+    meaning: 'Момент вокруг поперечной оси $Z$, приложенный в точке фокуса $0.25c$. Отрицательный момент стремится опустить нос аппарата (пикирование).',
+    howToConfigure: 'Для продольной статической устойчивости производная должна быть отрицательной: $\\frac{\\partial C_m}{\\partial \\alpha} < 0$.',
+    howToObtain: 'Отображается на табло в «Мониторе Сил». При смене угла $\\alpha$ следите за знаком $C_m$.',
+    badge: 'Продольная балансировка',
+  },
+  {
+    id: 'out_cp',
+    name: 'Эпюра распределения давления',
+    symbolLatex: 'C_p(x/c) = \\frac{p - p_\\infty}{\\frac{1}{2}\\rho V_\\infty^2}',
+    category: 'aero_output',
+    categoryName: 'Выходные Метрики',
+    location: 'Монитор Сил, 3D Лаборатория (Интерактивный График)',
+    meaning: 'График распределения местного статического давления вдоль хорды профиля от передней кромки $x/c=0$ до задней $x/c=1$.',
+    howToConfigure: 'Верхняя ветвь (отрицательные $C_p$) — разрежение на спинке (создает подъемную силу); нижняя (положительные $C_p$) — подпор на корыте.',
+    howToObtain: 'График $C_p$ рисуется автоматически в нижней половине «Монитора Сил». Площадь между верхней и нижней кривыми в точности равна $C_L$.',
+    badge: 'Эпюра давлений по хорде',
+  },
+  {
+    id: 'out_residual',
+    name: 'L2 Невязка Решателя FVM',
+    symbolLatex: '\\|r_k\\|_2 = \\sqrt{\\sum r_i^2}',
+    category: 'aero_output',
+    categoryName: 'Выходные Метрики',
+    location: 'Монитор Сходимости & Расширенные Солверы (Спарклайн)',
+    meaning: 'Количественная мера ошибки дискретизации и выполнения законов сохранения массы и импульса на текущей итерации.',
+    howToConfigure: 'Сходимость считается строгой при $\\|r_k\\|_2 < 10^{-6}...10^{-7}$. Зеленый спарклайн указывает на идеальное решение.',
+    howToObtain: 'Смотрите окно «Сходимость и Невязка» во время итераций GMRES/LUSGS. График в логарифмической шкале $\\log_{10}(\\|r\\|)$ падает вниз.',
+    badge: 'Точность и сходимость',
+  },
+
+  // --- 3D Инструменты ---
+  {
+    id: 'v3d_cutplane',
+    name: 'Секущие Плоскости (Cut Planes)',
+    symbolLatex: '\\Pi_{XY}, \\Pi_{YZ}, \\Pi_{XZ}',
+    category: 'visual_3d',
+    categoryName: '3D Инструменты',
+    location: '3D Визуальная Лаборатория (Тумблеры + Слайдеры координат)',
+    meaning: 'Ортогональные сечения трехмерного векторного поля течения с интерполяцией локальных чисел Маха, давления $p$ или завихренности $\\omega$.',
+    howToConfigure: 'Активируйте тумблер плоскости и перемещайте ползунок координаты (например, срез по размаху $Z/b$ или по хорде $X/c$).',
+    howToObtain: 'Перейдите во вкладку «3D Лаборатория» $\\to$ включите «Секущая плоскость XZ» $\\to$ на срезе крыла появится цветовая карта Маха с замыкающим скачком.',
+    badge: '3D Анализ поля',
+  },
+  {
+    id: 'v3d_qcriterion',
+    name: 'Изоповерхности Q-критерия вихрей',
+    symbolLatex: 'Q = \\frac{1}{2}(\\|\\mathbf{\\Omega}\\|^2 - \\|\\mathbf{S}\\|^2) > 0',
+    category: 'visual_3d',
+    categoryName: '3D Инструменты',
+    location: '3D Лаборатория, VLM Крыло (Тумблер + Слайдер порога Q)',
+    meaning: 'Метод локализации пространственных вихревых ядер (Hunt et al.), выделяющий области, где вращение тензора деформаций доминирует над сдвигом.',
+    howToConfigure: 'Включите тумблер «Q-критерий вихрей». Регулируйте порог $Q_{\\text{iso}}$ для фильтрации мелких турбулентных структур.',
+    howToObtain: 'Позволяет четко увидеть сходящие с законцовок крыла вихревые жгуты (Wingtip Vortices) и вихри отрыва передней кромки (LEX/Strake).',
+    badge: 'Вихревые трубки',
+  },
+  {
+    id: 'v3d_streamlines',
+    name: 'Лагранжевы Дымовые Линии Тока',
+    symbolLatex: '\\frac{d\\mathbf{x}_p}{dt} = \\mathbf{u}(\\mathbf{x}_p, t)',
+    category: 'visual_3d',
+    categoryName: '3D Инструменты',
+    location: '3D Лаборатория (Тумблер «Дымовые струи»)',
+    meaning: 'Траектории безынерционных частиц дыма, выпускаемых из виртуального гребня генераторов перед крылом.',
+    howToConfigure: 'Тумблер включает анимированный пучок цветных трассеров, искривляющихся в поле градиента давлений.',
+    howToObtain: 'Наглядно показывает скос потока (Downwash) за задней кромкой и перетекание воздуха с нижней поверхности крыла на верхнюю на законцовках.',
+    badge: 'Дымовая визуализация',
+  },
+  {
+    id: 'v3d_ab_compare',
+    name: 'A/B Компаратор Режимов',
+    symbolLatex: '\\Delta = \\text{Mode A} - \\text{Mode B}',
+    category: 'visual_3d',
+    categoryName: '3D Инструменты',
+    location: '3D Лаборатория (Тумблер «A/B Сравнение»)',
+    meaning: 'Сплит-экран (Split-View) для одновременного визуального сопоставления двух различных конфигураций (например, дозвук $M=0.3$ против трансзвука $M=0.82$).',
+    howToConfigure: 'Включите тумблер A/B $\\to$ задайте параметры для левого и правого окон $\\to$ проведите разделитель сплит-экрана.',
+    howToObtain: 'Позволяет визуально сопоставить положение скачка уплотнения и толщину пограничного слоя в двух разных режимах.',
+    badge: 'Сравнительный анализ',
+  },
+
+  // --- Космос и Навигация ---
+  {
+    id: 'space_deltav',
+    name: 'Характеристическая скорость',
+    symbolLatex: '\\Delta V = I_{\\text{sp}} g_0 \\ln\\left(\\frac{m_0}{m_f}\\right)',
+    category: 'space',
+    categoryName: 'Космос & GNC',
+    location: 'Космонавтика & GNC -> Перелет Ламбера (Табло)',
+    meaning: 'Полный запас характеристической скорости, требуемый для маневров перелета с начальной орбиты на целевую.',
+    howToConfigure: 'Задайте начальную высоту орбиты $r_1$, целевую $r_2$ и длительность перелета $\\Delta t$ $\\to$ решатель Ламбера оптимизирует импульсы $\\Delta V_1, \\Delta V_2$.',
+    howToObtain: 'Смотрите итоговый бюджет $\\Delta V_{\\text{total}}$ на карточке маневра. Сравнивайте его с запасом топлива на борту.',
+    badge: 'Формула Циолковского',
+  },
+  {
+    id: 'space_heatflux',
+    name: 'Пиковый тепловой поток входа',
+    symbolLatex: '\\dot{q} = \\frac{C}{\\sqrt{R_N}} \\left(\\frac{\\rho}{\\rho_0}\\right)^{0.5} \\left(\\frac{V}{10^4}\\right)^{3.05}',
+    category: 'space',
+    categoryName: 'Космос & GNC',
+    location: 'Космонавтика & GNC -> Гиперзвуковой вход (Табло & График)',
+    meaning: 'Конвективный тепловой поток в критической точке затупленного носка космического аппарата при спуске в атмосфере (модель Фэя-Ридделла).',
+    howToConfigure: 'Увеличение радиуса затупления $R_N$ снижает удельный тепловой поток за счет отжатия ударной волны.',
+    howToObtain: 'График $\\dot{q}(t)$ и суммарной дозы тепла $Q_{\\text{total}}$ строится вдоль всей баллистической траектории спуска.',
+    badge: 'Теплозащита ТЗП',
+  },
+  {
+    id: 'space_ekf',
+    name: 'Оценка Расширенного Фильтра Калмана',
+    symbolLatex: '\\hat{\\mathbf{x}}_{k|k} = \\hat{\\mathbf{x}}_{k|k-1} + \\mathbf{K}_k (\\mathbf{z}_k - h(\\hat{\\mathbf{x}}_{k|k-1}))',
+    category: 'space',
+    categoryName: 'Космос & GNC',
+    location: 'Космонавтика & GNC -> Фильтр EKF (График траектории)',
+    meaning: 'Оптимальная статистическая оценка истинного вектора состояния (координаты, скорости, углы) по зашумленным измерениям датчиков IMU/GPS.',
+    howToConfigure: 'Задайте дисперсии шума процесса $\\mathbf{Q}$ и шума измерений $\\mathbf{R}$.',
+    howToObtain: 'График сравнивает истинную траекторию (синяя линия), зашумленные замеры (красные точки) и сглаженную оценку EKF (зеленая линия).',
+    badge: 'Навигационная фильтрация',
+  },
+
+  // --- Микроэлектроника & EDA ---
+  {
+    id: 'eda_elmore',
+    name: 'Задержка Элмора по RC-цепи',
+    symbolLatex: '\\tau_D = \\sum_{k} R_k \\sum_{j \\in \\text{Downstream}(k)} C_j',
+    category: 'eda',
+    categoryName: 'Микроэлектроника',
+    location: 'Микроэлектроника & EDA -> Топология RC (Табло)',
+    meaning: 'Аналитическая оценка времени задержки распространения фронта логического сигнала по распределенной шине межсоединений кристалла СБИС.',
+    howToConfigure: 'Зависит от ширины проводника $w$, шага металлизации и длины линии $L$. Применение буферов (Repeater Insertion) снижает квадратичный рост $\\mathcal{O}(L^2)$ до линейного.',
+    howToObtain: 'Табло задержки в пикосекундах (пкс) пересчитывается при изменении длины шины и сопротивления металлизации.',
+    badge: 'Тайминг СБИС',
+  },
+  {
+    id: 'eda_tmr',
+    name: 'Надежность Мажоритарного Канала TMR',
+    symbolLatex: 'R_{\\text{TMR}}(t) = 3 R(t)^2 - 2 R(t)^3',
+    category: 'eda',
+    categoryName: 'Микроэлектроника',
+    location: 'Микроэлектроника & EDA -> Радиационная Стойкость (Индикатор)',
+    meaning: 'Вероятность безотказной работы вычислительного ядра с тройным модульным резервированием (Triple Modular Redundancy) и схемой голосования 2-из-3.',
+    howToConfigure: 'Включите переключатель «Активировать TMR» для парирования одиночных сбоев SEU (Single Event Upsets) от тяжелых ионов.',
+    howToObtain: 'При попадании иона индикатор покажет фиксацию ошибки в поврежденном канале и ее мгновенное мажоритарное исправление на выходе.',
+    badge: 'Отказоустойчивость БЦВМ',
+  },
+];
+
+export const SOP_RECIPES: SOPRecipe[] = [
+  {
+    id: 'recipe_aero_forces',
+    title: 'Рецепт 1: Расчет Поляр и Несущих Свойств Профиля (C_L, C_D, C_m)',
+    tag: 'Аэродинамика & CFD',
+    targetDomain: 'CFD & Аэро',
+    goal: 'Получить точные значения подъемной силы, сопротивления, качества и эпюры распределения давления для заданного профиля и режима полета.',
+    estimatedTime: '1 минута',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Выбор геометрии профиля',
+        description: 'Перейдите во вкладку «Пресеты NASA» и выберите нужный профиль (например, NACA 0012 для вертолетной лопасти/руля или NASA SC(2)-0714 для крейсерского лайнера). Нажмите «Применить Пресет».',
+        whereToClick: 'Вкладка «Пресеты NASA» -> Карточка профиля -> Кнопка «Применить»',
+        expectedOutcome: 'Параметры профиля переносятся в солвер, автоматически открывается окно «Монитор Сил».',
+      },
+      {
+        stepNumber: 2,
+        title: 'Установка кинематики полета',
+        description: 'С помощью ползунков задайте угол атаки $\\alpha = 4^\\circ$, крейсерское число Маха $M = 0.78$ и высоту полета $H = 11$ км.',
+        whereToClick: 'Монитор Сил -> Панель параметров потока',
+        expectedOutcome: 'Пересчет плотности воздуха $\\rho(H)$, скорости звука $a(H)$ и числа Рейнольдса $Re$.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Запуск FVM CFD Солвера',
+        description: 'Нажмите кнопку «Запустить Расчет». Следите за индикатором сходимости невязок.',
+        whereToClick: 'Монитор Сил -> Большая синяя кнопка «Запустить Расчет»',
+        expectedOutcome: 'Невязка $\|r_k\|_2$ падает ниже $10^{-7}$, на табло появляются $C_L$, $C_D$, $C_m$, строится эпюра давлений $C_p(x/c)$.',
+      },
+    ],
+    proTip: 'Для околозвуковых скоростей ($M > 0.75$) сверхкритический профиль NASA SC(2) демонстрирует на 40% меньшее волновое сопротивление $C_{Dw}$ по сравнению с классическим NACA 0012 за счет уплощенной формы спинки.',
+  },
+  {
+    id: 'recipe_3d_vortices',
+    title: 'Рецепт 2: Построение и Анализ 3D Вихревого Следа (Q-критерий + Срезы)',
+    tag: '3D Визуализация',
+    targetDomain: '3D Лаборатория',
+    goal: 'Визуализировать трехмерный скос потока, сходящие вихревые жгуты с законцовок крыла и локализовать положение скачка уплотнения в пространстве.',
+    estimatedTime: '1.5 минуты',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Переход в 3D Лабораторию',
+        description: 'В блоке вкладок Аэродинамики выберите «3D Визуальная Лаборатория».',
+        whereToClick: 'Вкладка «3D Лаборатория»',
+        expectedOutcome: 'Инициализация интерактивной сцены Three.js/WebGL с трехмерной геометрией несущей поверхности.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Активация изоповерхностей Q-критерия',
+        description: 'В панели визуальных слоев справа включите тумблер «Q-критерий вихрей». Ползунком отрегулируйте порог изоповерхности.',
+        whereToClick: '3D Лаборатория -> Панель слоев -> Тумблер «Q-критерий»',
+        expectedOutcome: 'В пространстве за законцовками крыла формируются закрученные вихревые трубки, окрашенные по градиенту давления.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Включение секущей плоскости (Cut Plane)',
+        description: 'Включите тумблер «Плоскость XZ» и с помощью слайдера координаты $Z/b$ проведите срез вдоль размаха крыла.',
+        whereToClick: '3D Лаборатория -> Секция «Секущие плоскости» -> Слайдер координаты',
+        expectedOutcome: 'Отображение двумерного цветового поля местных чисел Маха с резкой границей прямого скачка уплотнения.',
+      },
+    ],
+    proTip: 'Вращайте трехмерную модель зажатой левой кнопкой мыши, используйте колесо мыши для зума и правую кнопку для панорамирования.',
+  },
+  {
+    id: 'recipe_flutter_analysis',
+    title: 'Рецепт 3: Поиск Критической Скорости Изгибно-Крутильного Флаттера',
+    tag: 'Аэроупругость',
+    targetDomain: 'Флаттер & Динамика',
+    goal: 'Определить критическую скорость динамической неустойчивости $V_{\\text{flutter}}$ и проверить запас безопасности конструкции крыла.',
+    estimatedTime: '2 минуты',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Открытие модуля Аэроупругости',
+        description: 'Переключитесь на вкладку «Аэроупругость & Флаттер».',
+        whereToClick: 'Вкладка «Аэроупругость & Флаттер»',
+        expectedOutcome: 'Загрузка 2-степенной динамической модели упругого профиля (изгиб $h(t)$ + кручение $\\theta(t)$).',
+      },
+      {
+        stepNumber: 2,
+        title: 'Задание жесткостных параметров',
+        description: 'Задайте крутильную жесткость $K_\\theta$, изгибную жесткость $K_h$ и расстояние между центром масс и осью жесткости $x_\\alpha$.',
+        whereToClick: 'Панель жесткостных параметров флаттера',
+        expectedOutcome: 'Вычисление базовых парциальных частот $\\omega_h, \\omega_\\theta$.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Свип по скорости и анализ V-g диаграммы',
+        description: 'Нажмите «Запустить Свип по Скорости». Следите за точкой слияния частот и моментом, когда коэффициент демпфирования $g$ пересекает ноль снизу вверх.',
+        whereToClick: 'Кнопка «Запустить Свип по Скорости»',
+        expectedOutcome: 'На диаграмме $V-g$ фиксируется точная скорость $V_{\\text{flutter}}$. Система выдает нормативный запас по скорости $\\eta_{\\text{safe}} = V_{\\text{flutter}} / V_{\\text{cruise}}$.',
+      },
+    ],
+    proTip: 'Смещение центра тяжести вперед перед осью жесткости ($x_\\alpha < 0$) полностью устраняет классический изгибно-крутильный флаттер при любых скоростях.',
+  },
+  {
+    id: 'recipe_6dof_flight',
+    title: 'Рецепт 4: Моделирование 6-DoF Полета и Продольной Балансировки',
+    tag: 'Динамика Полета',
+    targetDomain: 'Флаттер & Динамика',
+    goal: 'Провести численную симуляцию пространственного маневрирования ЛА с учетом уравнений Эйлера, тяги двигателей и балансировочных отклонений рулей.',
+    estimatedTime: '2 минуты',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Инициализация 6-DoF симулятора',
+        description: 'Перейдите во вкладку «6-DoF Динамика Полета».',
+        whereToClick: 'Вкладка «6-DoF Динамика Полета»',
+        expectedOutcome: 'Загрузка трехмерного авиагоризонта PFD, графиков углов Эйлера $(\\psi, \\theta, \\gamma)$ и траектории.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Отклонение рулей высоты и элеронов',
+        description: 'Используйте интерактивный джойстик или слайдеры отклонения руля высоты $\\delta_e$ для ввода самолета в кабрирование/вираж.',
+        whereToClick: 'Интерактивный штурвал / Слайдер $\\delta_e$',
+        expectedOutcome: 'Интегратор Рунге-Кутты 4-го порядка рассчитывает переходный процесс короткопериодического и фугоидного движения.',
+      },
+    ],
+    proTip: 'Следите за шкалой перегрузки $n_y$. Нормативный предел для пассажирских самолетов составляет $+2.5g / -1.0g$.',
+  },
+  {
+    id: 'recipe_space_lambert',
+    title: 'Рецепт 5: Расчет Межпланетного Перелета Ламберта и Входа в Атмосферу',
+    tag: 'Космонавтика & GNC',
+    targetDomain: 'Космос & GNC',
+    goal: 'Рассчитать траекторию трансфера между круговыми орбитами, импульсы $\\Delta V$ и пиковый конвективный тепловой поток ТЗП при гиперзвуковом спуске.',
+    estimatedTime: '2.5 минуты',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Переход в домен Космонавтики',
+        description: 'В самом верху приложения нажмите вкладку «Космонавтика & GNC».',
+        whereToClick: 'Верхняя панель доменов -> Кнопка «Космонавтика & GNC»',
+        expectedOutcome: 'Открытие специализированного космического окружения (орбитальная механика, гиперзвуковой вход, EKF).',
+      },
+      {
+        stepNumber: 2,
+        title: 'Решение краевой задачи Ламберта',
+        description: 'Задайте радиусы начальной и целевой орбит, нажмите «Рассчитать Трансфер Ламберта».',
+        whereToClick: 'Модуль перелета Ламберта -> Кнопка расчета',
+        expectedOutcome: 'Построение эллиптической траектории трансфера и расчет импульсов $\\Delta V_1, \\Delta V_2$.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Анализ гиперзвукового нагрева ТЗП',
+        description: 'В секции «Гиперзвуковой Вход» запустите расчет профиля торможения в атмосфере.',
+        whereToClick: 'Секция «Вход в атмосферу» -> Кнопка симуляции',
+        expectedOutcome: 'График теплового потока Фэя-Ридделла $\\dot{q}(t)$ и расчет необходимой толщины абляционной теплозащиты.',
+      },
+    ],
+    proTip: 'Оптимизация времени перелета $\\Delta t$ по свипу свинг-бай гравитационных маневров позволяет снизить суммарный бюджет $\\Delta V$ на 20-35%.',
+  },
+  {
+    id: 'recipe_eda_avionics',
+    title: 'Рецепт 6: Стресс-Тест Авионики под Радиацией и Верификация TMR',
+    tag: 'Микроэлектроника & EDA',
+    targetDomain: 'EDA & Авионика',
+    goal: 'Оценить устойчивость бортовой ЭВМ к одиночным радиационным сбоям (SEU) и проверить безотказность мажоритарного резервирования.',
+    estimatedTime: '1.5 минуты',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Переход в домен EDA',
+        description: 'В верхнем селекторе доменов выберите «Микроэлектроника & EDA».',
+        whereToClick: 'Верхняя панель доменов -> Кнопка «Микроэлектроника & EDA»',
+        expectedOutcome: 'Загрузка топологического симулятора RC-цепей, глазковой диаграммы и модели радиационных эффектов.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Включение радиационного потока и TMR',
+        description: 'Увеличьте ползунок потока космических ионов $\\Phi_{\\text{ion}}$ и активируйте тумблер «Тройное Модульное Резервирование (TMR)».',
+        whereToClick: 'Панель радиационной стойкости -> Слайдер потока + Тумблер TMR',
+        expectedOutcome: 'Визуализация попадания ионов в память процессора и мгновенное мажоритарное исправление бита клапаном $Y = AB + BC + AC$.',
+      },
+    ],
+    proTip: 'Без TMR при потоке $10^5$ ион/см²·с вероятность фатального сбоя процессора достигает 90% за первые 48 часов полета.',
+  },
+  {
+    id: 'recipe_export_cae',
+    title: 'Рецепт 7: Генерация Инженерного Отчета по ГОСТ и Экспорт в ParaView',
+    tag: 'Экспорт & Документация',
+    targetDomain: 'Экспорт & CAE',
+    goal: 'Сформировать официальный структурированный отчет в формате PDF/ГОСТ и выгрузить расчетную сетку в ParaView Legacy VTK для внешней верификации.',
+    estimatedTime: '1 минута',
+    steps: [
+      {
+        stepNumber: 1,
+        title: 'Переход в модуль Экспорта',
+        description: 'Во вкладках Аэродинамики откройте модуль «Экспорт и Отчеты».',
+        whereToClick: 'Вкладка «Экспорт и Отчеты»',
+        expectedOutcome: 'Открытие центра генерации документации и экспорта расчетных данных.',
+      },
+      {
+        stepNumber: 2,
+        title: 'Печать официального PDF-отчета',
+        description: 'Нажмите зеленую кнопку «Сгенерировать и Распечатать PDF (ГОСТ)».',
+        whereToClick: 'Кнопка «Сгенерировать PDF»',
+        expectedOutcome: 'Формирование отчета с титульным листом по ГОСТ 7.32, таблицами сил, графиками $C_p$ и параметрами сходимости солвера.',
+      },
+      {
+        stepNumber: 3,
+        title: 'Выгрузка сетки ParaView (.vtk)',
+        description: 'Нажмите кнопку «Скачать ParaView Legacy (.vtk)» для экспорта 3D структурированной сетки.',
+        whereToClick: 'Секция CAE-экспорта -> Кнопка «ParaView VTK»',
+        expectedOutcome: 'Скачивание текстового файла `.vtk`, готового к открытию в ParaView, ANSYS Fluent или Tecplot.',
+      },
+    ],
+    proTip: 'Файлы конфигурации SU2 (`.cfg`) можно использовать для прямого запуска высокопроизводительного RANS-расчета на суперкомпьютерных кластерах.',
+  },
+];
+
 interface EngineeringHandbookModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -1181,9 +1722,18 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
   onClose,
   initialTopicId = 'overview',
 }) => {
+  const [activeHandbookTab, setActiveHandbookTab] = useState<'chapters' | 'ui_guide' | 'recipes'>('chapters');
   const [selectedTopicId, setSelectedTopicId] = useState<HandbookTopicId>(initialTopicId);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  
+  // UI Guide State
+  const [uiGuideCategory, setUiGuideCategory] = useState<string>('all');
+  const [uiGuideSearch, setUiGuideSearch] = useState<string>('');
+  const [activeWorkspaceZone, setActiveWorkspaceZone] = useState<number | null>(null);
+
+  // Recipes State
+  const [selectedRecipeId, setSelectedRecipeId] = useState<string>(SOP_RECIPES[0].id);
 
   // Sync initial topic when modal opens
   React.useEffect(() => {
@@ -1210,6 +1760,26 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
     return HANDBOOK_TOPICS.find((t) => t.id === selectedTopicId) || HANDBOOK_TOPICS[0];
   }, [selectedTopicId]);
 
+  // Filter UI parameters
+  const filteredDecoderItems = useMemo(() => {
+    return PARAMETER_DECODER_ITEMS.filter((item) => {
+      const matchCat = uiGuideCategory === 'all' || item.category === uiGuideCategory;
+      const q = uiGuideSearch.toLowerCase().trim();
+      const matchSearch =
+        q === '' ||
+        item.name.toLowerCase().includes(q) ||
+        item.meaning.toLowerCase().includes(q) ||
+        item.location.toLowerCase().includes(q) ||
+        item.howToConfigure.toLowerCase().includes(q) ||
+        item.howToObtain.toLowerCase().includes(q);
+      return matchCat && matchSearch;
+    });
+  }, [uiGuideCategory, uiGuideSearch]);
+
+  const activeRecipe = useMemo(() => {
+    return SOP_RECIPES.find((r) => r.id === selectedRecipeId) || SOP_RECIPES[0];
+  }, [selectedRecipeId]);
+
   if (!isOpen) return null;
 
   return (
@@ -1217,7 +1787,7 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
       <div className="relative w-full max-w-6xl h-[92vh] bg-slate-900 border border-slate-700/80 rounded-2xl sm:rounded-3xl shadow-2xl flex flex-col overflow-hidden text-slate-100">
         
         {/* Modal Top Header */}
-        <div className="flex items-center justify-between px-4 sm:px-6 py-3.5 border-b border-slate-800 bg-slate-950/90 shrink-0">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between px-4 sm:px-6 py-3.5 border-b border-slate-800 bg-slate-950/90 gap-3 shrink-0">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-500/20 to-indigo-500/20 text-cyan-400 border border-cyan-500/30">
               <BookOpen className="w-5 h-5" />
@@ -1232,404 +1802,846 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
                 </span>
               </div>
               <p className="text-xs text-slate-400">
-                Полное математическое обоснование, краевые условия, физика формул и руководство по интерфейсу
+                Полная архитектура интерфейса, декодер параметров («Что к чему и что значит»), физика формул и регламенты
               </p>
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onClose}
-            className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700"
-            title="Закрыть руководство"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            {/* Top Navigation Mode Switcher */}
+            <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
+              <button
+                type="button"
+                onClick={() => setActiveHandbookTab('chapters')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  activeHandbookTab === 'chapters'
+                    ? 'bg-gradient-to-r from-cyan-500 to-indigo-600 text-slate-950 shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>13 Научных Глав</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveHandbookTab('ui_guide')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  activeHandbookTab === 'ui_guide'
+                    ? 'bg-gradient-to-r from-cyan-500 to-indigo-600 text-slate-950 shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Гид по Интерфейсу</span>
+                <span className="text-[9px] px-1 py-0.2 rounded bg-cyan-950 text-cyan-300 font-mono hidden md:inline">
+                  Что к чему
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveHandbookTab('recipes')}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                  activeHandbookTab === 'recipes'
+                    ? 'bg-gradient-to-r from-cyan-500 to-indigo-600 text-slate-950 shadow-md'
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                }`}
+              >
+                <Workflow className="w-3.5 h-3.5" />
+                <span>Как Получить (Рецепты)</span>
+              </button>
+            </div>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition-colors cursor-pointer border border-slate-700 ml-1"
+              title="Закрыть руководство"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
-        {/* Modal Body: 2-Column Sidebar + Content View */}
-        <div className="flex-1 flex flex-col md:flex-row overflow-hidden">
-          
-          {/* Left Sidebar: Topic Selector & Search */}
-          <div className="w-full md:w-80 lg:w-96 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950/60 p-3 sm:p-4 flex flex-col gap-3 shrink-0 overflow-y-auto">
-            
-            {/* Search Input */}
-            <div className="relative">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Поиск формул, терминов..."
-                className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono transition-colors"
-              />
-            </div>
+        {/* ========================================================================= */}
+        {/* VIEW 1: 13 СПЕЦИАЛИЗИРОВАННЫХ НАУЧНЫХ ГЛАВ                               */}
+        {/* ========================================================================= */}
+        {activeHandbookTab === 'chapters' && (
+          <div className="flex-1 flex flex-col md:flex-row overflow-hidden animate-fadeIn">
+            {/* Left Sidebar: Topic Selector & Search */}
+            <div className="w-full md:w-80 lg:w-96 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950/60 p-3 sm:p-4 flex flex-col gap-3 shrink-0 overflow-y-auto">
+              
+              {/* Search Input */}
+              <div className="relative">
+                <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Поиск формул, модулей..."
+                  className="w-full pl-9 pr-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono transition-colors"
+                />
+              </div>
 
-            {/* Category Filter Chips */}
-            <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] font-mono scrollbar-none">
-              {[
-                { id: 'all', label: 'Все' },
-                { id: 'aero', label: 'CFD/Аэро' },
-                { id: 'space', label: 'GNC/Космос' },
-                { id: 'eda', label: 'EDA/Авионика' },
-              ].map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => setSelectedCategory(cat.id)}
-                  className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
-                    selectedCategory === cat.id
-                      ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
-                      : 'bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
-            </div>
-
-            {/* Topics List */}
-            <div className="space-y-1.5 flex-1 overflow-y-auto pr-1">
-              {filteredTopics.map((topic) => {
-                const IconComp = topic.icon;
-                const isSelected = topic.id === selectedTopicId;
-                return (
+              {/* Category Filter Chips */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] font-mono scrollbar-none">
+                {[
+                  { id: 'all', label: 'Все' },
+                  { id: 'aero', label: 'CFD/Аэро' },
+                  { id: 'space', label: 'GNC/Космос' },
+                  { id: 'eda', label: 'EDA/Авионика' },
+                ].map((cat) => (
                   <button
-                    key={topic.id}
+                    key={cat.id}
                     type="button"
-                    onClick={() => setSelectedTopicId(topic.id)}
-                    className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${
-                      isSelected
-                        ? 'bg-gradient-to-r from-cyan-950/80 to-slate-900 border-cyan-500/70 text-white shadow-md ring-1 ring-cyan-500/30'
-                        : 'bg-slate-900/40 hover:bg-slate-800/60 border-slate-800/80 text-slate-300'
+                    onClick={() => setSelectedCategory(cat.id)}
+                    className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
+                      selectedCategory === cat.id
+                        ? 'bg-cyan-500 text-slate-950 font-bold shadow-sm'
+                        : 'bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'
                     }`}
                   >
-                    <div className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${isSelected ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-400'}`}>
-                      <IconComp className="w-4 h-4" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between gap-1">
-                        <span className="text-xs font-bold truncate">{topic.title}</span>
-                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 shrink-0">
-                          {topic.badge}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
-                        {topic.summary}
-                      </p>
-                    </div>
+                    {cat.label}
                   </button>
-                );
-              })}
-
-              {filteredTopics.length === 0 && (
-                <div className="text-center py-8 text-xs text-slate-500 font-mono">
-                  По запросу ничего не найдено
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Right Main Panel: Comprehensive Technical Content */}
-          <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto space-y-6 bg-slate-900/50">
-            
-            {/* Topic Header Banner */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950/60 border border-slate-800 space-y-2 relative overflow-hidden shadow-lg">
-              <div className="absolute right-0 top-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[10px] font-mono font-bold uppercase tracking-wider">
-                  {activeTopic.categoryLabel}
-                </span>
-                <span className="text-xs font-mono text-slate-400 font-bold">
-                  Спецификация: {activeTopic.badge}
-                </span>
-              </div>
-              <h1 className="text-lg sm:text-2xl font-black text-white tracking-tight">
-                {activeTopic.title}
-              </h1>
-              <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-                {activeTopic.summary}
-              </p>
-            </div>
-
-            {/* 1. Инженерное Назначение & Физическая Роль */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 shadow-sm">
-              <div className="flex items-center gap-2 text-xs font-bold text-cyan-400 uppercase tracking-wider">
-                <Info className="w-4 h-4" />
-                <span>1. Инженерное Назначение и Физическая Роль</span>
-              </div>
-              <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
-                {activeTopic.purpose}
-              </p>
-
-              {/* Physical Significance Bullet Points */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
-                {activeTopic.physicalSignificance.map((item, idx) => (
-                  <div key={idx} className="flex items-start gap-2 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-300">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-                    <span>{item}</span>
-                  </div>
                 ))}
               </div>
+
+              {/* Topics List */}
+              <div className="space-y-1.5 flex-1 overflow-y-auto pr-1">
+                {filteredTopics.map((topic) => {
+                  const IconComp = topic.icon;
+                  const isSelected = topic.id === selectedTopicId;
+                  return (
+                    <button
+                      key={topic.id}
+                      type="button"
+                      onClick={() => setSelectedTopicId(topic.id)}
+                      className={`w-full text-left p-2.5 rounded-xl border transition-all cursor-pointer flex items-start gap-2.5 ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-cyan-950/80 to-slate-900 border-cyan-500/70 text-white shadow-md ring-1 ring-cyan-500/30'
+                          : 'bg-slate-900/40 hover:bg-slate-800/60 border-slate-800/80 text-slate-300'
+                      }`}
+                    >
+                      <div className={`p-1.5 rounded-lg shrink-0 mt-0.5 ${isSelected ? 'bg-cyan-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-400'}`}>
+                        <IconComp className="w-4 h-4" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="text-xs font-bold truncate">{topic.title}</span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 shrink-0">
+                            {topic.badge}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-400 line-clamp-1 mt-0.5">
+                          {topic.summary}
+                        </p>
+                      </div>
+                    </button>
+                  );
+                })}
+
+                {filteredTopics.length === 0 && (
+                  <div className="text-center py-8 text-xs text-slate-500 font-mono">
+                    По запросу ничего не найдено
+                  </div>
+                )}
+              </div>
             </div>
 
-            {/* 2. Математическое Обоснование & Уравнения */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 shadow-sm">
-              <div className="flex items-center justify-between flex-wrap gap-2">
-                <div className="flex items-center gap-2 text-xs font-bold text-indigo-400 uppercase tracking-wider">
-                  <Activity className="w-4 h-4" />
-                  <span>2. Математическое Обоснование & Уравнения</span>
+            {/* Right Main Panel: Comprehensive Technical Content */}
+            <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto space-y-6 bg-slate-900/50">
+              
+              {/* Topic Header Banner */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950/60 border border-slate-800 space-y-2 relative overflow-hidden shadow-lg">
+                <div className="absolute right-0 top-0 w-32 h-32 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[10px] font-mono font-bold uppercase tracking-wider">
+                    {activeTopic.categoryLabel}
+                  </span>
+                  <span className="text-xs font-mono text-slate-400 font-bold">
+                    Спецификация: {activeTopic.badge}
+                  </span>
                 </div>
-                <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 font-bold">
-                  KaTeX LaTeX Engine
-                </span>
+                <h1 className="text-lg sm:text-2xl font-black text-white tracking-tight">
+                  {activeTopic.title}
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  {activeTopic.summary}
+                </p>
               </div>
 
-              {/* Formula Callout Block */}
-              <div className="p-3.5 sm:p-4 rounded-xl bg-slate-900/90 border border-indigo-500/30 overflow-x-auto shadow-inner text-center">
-                <MathView math={activeTopic.mathematics.governingEquationLatex} block={true} className="text-cyan-300 text-sm sm:text-base font-bold" />
-              </div>
+              {/* 1. Инженерное Назначение & Физическая Роль */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 shadow-sm">
+                <div className="flex items-center gap-2 text-xs font-bold text-cyan-400 uppercase tracking-wider">
+                  <Info className="w-4 h-4" />
+                  <span>1. Инженерное Назначение и Физическая Роль</span>
+                </div>
+                <p className="text-xs sm:text-sm text-slate-200 leading-relaxed">
+                  {activeTopic.purpose}
+                </p>
 
-              <p className="text-xs sm:text-sm text-slate-300">
-                {activeTopic.mathematics.description}
-              </p>
-
-              {/* Derivation Steps */}
-              <div className="space-y-1.5 pt-1">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">
-                  Численные этапы и аппроксимации:
-                </h4>
-                <ul className="space-y-1 text-xs text-slate-300">
-                  {activeTopic.mathematics.derivationSteps.map((step, idx) => (
-                    <li key={idx} className="flex items-start gap-2">
-                      <span className="text-cyan-400 font-mono font-bold">{idx + 1}.</span>
-                      <MathText text={step} />
-                    </li>
+                {/* Physical Significance Bullet Points */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-2">
+                  {activeTopic.physicalSignificance.map((item, idx) => (
+                    <div key={idx} className="flex items-start gap-2 p-2.5 rounded-xl bg-slate-900/80 border border-slate-800 text-xs text-slate-300">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                      <span>{item}</span>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
 
-              {/* Boundary Conditions if present */}
-              {activeTopic.mathematics.boundaryConditions && (
-                <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5 mt-2">
-                  <h5 className="text-[11px] font-bold text-amber-400 uppercase tracking-wider font-mono">
-                    Краевые и Граничные Условия (Boundary Conditions):
-                  </h5>
+              {/* 2. Математическое Обоснование & Уравнения */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 shadow-sm">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-indigo-400 uppercase tracking-wider">
+                    <Activity className="w-4 h-4" />
+                    <span>2. Математическое Обоснование & Уравнения</span>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-indigo-950 text-indigo-300 border border-indigo-800 font-bold">
+                    KaTeX LaTeX Engine
+                  </span>
+                </div>
+
+                {/* Formula Callout Block */}
+                <div className="p-3.5 sm:p-4 rounded-xl bg-slate-900/90 border border-indigo-500/30 overflow-x-auto shadow-inner text-center">
+                  <MathView math={activeTopic.mathematics.governingEquationLatex} block={true} className="text-cyan-300 text-sm sm:text-base font-bold" />
+                </div>
+
+                <p className="text-xs sm:text-sm text-slate-300">
+                  {activeTopic.mathematics.description}
+                </p>
+
+                {/* Derivation Steps */}
+                <div className="space-y-1.5 pt-1">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">
+                    Численные этапы и аппроксимации:
+                  </h4>
                   <ul className="space-y-1 text-xs text-slate-300">
-                    {activeTopic.mathematics.boundaryConditions.map((bc, idx) => (
+                    {activeTopic.mathematics.derivationSteps.map((step, idx) => (
                       <li key={idx} className="flex items-start gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
-                        <MathText text={bc} />
+                        <span className="text-cyan-400 font-mono font-bold">{idx + 1}.</span>
+                        <MathText text={step} />
                       </li>
                     ))}
                   </ul>
                 </div>
-              )}
-            </div>
 
-            {/* 3. Руководство по Интерфейсу и Элементам Управления */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 shadow-sm">
-              <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
-                <Sliders className="w-4 h-4" />
-                <span>3. Руководство по Интерфейсу (Как Управлять и Читать Графики)</span>
-              </div>
-              <p className="text-xs sm:text-sm text-slate-300">
-                {activeTopic.uiWalkthrough.description}
-              </p>
-
-              {/* Controls Table */}
-              <div className="space-y-2">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">
-                  Элементы управления и входные параметры:
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {activeTopic.uiWalkthrough.controls.map((ctrl, idx) => (
-                    <div key={idx} className="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold text-white flex items-center gap-1.5">
-                          <span className="w-2 h-2 rounded-full bg-cyan-400" />
-                          <MathText text={ctrl.name} />
-                        </span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">
-                          {ctrl.type}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-300">
-                        <MathText text={ctrl.role} />
-                      </p>
-                      {ctrl.recommended && (
-                        <div className="text-[10px] font-mono text-cyan-400/90 pt-0.5">
-                          Рекомендация: {ctrl.recommended}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Readouts & Indicators Table */}
-              <div className="space-y-2 pt-2 border-t border-slate-800/80">
-                <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">
-                  Выходные индикаторы, графики и метрики:
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {activeTopic.uiWalkthrough.readouts.map((ro, idx) => (
-                    <div key={idx} className="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold text-emerald-300">
-                          <MathText text={ro.name} />
-                        </span>
-                        <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">
-                          {ro.unit}
-                        </span>
-                      </div>
-                      <p className="text-[11px] text-slate-300">
-                        <MathText text={ro.interpretation} />
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-
-            {/* 4. Пошаговые Инструкции & Инженерный Workflow */}
-            {activeTopic.engineeringWorkflow && (
-              <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 shadow-sm">
-                <div className="flex items-center justify-between flex-wrap gap-2">
-                  <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
-                    <CheckCircle2 className="w-4 h-4" />
-                    <span>4. Инженерный Рабочий Процесс (Workflow & Best Practices)</span>
-                  </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-bold">
-                    Standard Operating Procedure (SOP)
-                  </span>
-                </div>
-
-                <div className="space-y-1">
-                  <h3 className="text-sm font-bold text-white">
-                    {activeTopic.engineeringWorkflow.title}
-                  </h3>
-                  <p className="text-xs text-slate-300">
-                    <strong className="text-cyan-400">Цель операции: </strong>
-                    <MathText text={activeTopic.engineeringWorkflow.goal} />
-                  </p>
-                </div>
-
-                {/* Steps Timeline / Cards */}
-                <div className="space-y-2.5 pt-1">
-                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">
-                    Пошаговый регламент действий:
-                  </h4>
-                  <div className="space-y-2">
-                    {activeTopic.engineeringWorkflow.steps.map((step) => (
-                      <div
-                        key={step.stepNumber}
-                        className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <span className="w-5 h-5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono font-bold text-xs flex items-center justify-center shrink-0">
-                              {step.stepNumber}
-                            </span>
-                            <span className="text-xs font-bold text-slate-100">
-                              {step.title}
-                            </span>
-                          </div>
-                          <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 shrink-0">
-                            {step.uiTarget}
-                          </span>
-                        </div>
-
-                        <div className="text-xs text-slate-300 pl-7 space-y-1">
-                          <p>
-                            <span className="text-slate-400 font-medium">Действие: </span>
-                            <MathText text={step.action} />
-                          </p>
-                          <p className="text-emerald-400/90 text-[11px] bg-emerald-950/30 p-1.5 rounded-lg border border-emerald-900/40">
-                            <span className="font-bold">Ожидаемый результат: </span>
-                            <MathText text={step.expectedResult} />
-                          </p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Pitfalls & Troubleshooting */}
-                {activeTopic.engineeringWorkflow.pitfallsAndTroubleshooting && activeTopic.engineeringWorkflow.pitfallsAndTroubleshooting.length > 0 && (
-                  <div className="space-y-2 pt-2 border-t border-slate-800/80">
-                    <h4 className="text-xs font-bold text-rose-400 uppercase tracking-wider font-mono flex items-center gap-1.5">
-                      <AlertTriangle className="w-3.5 h-3.5" />
-                      <span>Диагностика ошибок & Решение проблем (Troubleshooting):</span>
-                    </h4>
-                    <div className="space-y-2">
-                      {activeTopic.engineeringWorkflow.pitfallsAndTroubleshooting.map((tip, idx) => (
-                        <div key={idx} className="p-3 rounded-xl bg-rose-950/20 border border-rose-900/40 text-xs space-y-1">
-                          <div className="font-bold text-rose-300 flex items-center gap-1.5">
-                            <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
-                            <span>Проблема: {tip.issue}</span>
-                          </div>
-                          <p className="text-slate-300 pl-3">
-                            <span className="text-emerald-400 font-bold">Решение: </span>
-                            <MathText text={tip.resolution} />
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Best Practices */}
-                {activeTopic.engineeringWorkflow.bestPractices && activeTopic.engineeringWorkflow.bestPractices.length > 0 && (
-                  <div className="space-y-2 pt-2 border-t border-slate-800/80">
-                    <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider font-mono flex items-center gap-1.5">
-                      <Sparkles className="w-3.5 h-3.5" />
-                      <span>Инженерные рекомендации & Best Practices:</span>
-                    </h4>
-                    <ul className="space-y-1.5 text-xs text-slate-300">
-                      {activeTopic.engineeringWorkflow.bestPractices.map((bp, idx) => (
-                        <li key={idx} className="flex items-start gap-2 p-2 rounded-lg bg-slate-900/60 border border-slate-800">
-                          <span className="text-cyan-400 font-bold">★</span>
-                          <MathText text={bp} />
+                {/* Boundary Conditions if present */}
+                {activeTopic.mathematics.boundaryConditions && (
+                  <div className="p-3 rounded-xl bg-slate-900/60 border border-slate-800 space-y-1.5 mt-2">
+                    <h5 className="text-[11px] font-bold text-amber-400 uppercase tracking-wider font-mono">
+                      Краевые и Граничные Условия (Boundary Conditions):
+                    </h5>
+                    <ul className="space-y-1 text-xs text-slate-300">
+                      {activeTopic.mathematics.boundaryConditions.map((bc, idx) => (
+                        <li key={idx} className="flex items-start gap-2">
+                          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5 shrink-0" />
+                          <MathText text={bc} />
                         </li>
                       ))}
                     </ul>
                   </div>
                 )}
               </div>
-            )}
 
-            {/* 5. Академические Первоисточники и Литература */}
-            <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 shadow-sm">
-              <div className="flex items-center gap-2 text-xs font-bold text-purple-400 uppercase tracking-wider">
-                <BookOpen className="w-4 h-4" />
-                <span>5. Академические Первоисточники и Стандарты</span>
+              {/* 3. Руководство по Интерфейсу и Элементам Управления */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 shadow-sm">
+                <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider">
+                  <Sliders className="w-4 h-4" />
+                  <span>3. Руководство по Интерфейсу (Как Управлять и Читать Графики)</span>
+                </div>
+                <p className="text-xs sm:text-sm text-slate-300">
+                  {activeTopic.uiWalkthrough.description}
+                </p>
+
+                {/* Controls Table */}
+                <div className="space-y-2">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">
+                    Элементы управления и входные параметры:
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {activeTopic.uiWalkthrough.controls.map((ctrl, idx) => (
+                      <div key={idx} className="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-white flex items-center gap-1.5">
+                            <span className="w-2 h-2 rounded-full bg-cyan-400" />
+                            <MathText text={ctrl.name} />
+                          </span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400">
+                            {ctrl.type}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-300">
+                          <MathText text={ctrl.role} />
+                        </p>
+                        {ctrl.recommended && (
+                          <div className="text-[10px] font-mono text-cyan-400/90 pt-0.5">
+                            Рекомендация: {ctrl.recommended}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Readouts & Indicators Table */}
+                <div className="space-y-2 pt-2 border-t border-slate-800/80">
+                  <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">
+                    Выходные индикаторы, графики и метрики:
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {activeTopic.uiWalkthrough.readouts.map((ro, idx) => (
+                      <div key={idx} className="p-3 rounded-xl bg-slate-900 border border-slate-800 space-y-1">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-emerald-300">
+                            <MathText text={ro.name} />
+                          </span>
+                          <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-950 text-emerald-400 border border-emerald-800">
+                            {ro.unit}
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-300">
+                          <MathText text={ro.interpretation} />
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
-              <div className="space-y-2">
-                {activeTopic.references.map((ref, idx) => (
-                  <div key={idx} className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 flex items-start justify-between gap-3">
-                    <div>
-                      <div className="font-bold text-slate-200">
-                        {ref.authors} ({ref.year})
-                      </div>
-                      <div className="text-slate-400 italic mt-0.5">
-                        «{ref.title}» — {ref.publisher}
-                      </div>
+
+              {/* 4. Пошаговые Инструкции & Инженерный Workflow */}
+              {activeTopic.engineeringWorkflow && (
+                <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 shadow-sm">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider">
+                      <CheckCircle2 className="w-4 h-4" />
+                      <span>4. Инженерный Рабочий Процесс (Workflow & Best Practices)</span>
                     </div>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 shrink-0">
-                      Standard
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-950 text-amber-300 border border-amber-800 font-bold">
+                      Standard Operating Procedure (SOP)
                     </span>
                   </div>
-                ))}
+
+                  <div className="space-y-1">
+                    <h3 className="text-sm font-bold text-white">
+                      {activeTopic.engineeringWorkflow.title}
+                    </h3>
+                    <p className="text-xs text-slate-300">
+                      <strong className="text-cyan-400">Цель операции: </strong>
+                      <MathText text={activeTopic.engineeringWorkflow.goal} />
+                    </p>
+                  </div>
+
+                  {/* Steps Timeline / Cards */}
+                  <div className="space-y-2.5 pt-1">
+                    <h4 className="text-xs font-bold text-slate-400 uppercase tracking-wider font-mono">
+                      Пошаговый регламент действий:
+                    </h4>
+                    <div className="space-y-2">
+                      {activeTopic.engineeringWorkflow.steps.map((step) => (
+                        <div
+                          key={step.stepNumber}
+                          className="p-3 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2"
+                        >
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="flex items-center gap-2">
+                              <span className="w-5 h-5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                                {step.stepNumber}
+                              </span>
+                              <span className="text-xs font-bold text-slate-100">
+                                {step.title}
+                              </span>
+                            </div>
+                            <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-400 border border-slate-700 shrink-0">
+                              {step.uiTarget}
+                            </span>
+                          </div>
+
+                          <div className="text-xs text-slate-300 pl-7 space-y-1">
+                            <p>
+                              <span className="text-slate-400 font-medium">Действие: </span>
+                              <MathText text={step.action} />
+                            </p>
+                            <p className="text-emerald-400/90 text-[11px] bg-emerald-950/30 p-1.5 rounded-lg border border-emerald-900/40">
+                              <span className="font-bold">Ожидаемый результат: </span>
+                              <MathText text={step.expectedResult} />
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Pitfalls & Troubleshooting */}
+                  {activeTopic.engineeringWorkflow.pitfallsAndTroubleshooting && activeTopic.engineeringWorkflow.pitfallsAndTroubleshooting.length > 0 && (
+                    <div className="space-y-2 pt-2 border-t border-slate-800/80">
+                      <h4 className="text-xs font-bold text-rose-400 uppercase tracking-wider font-mono flex items-center gap-1.5">
+                        <AlertTriangle className="w-3.5 h-3.5" />
+                        <span>Диагностика ошибок & Решение проблем (Troubleshooting):</span>
+                      </h4>
+                      <div className="space-y-2">
+                        {activeTopic.engineeringWorkflow.pitfallsAndTroubleshooting.map((tip, idx) => (
+                          <div key={idx} className="p-3 rounded-xl bg-rose-950/20 border border-rose-900/40 text-xs space-y-1">
+                            <div className="font-bold text-rose-300 flex items-center gap-1.5">
+                              <span className="w-1.5 h-1.5 rounded-full bg-rose-400" />
+                              <span>Проблема: {tip.issue}</span>
+                            </div>
+                            <p className="text-slate-300 pl-3">
+                              <span className="text-emerald-400 font-bold">Решение: </span>
+                              <MathText text={tip.resolution} />
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Best Practices */}
+                  {activeTopic.engineeringWorkflow.bestPractices && activeTopic.engineeringWorkflow.bestPractices.length > 0 && (
+                    <div className="space-y-2 pt-2 border-t border-slate-800/80">
+                      <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider font-mono flex items-center gap-1.5">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>Инженерные рекомендации & Best Practices:</span>
+                      </h4>
+                      <ul className="space-y-1.5 text-xs text-slate-300">
+                        {activeTopic.engineeringWorkflow.bestPractices.map((bp, idx) => (
+                          <li key={idx} className="flex items-start gap-2 p-2 rounded-lg bg-slate-900/60 border border-slate-800">
+                            <span className="text-cyan-400 font-bold">★</span>
+                            <MathText text={bp} />
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* 5. Академические Первоисточники и Литература */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-3 shadow-sm">
+                <div className="flex items-center gap-2 text-xs font-bold text-purple-400 uppercase tracking-wider">
+                  <BookOpen className="w-4 h-4" />
+                  <span>5. Академические Первоисточники и Стандарты</span>
+                </div>
+                <div className="space-y-2">
+                  {activeTopic.references.map((ref, idx) => (
+                    <div key={idx} className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 flex items-start justify-between gap-3">
+                      <div>
+                        <div className="font-bold text-slate-200">
+                          {ref.authors} ({ref.year})
+                        </div>
+                        <div className="text-slate-400 italic mt-0.5">
+                          «{ref.title}» — {ref.publisher}
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-950 text-purple-300 border border-purple-800 shrink-0">
+                        Standard
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* VIEW 2: ИНТЕРАКТИВНЫЙ ГИД ПО ИНТЕРФЕЙСУ («ЧТО К ЧЕМУ & ЧТО ЗНАЧИТ»)       */}
+        {/* ========================================================================= */}
+        {activeHandbookTab === 'ui_guide' && (
+          <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto space-y-6 bg-slate-900/60 animate-fadeIn">
+            
+            {/* Master Banner */}
+            <div className="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-indigo-950 border border-slate-800 space-y-3 shadow-xl">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5">
+                  <SlidersHorizontal className="w-3 h-3" /> Интерактивная Карта Интерфейса
+                </span>
+                <span className="text-xs font-mono text-cyan-400 font-bold">
+                  25+ Параметров & Органов Управления
+                </span>
+              </div>
+              <h1 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+                Что к Чему, Что Значит и Как Получить Результат
+              </h1>
+              <p className="text-xs sm:text-sm text-slate-300 max-w-4xl leading-relaxed">
+                Наглядное руководство по структуре экрана студии, физическому смыслу каждого ползунка и числового табло, а также точным правилам настройки для различных режимов полета и вычислений.
+              </p>
+            </div>
+
+            {/* A. Интерактивная Схема Рабочей Области Студии (5 Главных Зон) */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 shadow-sm">
+              <div className="flex items-center justify-between flex-wrap gap-2">
+                <div className="flex items-center gap-2 text-xs font-bold text-cyan-400 uppercase tracking-wider font-mono">
+                  <Layers className="w-4 h-4" />
+                  <span>А. Архитектурная Карта Экрана Студии (5 Функциональных Зон)</span>
+                </div>
+                <span className="text-[11px] text-slate-400">
+                  Нажмите на зону, чтобы увидеть ее роль
+                </span>
+              </div>
+
+              {/* Visual Mockup Grid */}
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-3 p-3 rounded-2xl bg-slate-900/90 border border-slate-800">
+                {/* Zone 1: Header */}
+                <button
+                  type="button"
+                  onClick={() => setActiveWorkspaceZone(1)}
+                  className={`md:col-span-12 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    activeWorkspaceZone === 1
+                      ? 'bg-cyan-950/80 border-cyan-400 ring-2 ring-cyan-500/40'
+                      : 'bg-slate-950 hover:bg-slate-900 border-slate-800 text-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-cyan-300 flex items-center gap-1.5">
+                      <span className="px-1.5 py-0.2 rounded bg-cyan-500 text-slate-950 font-mono font-bold text-[10px]">1</span>
+                      <span>Верхняя Панель Доменов (Domain Selector Bar)</span>
+                    </span>
+                    <span className="text-[10px] font-mono text-slate-400">CFD • GNC • EDA</span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Переключение глобальной дисциплины: «✈️ Аэродинамика», «🚀 Космонавтика», «🛰️ Микроэлектроника & EDA».
+                  </p>
+                </button>
+
+                {/* Zone 2: Control Deck */}
+                <button
+                  type="button"
+                  onClick={() => setActiveWorkspaceZone(2)}
+                  className={`md:col-span-4 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    activeWorkspaceZone === 2
+                      ? 'bg-indigo-950/80 border-indigo-400 ring-2 ring-indigo-500/40'
+                      : 'bg-slate-950 hover:bg-slate-900 border-slate-800 text-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-indigo-300 flex items-center gap-1.5">
+                      <span className="px-1.5 py-0.2 rounded bg-indigo-500 text-slate-950 font-mono font-bold text-[10px]">2</span>
+                      <span>Входные Параметры & Пресеты</span>
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Угол атаки $\alpha$, Мах $M$, высота $H$, профили NASA, тумблеры солверов.
+                  </p>
+                </button>
+
+                {/* Zone 3: Visual Canvas */}
+                <button
+                  type="button"
+                  onClick={() => setActiveWorkspaceZone(3)}
+                  className={`md:col-span-8 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    activeWorkspaceZone === 3
+                      ? 'bg-emerald-950/80 border-emerald-400 ring-2 ring-emerald-500/40'
+                      : 'bg-slate-950 hover:bg-slate-900 border-slate-800 text-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-emerald-300 flex items-center gap-1.5">
+                      <span className="px-1.5 py-0.2 rounded bg-emerald-500 text-slate-950 font-mono font-bold text-[10px]">3</span>
+                      <span>Интерактивный 3D/2D Вычислительный Холст (Viewport)</span>
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    3D вращение крыла, изоповерхности $Q$-вихрей, секущие срезы Cut Planes, дымовые линии тока, эпюры $C_p$.
+                  </p>
+                </button>
+
+                {/* Zone 4: Forces & Telemetry */}
+                <button
+                  type="button"
+                  onClick={() => setActiveWorkspaceZone(4)}
+                  className={`md:col-span-6 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    activeWorkspaceZone === 4
+                      ? 'bg-amber-950/80 border-amber-400 ring-2 ring-amber-500/40'
+                      : 'bg-slate-950 hover:bg-slate-900 border-slate-800 text-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-amber-300 flex items-center gap-1.5">
+                      <span className="px-1.5 py-0.2 rounded bg-amber-500 text-slate-950 font-mono font-bold text-[10px]">4</span>
+                      <span>Телеметрия Сил & Сходимости ($C_L, C_D, L/D, \|r_k\|_2$)</span>
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Числовые табло интегральных коэффициентов, поляры, логарифмический спарклайн невязки GMRES.
+                  </p>
+                </button>
+
+                {/* Zone 5: Export & Reports */}
+                <button
+                  type="button"
+                  onClick={() => setActiveWorkspaceZone(5)}
+                  className={`md:col-span-6 p-3 rounded-xl border text-left transition-all cursor-pointer ${
+                    activeWorkspaceZone === 5
+                      ? 'bg-purple-950/80 border-purple-400 ring-2 ring-purple-500/40'
+                      : 'bg-slate-950 hover:bg-slate-900 border-slate-800 text-slate-300'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-purple-300 flex items-center gap-1.5">
+                      <span className="px-1.5 py-0.2 rounded bg-purple-500 text-slate-950 font-mono font-bold text-[10px]">5</span>
+                      <span>Экспорт Отчетов & CAE Форматов (PDF, VTK, SU2)</span>
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">
+                    Генерация официального PDF-отчета по ГОСТ, экспорт 3D сетки в ParaView Legacy (.vtk) и конфига SU2.
+                  </p>
+                </button>
               </div>
             </div>
 
+            {/* B. Большой Декодер Параметров & Терминов («Что к чему и что значит») */}
+            <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-xs font-bold text-emerald-400 uppercase tracking-wider font-mono">
+                  <Sliders className="w-4 h-4" />
+                  <span>Б. Декодер Параметров: Что Это Значит, Где Искать & Как Получить</span>
+                </div>
+                
+                {/* Search in Decoder */}
+                <div className="relative w-full sm:w-64">
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    value={uiGuideSearch}
+                    onChange={(e) => setUiGuideSearch(e.target.value)}
+                    placeholder="Фильтр терминов (Mach, Cl, Q...)"
+                    className="w-full pl-8 pr-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-500 font-mono"
+                  />
+                </div>
+              </div>
+
+              {/* Category Filter Chips */}
+              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] font-mono scrollbar-none">
+                {[
+                  { id: 'all', label: 'Все Параметры' },
+                  { id: 'input', label: 'Входные Ползунки' },
+                  { id: 'aero_output', label: 'Выходные Силы (Cl, Cd, Cp)' },
+                  { id: 'visual_3d', label: '3D Инструменты & Вихри' },
+                  { id: 'space', label: 'Космос & Навигация' },
+                  { id: 'eda', label: 'EDA & Микроэлектроника' },
+                ].map((cat) => (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    onClick={() => setUiGuideCategory(cat.id)}
+                    className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer whitespace-nowrap ${
+                      uiGuideCategory === cat.id
+                        ? 'bg-emerald-500 text-slate-950 font-bold shadow-sm'
+                        : 'bg-slate-900 text-slate-400 hover:text-slate-200 hover:bg-slate-800 border border-slate-800'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Cards Grid: Parameter by Parameter Detailed Breakdown */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5 pt-1">
+                {filteredDecoderItems.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-3 shadow-md hover:border-slate-700 transition-colors"
+                  >
+                    {/* Header */}
+                    <div className="flex items-start justify-between gap-2 border-b border-slate-800/80 pb-2.5">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-bold text-white tracking-tight">
+                            {item.name}
+                          </span>
+                          <span className="px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono font-bold text-xs border border-cyan-800">
+                            <MathText text={`$${item.symbolLatex}$`} />
+                          </span>
+                        </div>
+                        <div className="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5">
+                          <MapPin className="w-3 h-3 text-cyan-400 shrink-0" />
+                          <span className="font-mono">{item.location}</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-slate-300 shrink-0">
+                        {item.badge}
+                      </span>
+                    </div>
+
+                    {/* What it means */}
+                    <div className="space-y-1 text-xs">
+                      <span className="text-slate-400 font-bold uppercase tracking-wider font-mono text-[10px] text-cyan-400">
+                        💡 Что это значит (Физический смысл):
+                      </span>
+                      <p className="text-slate-200 leading-relaxed">
+                        <MathText text={item.meaning} />
+                      </p>
+                    </div>
+
+                    {/* How to configure */}
+                    <div className="space-y-1 text-xs bg-slate-950/60 p-2.5 rounded-xl border border-slate-800/80">
+                      <span className="text-slate-400 font-bold uppercase tracking-wider font-mono text-[10px] text-amber-400">
+                        ⚙️ Как настраивать & Рекомендуемые диапазоны:
+                      </span>
+                      <p className="text-slate-300">
+                        <MathText text={item.howToConfigure} />
+                      </p>
+                    </div>
+
+                    {/* How to obtain */}
+                    <div className="space-y-1 text-xs bg-emerald-950/20 p-2.5 rounded-xl border border-emerald-900/40">
+                      <span className="text-emerald-400 font-bold uppercase tracking-wider font-mono text-[10px]">
+                        🎯 Как получить результат и что покажет:
+                      </span>
+                      <p className="text-emerald-200/90">
+                        <MathText text={item.howToObtain} />
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {filteredDecoderItems.length === 0 && (
+                <div className="text-center py-12 text-xs text-slate-500 font-mono">
+                  По данному запросу параметры не найдены.
+                </div>
+              )}
+            </div>
+
           </div>
-        </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* VIEW 3: ГОТОВЫЕ РЕЦЕПТЫ («КАК ПОЛУЧИТЬ РЕЗУЛЬТАТ» — ПОШАГОВЫЕ SOP)        */}
+        {/* ========================================================================= */}
+        {activeHandbookTab === 'recipes' && (
+          <div className="flex-1 flex flex-col md:flex-row overflow-hidden animate-fadeIn">
+            {/* Left Sidebar: Recipe List */}
+            <div className="w-full md:w-80 lg:w-96 border-b md:border-b-0 md:border-r border-slate-800 bg-slate-950/60 p-3 sm:p-4 flex flex-col gap-2 shrink-0 overflow-y-auto">
+              <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider font-mono px-1">
+                <Workflow className="w-4 h-4" />
+                <span>7 Экспресс-Сценариев (SOP)</span>
+              </div>
+              <p className="text-[11px] text-slate-400 px-1 pb-1">
+                Пошаговые алгоритмы действий инженера от запуска до экспорта
+              </p>
+
+              <div className="space-y-1.5 flex-1 overflow-y-auto pr-1">
+                {SOP_RECIPES.map((recipe) => {
+                  const isSelected = recipe.id === selectedRecipeId;
+                  return (
+                    <button
+                      key={recipe.id}
+                      type="button"
+                      onClick={() => setSelectedRecipeId(recipe.id)}
+                      className={`w-full text-left p-3 rounded-xl border transition-all cursor-pointer flex flex-col gap-1 ${
+                        isSelected
+                          ? 'bg-gradient-to-r from-amber-950/80 to-slate-900 border-amber-500/70 text-white shadow-md ring-1 ring-amber-500/30'
+                          : 'bg-slate-900/40 hover:bg-slate-800/60 border-slate-800/80 text-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold truncate">{recipe.title}</span>
+                        <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-400 shrink-0">
+                          {recipe.estimatedTime}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-[10px] font-mono text-amber-400/90">
+                        <span>[{recipe.targetDomain}]</span>
+                      </div>
+                      <p className="text-[11px] text-slate-400 line-clamp-1">
+                        {recipe.goal}
+                      </p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right Main Panel: Recipe Execution Details */}
+            <div className="flex-1 p-4 sm:p-6 lg:p-8 overflow-y-auto space-y-6 bg-slate-900/50">
+              
+              {/* Recipe Header */}
+              <div className="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-slate-950 via-slate-900 to-amber-950/40 border border-slate-800 space-y-2 relative overflow-hidden shadow-lg">
+                <div className="flex items-center justify-between flex-wrap gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-mono font-bold uppercase tracking-wider">
+                    {activeRecipe.targetDomain}
+                  </span>
+                  <span className="text-xs font-mono text-slate-400 font-bold">
+                    Время выполнения: ~{activeRecipe.estimatedTime}
+                  </span>
+                </div>
+                <h1 className="text-lg sm:text-2xl font-black text-white tracking-tight">
+                  {activeRecipe.title}
+                </h1>
+                <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
+                  <strong className="text-cyan-400">Целевой результат: </strong>
+                  <MathText text={activeRecipe.goal} />
+                </p>
+              </div>
+
+              {/* Steps Detailed Flow */}
+              <div className="p-4 sm:p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-4 shadow-sm">
+                <div className="flex items-center gap-2 text-xs font-bold text-amber-400 uppercase tracking-wider font-mono">
+                  <CheckSquare className="w-4 h-4" />
+                  <span>Пошаговый Протокол Действий Инженера:</span>
+                </div>
+
+                <div className="space-y-3">
+                  {activeRecipe.steps.map((st) => (
+                    <div
+                      key={st.stepNumber}
+                      className="p-4 rounded-xl bg-slate-900/90 border border-slate-800 space-y-2.5 shadow-sm"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex items-center gap-2.5">
+                          <span className="w-6 h-6 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-mono font-bold text-xs flex items-center justify-center shrink-0">
+                            {st.stepNumber}
+                          </span>
+                          <h3 className="text-xs sm:text-sm font-bold text-white">
+                            {st.title}
+                          </h3>
+                        </div>
+                        <div className="flex items-center gap-1 text-[10px] font-mono px-2 py-0.5 rounded bg-slate-800 text-cyan-300 border border-slate-700 shrink-0">
+                          <MousePointer className="w-3 h-3 text-cyan-400" />
+                          <span>{st.whereToClick}</span>
+                        </div>
+                      </div>
+
+                      <div className="text-xs text-slate-300 pl-8 space-y-2">
+                        <p className="leading-relaxed">
+                          <MathText text={st.description} />
+                        </p>
+                        <div className="p-2.5 rounded-lg bg-emerald-950/30 border border-emerald-900/40 text-[11px] text-emerald-300 flex items-start gap-2">
+                          <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-bold">Что покажет экран: </span>
+                            <MathText text={st.expectedOutcome} />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pro Tip Callout */}
+                <div className="p-3.5 sm:p-4 rounded-xl bg-gradient-to-r from-cyan-950/40 to-slate-900 border border-cyan-500/30 text-xs space-y-1">
+                  <div className="flex items-center gap-1.5 font-bold text-cyan-300 font-mono uppercase tracking-wider text-[11px]">
+                    <Lightbulb className="w-4 h-4 text-amber-400" />
+                    <span>Инженерная Рекомендация (Pro Tip):</span>
+                  </div>
+                  <p className="text-slate-300 pl-5 leading-relaxed">
+                    <MathText text={activeRecipe.proTip} />
+                  </p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        )}
 
         {/* Modal Bottom Status Bar */}
         <div className="px-4 sm:px-6 py-2.5 border-t border-slate-800 bg-slate-950 flex items-center justify-between text-xs text-slate-400 font-mono shrink-0">
-          <span>Студия Инжиниринга v3.0 PRO | Документация верифицирована</span>
+          <span>Студия Инжиниринга v3.0 PRO | Интерактивное руководство верифицировано</span>
           <button
             type="button"
             onClick={onClose}
@@ -1643,3 +2655,4 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
     </div>
   );
 };
+

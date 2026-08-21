@@ -26,6 +26,7 @@ import {
 import { MathText } from './MathView';
 import { AerodynamicsModule } from './aerodynamics/AerodynamicsModule';
 import { EngineeringHandbookModal, HandbookTopicId } from './EngineeringHandbookModal';
+import { FutureRoadmapModal } from './FutureRoadmapModal';
 import { NvidiaHardwareEnforcerBar } from './NvidiaHardwareEnforcerBar';
 
 export type EngineeringDomain = 'aero' | 'space' | 'eda';
@@ -34,6 +35,7 @@ export const EngineeringStudio: React.FC = () => {
   const [activeDomain, setActiveDomain] = useState<EngineeringDomain>('aero');
   const [activeAeroTab, setActiveAeroTab] = useState<string>('presets');
   const [isHandbookOpen, setIsHandbookOpen] = useState<boolean>(false);
+  const [isRoadmapOpen, setIsRoadmapOpen] = useState<boolean>(false);
   const [handbookTopicId, setHandbookTopicId] = useState<HandbookTopicId>('presets');
 
   const handleAeroTabChange = useCallback((tab: string) => {
@@ -109,28 +111,46 @@ export const EngineeringStudio: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-2 self-start md:self-auto shrink-0 flex-wrap">
-            {/* Single Unified Info & Handbook Trigger Button with Active Section Detection */}
+          <div className="flex flex-col gap-2 self-start md:self-auto shrink-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Single Unified Info & Handbook Trigger Button with Active Section Detection */}
+              <button
+                type="button"
+                onClick={handleOpenCurrentHandbook}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:from-cyan-400 hover:to-indigo-400 text-slate-950 font-black text-xs shadow-lg shadow-cyan-950/60 transition-all cursor-pointer border border-cyan-400/40"
+                title={`Открыть научно-технический справочник: ${activeTopicInfo.label}`}
+              >
+                <Info className="w-4 h-4 text-slate-950" />
+                <span>Инфо & Справочник</span>
+                <span className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-slate-950/25 text-[10px] font-mono font-bold tracking-tight">
+                  [{activeTopicInfo.label}]
+                </span>
+              </button>
+
+              <div className="flex items-center gap-2 bg-slate-950/70 p-1.5 rounded-xl border border-slate-800">
+                <div className="flex flex-col text-right pr-2 hidden lg:flex">
+                  <span className="text-[10px] text-slate-400 font-mono">Вычислительное Ядро</span>
+                  <span className="text-xs font-bold text-cyan-300 font-mono">CSR + AMG + RK4</span>
+                </div>
+                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+              </div>
+            </div>
+
+            {/* Temporary Development Stage Button: Future Roadmap */}
             <button
               type="button"
-              onClick={handleOpenCurrentHandbook}
-              className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:from-cyan-400 hover:to-indigo-400 text-slate-950 font-black text-xs shadow-lg shadow-cyan-950/60 transition-all cursor-pointer border border-cyan-400/40"
-              title={`Открыть научно-технический справочник: ${activeTopicInfo.label}`}
+              onClick={() => setIsRoadmapOpen(true)}
+              className="flex items-center justify-between gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-orange-500/15 to-rose-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 hover:text-amber-200 border border-amber-500/40 text-xs font-bold transition-all cursor-pointer shadow-md shadow-amber-950/40 group"
+              title="План развития проекта: от БПЛА и Кукурузника до Самолетов и Космических Ракет"
             >
-              <Info className="w-4 h-4 text-slate-950" />
-              <span>Инфо & Справочник</span>
-              <span className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-slate-950/25 text-[10px] font-mono font-bold tracking-tight">
-                [{activeTopicInfo.label}]
+              <div className="flex items-center gap-2">
+                <Compass className="w-4 h-4 text-amber-400 group-hover:rotate-45 transition-transform" />
+                <span>✨ Будущая разработка</span>
+              </div>
+              <span className="px-2 py-0.5 rounded bg-amber-950/80 text-[10px] font-mono text-amber-400 border border-amber-800/60 font-bold">
+                [Roadmap: БПЛА $\to$ Ракета]
               </span>
             </button>
-
-            <div className="flex items-center gap-2 bg-slate-950/70 p-1.5 rounded-xl border border-slate-800">
-              <div className="flex flex-col text-right pr-2 hidden lg:flex">
-                <span className="text-[10px] text-slate-400 font-mono">Вычислительное Ядро</span>
-                <span className="text-xs font-bold text-cyan-300 font-mono">CSR + AMG + RK4</span>
-              </div>
-              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-            </div>
           </div>
         </div>
 
@@ -215,6 +235,12 @@ export const EngineeringStudio: React.FC = () => {
         isOpen={isHandbookOpen}
         onClose={() => setIsHandbookOpen(false)}
         initialTopicId={handbookTopicId}
+      />
+
+      {/* Future Roadmap & Engineering Flight Envelope Plan Modal */}
+      <FutureRoadmapModal
+        isOpen={isRoadmapOpen}
+        onClose={() => setIsRoadmapOpen(false)}
       />
     </div>
   );
