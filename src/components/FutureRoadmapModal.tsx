@@ -503,6 +503,21 @@ export const INITIAL_ROADMAP_FEATURES: RoadmapFeatureItem[] = [
     targetMilestone: 'БПЛА & Sense-and-Avoid',
     mathBasis: 'l(m_i \\mid z_{1:t}) = l(m_i \\mid z_{1:t-1}) + l(m_i \\mid z_t) - l_0, \\quad G(\\theta) = c_1 |\\theta - \\theta_{\\text{tgt}}| + c_2 \\frac{1}{d_{\\text{clear}}}, \\quad \\text{TTC} = \\frac{d_{\\min}}{V}',
   },
+  {
+    id: 'feat_uav_aeroacoustics_fwh_detection',
+    title: '30. Аэроакустическая Заметность БПЛА, Шумовой След Винтов (FW-H) & Обнаружение Микрофонами',
+    category: 'Аэродинамика',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Дроны / VTOL',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Расчет спектра шума вращающихся винтов на основе уравнения Фоукса Вильямса — Хокингса (FW-H), тонального шума лопастей (BPF), затухания в атмосфере по ISO 9613-1 и дальности обнаружения наземными акустическими пеленгаторами.',
+    engineeringImpact: 'Позволяет рассчитывать безопасные высоты и режимы полета БПЛА для исключения акустического демаскирования над заданными районами и проектировать малошумные геометрии винтов.',
+    autoDetected: true,
+    defaultStatus: 'completed',
+    targetMilestone: 'БПЛА & Акустическая Скрытность',
+    mathBasis: '\\square^2 p\'(\\mathbf{x}, t) = \\frac{\\partial}{\\partial t}[\\rho_0 v_n \\delta(f)] - \\frac{\\partial}{\\partial x_i}[L_i \\delta(f)] + \\frac{\\partial^2 T_{ij}}{\\partial x_i \\partial x_j}, \\quad f_{\\text{BPF}} = \\frac{B \\cdot \\text{RPM}}{60}',
+  },
 ];
 
 interface FutureRoadmapModalProps {
