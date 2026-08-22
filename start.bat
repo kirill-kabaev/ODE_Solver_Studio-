@@ -66,17 +66,14 @@ echo [+] Файл .env готов.
 REM 3. Проверка и установка зависимостей
 :CHECK_DEPS
 echo.
-echo [3/4] Проверка библиотек (node_modules)...
-if exist "node_modules\" goto :BUILD_STEP
-
-echo [*] Установка зависимостей (npm install)...
+echo [3/4] Проверка и синхронизация всех библиотек (npm install)...
 call npm install
 if %ERRORLEVEL% NEQ 0 (
     echo [-] Ошибка при установке npm библиотек!
     pause
     exit /b %ERRORLEVEL%
 )
-echo [+] Библиотеки установлены!
+echo [+] Все библиотеки успешно синхронизированы и обновлены!
 
 REM 4. Компиляция свежего бандла и запуск
 :BUILD_STEP
@@ -85,9 +82,14 @@ echo [4/4] Сборка и подготовка запуска...
 set NODE_ENV=production
 call npm run build
 if %ERRORLEVEL% NEQ 0 (
-    echo [-] Ошибка компиляции проекта!
-    pause
-    exit /b %ERRORLEVEL%
+    echo [-] Ошибка при первой сборке, повторная попытка после чистки...
+    call npm install
+    call npm run build
+    if %ERRORLEVEL% NEQ 0 (
+        echo [-] Ошибка компиляции проекта!
+        pause
+        exit /b %ERRORLEVEL%
+    )
 )
 
 echo.
