@@ -1,4 +1,3 @@
-import nodemailer from "nodemailer";
 import fs from "fs";
 import path from "path";
 
@@ -72,9 +71,9 @@ export function saveActivationRecord(record: ActivationRecord) {
 }
 
 /**
- * Creates nodemailer transport if configured
+ * Creates nodemailer transport if configured and module exists
  */
-function createMailerTransport() {
+async function createMailerTransport() {
   const host = process.env.SMTP_HOST || "smtp.gmail.com";
   const port = Number(process.env.SMTP_PORT) || 465;
   const user = process.env.SMTP_USER;
@@ -84,15 +83,22 @@ function createMailerTransport() {
     return null;
   }
 
-  return nodemailer.createTransport({
-    host,
-    port,
-    secure: port === 465,
-    auth: {
-      user,
-      pass,
-    },
-  });
+  try {
+    const nodemailerModule = await import("nodemailer");
+    const nodemailer = (nodemailerModule as any).default || nodemailerModule;
+    return nodemailer.createTransport({
+      host,
+      port,
+      secure: port === 465,
+      auth: {
+        user,
+        pass,
+      },
+    });
+  } catch (err) {
+    console.warn("nodemailer not installed or not resolvable, falling back to built-in telemetry logger:", err);
+    return null;
+  }
 }
 
 /**
@@ -233,7 +239,7 @@ AERO-STUDIO PRO v3.0 — УВЕДОМЛЕНИЕ О НОВОЙ АКТИВАЦИИ
   console.log(`Recipients: ${SUPER_ADMIN_EMAILS.join(", ")}`);
   console.log(`===================================================================\n`);
 
-  const transporter = createMailerTransport();
+  const transporter = await createMailerTransport();
 
   if (transporter) {
     try {
