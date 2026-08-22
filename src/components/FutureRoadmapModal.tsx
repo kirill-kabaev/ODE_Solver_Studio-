@@ -428,6 +428,21 @@ export const INITIAL_ROADMAP_FEATURES: RoadmapFeatureItem[] = [
     targetMilestone: 'БПЛА & РЭБ-Навигация',
     mathBasis: '\\mathbf{x}_{k} = f(\\mathbf{x}_{k-1}, \\mathbf{u}_k) + \\mathbf{w}_k, \\quad \\mathbf{K}_k = \\mathbf{P}_k^- \\mathbf{H}_k^T (\\mathbf{H}_k \\mathbf{P}_k^- \\mathbf{H}_k^T + \\mathbf{R}_k)^{-1}, \\quad d_{\\chi^2} = \\mathbf{y}_k^T \\mathbf{S}_k^{-1} \\mathbf{y}_k < \\gamma',
   },
+  {
+    id: 'feat_uav_rf_link_fresnel_relay',
+    title: '25. Радиолиния БПЛА, Зона Френеля, Бюджет Канала (RF Link Budget) & Дроны-Ретрансляторы',
+    category: 'Космос & Авионика',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Дроны / VTOL',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Расчет бюджета радиолинии (RF Link Budget) ExpressLRS 868/2.4G, видеолинков 5.8G/1.2G и тактического COFDM Mesh. Расчет 1-й зоны Френеля, огибания складок рельефа, дифракционных потерь ножевого края (Knife-Edge) и оптимизация высоты и позиции дрона-ретранслятора.',
+    engineeringImpact: 'Обеспечивает предотвращение внезапного срыва радиоуправления и видеопотока БПЛА в складках местности и кратно расширяет радиус боевого/поискового применения за счет воздушных ретрансляторов.',
+    autoDetected: true,
+    defaultStatus: 'completed',
+    targetMilestone: 'БПЛА & Радиосвязь',
+    mathBasis: 'r_1 = \\sqrt{\\frac{\\lambda d_1 d_2}{d_1 + d_2}}, \\quad \\text{FSPL} = 20\\log_{10}(d) + 20\\log_{10}(f) + 32.45, \\quad P_{\\text{rx}} = P_{\\text{tx}} + G_{\\text{tx}} + G_{\\text{rx}} - L',
+  },
 ];
 
 interface FutureRoadmapModalProps {
