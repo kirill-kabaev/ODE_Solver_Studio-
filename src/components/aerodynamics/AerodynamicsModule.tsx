@@ -36,6 +36,8 @@ import { UAVVTOLTransitionModule } from './uav/UAVVTOLTransitionModule';
 import { UAVSwarmFlockingModule } from './uav/UAVSwarmFlockingModule';
 import { UAVObstacleAvoidanceModule } from './uav/UAVObstacleAvoidanceModule';
 import { UAVAeroacousticsModule } from './uav/UAVAeroacousticsModule';
+import { UAVFaultToleranceModule } from './uav/UAVFaultToleranceModule';
+import { UAVHybridIcingModule } from './uav/UAVHybridIcingModule';
 import { BiplaneAn2Module } from './civil/BiplaneAn2Module';
 import { CommercialAirlinerModule } from './civil/CommercialAirlinerModule';
 import { SupersonicAviationModule } from './supersonic/SupersonicAviationModule';
@@ -72,6 +74,8 @@ export type AeroSubTab =
   | 'uav_swarm'
   | 'uav_avoidance'
   | 'uav_acoustics'
+  | 'uav_fault_tolerance'
+  | 'uav_hybrid_icing'
   | 'physics_solvers'
   | 'export_report'
   | 'vlm'
@@ -120,11 +124,11 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '8 Систем',
+    tag: '10 Систем',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'Силовые установки, РЭБ-навигация EKF3, радиолинк, Pro-Nav, VTOL, рой, OctoMap и FW-H шум',
+    description: 'Силовые установки, РЭБ-навигация EKF3, радиолинк, Pro-Nav, VTOL, рой, OctoMap, FW-H шум, отказ моторов FTC & гибриды',
     defaultSubTab: 'uav_studio',
   },
   {
@@ -585,6 +589,32 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
             <Volume2 className="w-3.5 h-3.5 text-rose-400" />
             <span>🔊 FW-H Аэроакустика</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_fault_tolerance')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_fault_tolerance'
+                ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 text-slate-950 shadow-md font-black ring-1 ring-amber-400/50'
+                : 'text-amber-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-amber-900/50'
+            }`}
+          >
+            <Shield className="w-3.5 h-3.5 text-amber-400" />
+            <span>⚠️ Отказ Моторов (FTC / QP)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_hybrid_icing')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_hybrid_icing'
+                ? 'bg-gradient-to-r from-teal-400 via-cyan-500 to-indigo-500 text-slate-950 shadow-md font-black ring-1 ring-teal-400/50'
+                : 'text-teal-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-teal-900/50'
+            }`}
+          >
+            <Flame className="w-3.5 h-3.5 text-teal-400" />
+            <span>⚡ Гибридная СУ, Лед & EDF</span>
+          </button>
         </div>
       )}
 
@@ -676,6 +706,8 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           {activeUAVSubTab === 'uav_swarm' && <UAVSwarmFlockingModule />}
           {activeUAVSubTab === 'uav_avoidance' && <UAVObstacleAvoidanceModule />}
           {activeUAVSubTab === 'uav_acoustics' && <UAVAeroacousticsModule />}
+          {activeUAVSubTab === 'uav_fault_tolerance' && <UAVFaultToleranceModule />}
+          {activeUAVSubTab === 'uav_hybrid_icing' && <UAVHybridIcingModule />}
         </>
       )}
 
