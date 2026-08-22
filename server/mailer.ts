@@ -76,8 +76,12 @@ export function saveActivationRecord(record: ActivationRecord) {
 async function createMailerTransport() {
   const host = process.env.SMTP_HOST || "smtp.gmail.com";
   const port = Number(process.env.SMTP_PORT) || 465;
-  const user = process.env.SMTP_USER;
-  const pass = process.env.SMTP_PASS;
+  const user = process.env.SMTP_USER?.trim();
+  // Sanitize Google App Passwords by removing accidental whitespace (e.g. "abcd efgh ijkl mnop" -> "abcdefghijklmnop")
+  let pass = process.env.SMTP_PASS?.trim();
+  if (pass && host.includes("gmail.com")) {
+    pass = pass.replace(/\s+/g, "");
+  }
 
   if (!user || !pass) {
     return null;
