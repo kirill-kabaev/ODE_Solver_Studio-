@@ -17,6 +17,7 @@ import {
   Radio,
   Crosshair,
   Plane,
+  Boxes,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
@@ -26,6 +27,7 @@ import { UAVRadioLinkRelayModule } from './uav/UAVRadioLinkRelayModule';
 import { UAVGuidanceTrackingModule } from './uav/UAVGuidanceTrackingModule';
 import { UAVVTOLTransitionModule } from './uav/UAVVTOLTransitionModule';
 import { UAVSwarmFlockingModule } from './uav/UAVSwarmFlockingModule';
+import { UAVObstacleAvoidanceModule } from './uav/UAVObstacleAvoidanceModule';
 import { CFDWindTunnel } from './CFDWindTunnel';
 import { PressureDistributionGraph } from './PressureDistributionGraph';
 import { FlutterSimulator } from './FlutterSimulator';
@@ -39,7 +41,7 @@ import { AeroReportExportStudio } from './AeroReportExportStudio';
 import { EngineeringPresetCatalog, EngineeringPreset, ENGINEERING_PRESETS } from './EngineeringPresetCatalog';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
 
-export type AeroSubTab = 'presets' | 'visual_studio' | 'uav_studio' | 'uav_ew_nav' | 'uav_rf_link' | 'uav_guidance' | 'uav_vtol' | 'uav_swarm' | 'physics_solvers' | 'export_report' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
+export type AeroSubTab = 'presets' | 'visual_studio' | 'uav_studio' | 'uav_ew_nav' | 'uav_rf_link' | 'uav_guidance' | 'uav_vtol' | 'uav_swarm' | 'uav_avoidance' | 'physics_solvers' | 'export_report' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
 
 interface AerodynamicsModuleProps {
   onTabChange?: (tab: AeroSubTab) => void;
@@ -207,6 +209,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
 
         <button
           type="button"
+          onClick={() => handleTabSelect('uav_avoidance')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'uav_avoidance'
+              ? 'bg-gradient-to-r from-indigo-500 via-sky-500 to-teal-400 text-slate-950 shadow-md font-black ring-1 ring-indigo-400/50'
+              : 'text-indigo-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-indigo-900/50'
+          }`}
+        >
+          <Boxes className="w-4 h-4 text-indigo-400" />
+          <span>🧱 3D OctoMap & Огибание (Sense & Avoid)</span>
+        </button>
+
+        <button
+          type="button"
           onClick={() => handleTabSelect('physics_solvers')}
           className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
             activeTab === 'physics_solvers'
@@ -367,6 +382,11 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
       {/* Sub-tab: UAV Swarm Flocking & Cooperative Mesh */}
       {activeTab === 'uav_swarm' && (
         <UAVSwarmFlockingModule />
+      )}
+
+      {/* Sub-tab: UAV Obstacle Avoidance & 3D OctoMap */}
+      {activeTab === 'uav_avoidance' && (
+        <UAVObstacleAvoidanceModule />
       )}
 
       {/* Sub-tab: Advanced Aero Solvers Lab (Physics & Solvers) */}

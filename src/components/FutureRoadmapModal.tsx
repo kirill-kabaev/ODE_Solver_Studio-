@@ -488,6 +488,21 @@ export const INITIAL_ROADMAP_FEATURES: RoadmapFeatureItem[] = [
     targetMilestone: 'БПЛА & Роевой Интеллект',
     mathBasis: '\\mathbf{F}_i = W_{\\text{sep}} \\mathbf{F}_{i,\\text{sep}} + W_{\\text{coh}} \\mathbf{F}_{i,\\text{coh}} + W_{\\text{ali}} \\mathbf{F}_{i,\\text{ali}}, \\quad \\lambda_2(L) > 0, \\quad \\Delta C_{Di} = -\\eta_{\\text{upwash}} \\frac{C_L^2}{\\pi e AR}',
   },
+  {
+    id: 'feat_uav_octomap_vfh_avoidance',
+    title: '29. Автономное 3D-Картографирование (OctoMap) & Избегание Препятствий (VFH+/A*)',
+    category: 'Космос & Авионика',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Дроны / VTOL',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Вероятностное 3D воксельное картографирование OctoMap по данным LiDAR/Stereo-Vision, векторно-полевые полярные гистограммы VFH+ и локально-глобальный планировщик траекторий огибания (A*/ESDF) в лесу, городской застройке и вблизи ЛЭП.',
+    engineeringImpact: 'Обеспечивает безаварийный автономный полет БПЛА в условиях полного отсутствия спутниковой навигации (GPS-denied) и при наличии динамических и сверхтонких препятствий.',
+    autoDetected: true,
+    defaultStatus: 'completed',
+    targetMilestone: 'БПЛА & Sense-and-Avoid',
+    mathBasis: 'l(m_i \\mid z_{1:t}) = l(m_i \\mid z_{1:t-1}) + l(m_i \\mid z_t) - l_0, \\quad G(\\theta) = c_1 |\\theta - \\theta_{\\text{tgt}}| + c_2 \\frac{1}{d_{\\text{clear}}}, \\quad \\text{TTC} = \\frac{d_{\\min}}{V}',
+  },
 ];
 
 interface FutureRoadmapModalProps {
