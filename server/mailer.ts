@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import nodemailer from "nodemailer";
 
 export interface ActivationPayload {
   email: string;
@@ -88,8 +89,6 @@ async function createMailerTransport() {
   }
 
   try {
-    const nodemailerModule = await import("nodemailer");
-    const nodemailer = (nodemailerModule as any).default || nodemailerModule;
     return nodemailer.createTransport({
       host,
       port,
@@ -104,7 +103,7 @@ async function createMailerTransport() {
       },
     });
   } catch (err) {
-    console.warn("nodemailer not installed or not resolvable, falling back to built-in telemetry logger:", err);
+    console.warn("Error creating nodemailer transport:", err);
     return null;
   }
 }
