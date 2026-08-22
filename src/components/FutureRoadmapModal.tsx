@@ -458,6 +458,21 @@ export const INITIAL_ROADMAP_FEATURES: RoadmapFeatureItem[] = [
     targetMilestone: 'БПЛА & Самонаведение',
     mathBasis: 'a_n = N V_c \\dot{\\lambda} + \\frac{N}{2} a_{T\\perp}, \\quad \\dot{\\lambda} = \\frac{x_r v_{yr} - y_r v_{xr}}{R^2}, \\quad \\hat{\\mathbf{x}}_{k+\\tau} = \\hat{\\mathbf{x}}_k + \\hat{\\mathbf{v}}_k \\tau + \\frac{1}{2} \\hat{\\mathbf{a}}_k \\tau^2',
   },
+  {
+    id: 'feat_uav_vtol_transition_dynamics',
+    title: '27. Аэродинамика Переходных Режимов VTOL, Конвертопланов & Коридор Сваливания',
+    category: 'Аэродинамика',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Дроны / VTOL',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Комплексный расчет переходных режимов (Transition Phase) для QuadPlane, Tiltrotor, Tilt-Wing и Tailsitter. Определение коридора сваливания V_stall(theta), безопасной скорости подхвата крылом V_safe, замещения подъемной тяги роторов аэродинамической подъемной силой крыла и потребной энергии фазы ускорения.',
+    engineeringImpact: 'Критически важно для предотвращения катастрофической потери высоты (просадки) и срыва потока при переходе тяжелых VTOL БПЛА из режима вертолетного висения в скоростной самолетный полет.',
+    autoDetected: true,
+    defaultStatus: 'completed',
+    targetMilestone: 'БПЛА & VTOL Аэродинамика',
+    mathBasis: 'V_{\\text{stall}} = \\sqrt{\\frac{2(mg - T_z)}{\\rho S C_{L\\max}}}, \\quad L(V) + T_z(\\theta) = mg, \\quad E_{\\text{trans}} = \\int_0^{T_{\\text{trans}}} P(t) dt',
+  },
 ];
 
 interface FutureRoadmapModalProps {
