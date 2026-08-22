@@ -25,6 +25,7 @@ import { UAVNavigationEWModule } from './uav/UAVNavigationEWModule';
 import { UAVRadioLinkRelayModule } from './uav/UAVRadioLinkRelayModule';
 import { UAVGuidanceTrackingModule } from './uav/UAVGuidanceTrackingModule';
 import { UAVVTOLTransitionModule } from './uav/UAVVTOLTransitionModule';
+import { UAVSwarmFlockingModule } from './uav/UAVSwarmFlockingModule';
 import { CFDWindTunnel } from './CFDWindTunnel';
 import { PressureDistributionGraph } from './PressureDistributionGraph';
 import { FlutterSimulator } from './FlutterSimulator';
@@ -38,7 +39,7 @@ import { AeroReportExportStudio } from './AeroReportExportStudio';
 import { EngineeringPresetCatalog, EngineeringPreset, ENGINEERING_PRESETS } from './EngineeringPresetCatalog';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
 
-export type AeroSubTab = 'presets' | 'visual_studio' | 'uav_studio' | 'uav_ew_nav' | 'uav_rf_link' | 'uav_guidance' | 'uav_vtol' | 'physics_solvers' | 'export_report' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
+export type AeroSubTab = 'presets' | 'visual_studio' | 'uav_studio' | 'uav_ew_nav' | 'uav_rf_link' | 'uav_guidance' | 'uav_vtol' | 'uav_swarm' | 'physics_solvers' | 'export_report' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
 
 interface AerodynamicsModuleProps {
   onTabChange?: (tab: AeroSubTab) => void;
@@ -189,6 +190,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
         >
           <Plane className="w-4 h-4 text-indigo-400" />
           <span>🔄 VTOL & Конвертопланы (Transition)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabSelect('uav_swarm')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'uav_swarm'
+              ? 'bg-gradient-to-r from-teal-400 via-cyan-500 to-emerald-400 text-slate-950 shadow-md font-black ring-1 ring-teal-400/50'
+              : 'text-teal-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-teal-900/50'
+          }`}
+        >
+          <Radio className="w-4 h-4 text-teal-400" />
+          <span>👥 Рой & Mesh-Сеть (Swarm Flocking)</span>
         </button>
 
         <button
@@ -348,6 +362,11 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
       {/* Sub-tab: UAV VTOL & Tiltrotor Transition Dynamics */}
       {activeTab === 'uav_vtol' && (
         <UAVVTOLTransitionModule />
+      )}
+
+      {/* Sub-tab: UAV Swarm Flocking & Cooperative Mesh */}
+      {activeTab === 'uav_swarm' && (
+        <UAVSwarmFlockingModule />
       )}
 
       {/* Sub-tab: Advanced Aero Solvers Lab (Physics & Solvers) */}

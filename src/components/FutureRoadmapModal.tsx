@@ -473,6 +473,21 @@ export const INITIAL_ROADMAP_FEATURES: RoadmapFeatureItem[] = [
     targetMilestone: 'БПЛА & VTOL Аэродинамика',
     mathBasis: 'V_{\\text{stall}} = \\sqrt{\\frac{2(mg - T_z)}{\\rho S C_{L\\max}}}, \\quad L(V) + T_z(\\theta) = mg, \\quad E_{\\text{trans}} = \\int_0^{T_{\\text{trans}}} P(t) dt',
   },
+  {
+    id: 'feat_uav_swarm_flocking_mesh',
+    title: '28. Динамика Роя БПЛА: Формации Рейнольдса (Boids), Upwash-Экономия & Mesh-Топология',
+    category: 'Динамика & СУ',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Дроны / VTOL',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Моделирование децентрализованного группового управления роем (Reynolds Flocking: Cohesion, Separation, Alignment). Расчет аэродинамической интерференции и экономии энергии в V-клине (Upwash-вихри до 18%), перестроения топологий и устойчивости Mesh-радиосети при потере узлов.',
+    engineeringImpact: 'Обеспечивает синхронное автономное выполнение групповых миссий (поиск, прикрытие, картографирование) с сохранением связности сети и снижением расхода аккумуляторов/топлива ведомых аппаратов.',
+    autoDetected: true,
+    defaultStatus: 'completed',
+    targetMilestone: 'БПЛА & Роевой Интеллект',
+    mathBasis: '\\mathbf{F}_i = W_{\\text{sep}} \\mathbf{F}_{i,\\text{sep}} + W_{\\text{coh}} \\mathbf{F}_{i,\\text{coh}} + W_{\\text{ali}} \\mathbf{F}_{i,\\text{ali}}, \\quad \\lambda_2(L) > 0, \\quad \\Delta C_{Di} = -\\eta_{\\text{upwash}} \\frac{C_L^2}{\\pi e AR}',
+  },
 ];
 
 interface FutureRoadmapModalProps {
