@@ -443,6 +443,21 @@ export const INITIAL_ROADMAP_FEATURES: RoadmapFeatureItem[] = [
     targetMilestone: 'БПЛА & Радиосвязь',
     mathBasis: 'r_1 = \\sqrt{\\frac{\\lambda d_1 d_2}{d_1 + d_2}}, \\quad \\text{FSPL} = 20\\log_{10}(d) + 20\\log_{10}(f) + 32.45, \\quad P_{\\text{rx}} = P_{\\text{tx}} + G_{\\text{tx}} + G_{\\text{rx}} - L',
   },
+  {
+    id: 'feat_uav_guidance_tracking_pro_nav',
+    title: '26. Самонаведение БПЛА, Пропорциональная Навигация (PN/APN) & Оптический Автозахват Целей',
+    category: 'Космос & Авионика',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Дроны / VTOL',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Моделирование законов самонаведения (PN, Augmented PN с компенсацией ускорения цели a_T, Lead Pursuit). Расчет угловой скорости линии визирования (LOS Rate), компенсация задержки видеопотока и нейросетевого трекера через фильтр Калмана, ветровой снос и ограничения по перегрузке ny.',
+    engineeringImpact: 'Позволяет рассчитывать высокоточные алгоритмы терминального наведения дронов-перехватчиков и FPV-комплексов на маневрирующие наземные и воздушные цели в условиях помех и задержек видеоканала.',
+    autoDetected: true,
+    defaultStatus: 'completed',
+    targetMilestone: 'БПЛА & Самонаведение',
+    mathBasis: 'a_n = N V_c \\dot{\\lambda} + \\frac{N}{2} a_{T\\perp}, \\quad \\dot{\\lambda} = \\frac{x_r v_{yr} - y_r v_{xr}}{R^2}, \\quad \\hat{\\mathbf{x}}_{k+\\tau} = \\hat{\\mathbf{x}}_k + \\hat{\\mathbf{v}}_k \\tau + \\frac{1}{2} \\hat{\\mathbf{a}}_k \\tau^2',
+  },
 ];
 
 interface FutureRoadmapModalProps {

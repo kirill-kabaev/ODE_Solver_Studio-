@@ -15,12 +15,14 @@ import {
   Disc,
   FileText,
   Radio,
+  Crosshair,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
 import { UAVDroneStudioModule } from './uav/UAVDroneStudioModule';
 import { UAVNavigationEWModule } from './uav/UAVNavigationEWModule';
 import { UAVRadioLinkRelayModule } from './uav/UAVRadioLinkRelayModule';
+import { UAVGuidanceTrackingModule } from './uav/UAVGuidanceTrackingModule';
 import { CFDWindTunnel } from './CFDWindTunnel';
 import { PressureDistributionGraph } from './PressureDistributionGraph';
 import { FlutterSimulator } from './FlutterSimulator';
@@ -34,7 +36,7 @@ import { AeroReportExportStudio } from './AeroReportExportStudio';
 import { EngineeringPresetCatalog, EngineeringPreset, ENGINEERING_PRESETS } from './EngineeringPresetCatalog';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
 
-export type AeroSubTab = 'presets' | 'visual_studio' | 'uav_studio' | 'uav_ew_nav' | 'uav_rf_link' | 'physics_solvers' | 'export_report' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
+export type AeroSubTab = 'presets' | 'visual_studio' | 'uav_studio' | 'uav_ew_nav' | 'uav_rf_link' | 'uav_guidance' | 'physics_solvers' | 'export_report' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
 
 interface AerodynamicsModuleProps {
   onTabChange?: (tab: AeroSubTab) => void;
@@ -159,6 +161,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
         >
           <Radio className="w-4 h-4 text-indigo-400" />
           <span>📡 Радиолиния, Зона Френеля & Ретрансляторы</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabSelect('uav_guidance')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'uav_guidance'
+              ? 'bg-gradient-to-r from-rose-500 via-red-500 to-amber-500 text-white shadow-md font-black ring-1 ring-rose-400/50'
+              : 'text-rose-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-rose-900/50'
+          }`}
+        >
+          <Crosshair className="w-4 h-4 text-rose-400" />
+          <span>🎯 Самонаведение & Автозахват (Pro-Nav)</span>
         </button>
 
         <button
@@ -308,6 +323,11 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
       {/* Sub-tab: UAV RF Link Budget, Fresnel Zone & Airborne Relays */}
       {activeTab === 'uav_rf_link' && (
         <UAVRadioLinkRelayModule />
+      )}
+
+      {/* Sub-tab: UAV Homing Guidance, Pro-Nav & Optical Tracking */}
+      {activeTab === 'uav_guidance' && (
+        <UAVGuidanceTrackingModule />
       )}
 
       {/* Sub-tab: Advanced Aero Solvers Lab (Physics & Solvers) */}
