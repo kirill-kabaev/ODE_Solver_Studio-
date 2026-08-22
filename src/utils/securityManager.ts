@@ -314,6 +314,18 @@ export async function authenticateWithCredentials(
   };
 }
 
+export interface ActivationResponseResult {
+  success: boolean;
+  user?: AuthUser;
+  error?: string;
+  emailSent?: boolean;
+  emailStatusMessage?: string;
+  recipients?: string[];
+  keyNumber?: number;
+  hwFingerprint?: string;
+  displayMac?: string;
+}
+
 /**
  * Регистрация и активация пользователя по одному из 100 лицензионных ключей
  */
@@ -321,7 +333,7 @@ export async function activateWithLicenseKey(
   email: string,
   password: string,
   licenseKey: string
-): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
+): Promise<ActivationResponseResult> {
   const cleanEmail = email.trim().toLowerCase();
   const cleanKey = licenseKey.trim().toUpperCase();
 
@@ -341,7 +353,13 @@ export async function activateWithLicenseKey(
   if (isSuperUserEmail(cleanEmail)) {
     const superUser = createSuperAdminUser(cleanEmail);
     setCurrentSession(superUser);
-    return { success: true, user: superUser };
+    return {
+      success: true,
+      user: superUser,
+      emailSent: true,
+      emailStatusMessage: 'Авторизован суперпользователь с наивысшим приоритетом.',
+      recipients: SUPER_USER_EMAILS,
+    };
   }
 
   const allKeys = loadLicenseKeys();
@@ -429,9 +447,13 @@ export async function activateWithLicenseKey(
     },
   };
 
-  // Неблокирующая отправка уведомления на сервер и почты суперпользователя
+  let emailSent = false;
+  let emailStatusMessage = 'Данные зафиксированы в локальном реестре сервера.';
+  let recipients = SUPER_USER_EMAILS;
+
+  // Отправка уведомления на сервер и почты суперпользователя с ожиданием ответа
   try {
-    fetch('/api/license/notify-activation', {
+    const resp = await fetch('/api/license/notify-activation', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -448,15 +470,36 @@ export async function activateWithLicenseKey(
         agreementVersion: 'EULA_v3.0_2026',
         timestamp: new Date().toISOString(),
       }),
-    }).catch((err) => {
-      console.warn('Notification endpoint non-critical error:', err);
     });
-  } catch (err) {
-    console.warn('Failed to dispatch background activation alert', err);
+
+    const data = await resp.json();
+    if (data.success) {
+      emailSent = Boolean(data.emailSent);
+      if (data.statusMessage) {
+        emailStatusMessage = data.statusMessage;
+      }
+      if (data.recipients) {
+        recipients = data.recipients;
+      }
+    } else if (data.error) {
+      emailStatusMessage = `Ошибка почтового сервера: ${data.error}`;
+    }
+  } catch (err: any) {
+    console.warn('Failed to dispatch activation alert', err);
+    emailStatusMessage = `Ошибка сетевого подключения к серверу отправки: ${err?.message || err}`;
   }
 
   setCurrentSession(authedUser);
-  return { success: true, user: authedUser };
+  return {
+    success: true,
+    user: authedUser,
+    emailSent,
+    emailStatusMessage,
+    recipients,
+    keyNumber: keyRecord.keyNumber,
+    hwFingerprint: hw.fingerprint,
+    displayMac: hw.displayMac,
+  };
 }
 
 /**

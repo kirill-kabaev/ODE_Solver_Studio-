@@ -8,6 +8,7 @@ import { detectSystemGpus } from "./server/hardware";
 import {
   sendActivationEmailNotification,
   getActivationRecords,
+  getSmtpDiagnostic,
 } from "./server/mailer";
 
 dotenv.config();
@@ -118,6 +119,16 @@ app.post("/api/license/test-email", async (req, res) => {
       clientIp: "127.0.0.1",
     });
     res.json({ success: true, result });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Diagnostic SMTP status check
+app.get("/api/license/smtp-diagnostic", async (req, res) => {
+  try {
+    const diag = await getSmtpDiagnostic();
+    res.json({ success: true, diagnostic: diag });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message });
   }

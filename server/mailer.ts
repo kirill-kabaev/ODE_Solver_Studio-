@@ -74,10 +74,10 @@ export function saveActivationRecord(record: ActivationRecord) {
  * Creates nodemailer transport if configured and module exists
  */
 async function createMailerTransport() {
-  const host = process.env.SMTP_HOST || "smtp.gmail.com";
+  const host = (process.env.SMTP_HOST || "smtp.gmail.com").trim();
   const port = Number(process.env.SMTP_PORT) || 465;
   const user = process.env.SMTP_USER?.trim();
-  // Sanitize Google App Passwords by removing accidental whitespace (e.g. "abcd efgh ijkl mnop" -> "abcdefghijklmnop")
+  // Sanitize passwords by removing accidental surrounding whitespace
   let pass = process.env.SMTP_PASS?.trim();
   if (pass && host.includes("gmail.com")) {
     pass = pass.replace(/\s+/g, "");
@@ -98,6 +98,10 @@ async function createMailerTransport() {
         user,
         pass,
       },
+      tls: {
+        // Do not fail on invalid certificates if any local proxy exists
+        rejectUnauthorized: false,
+      },
     });
   } catch (err) {
     console.warn("nodemailer not installed or not resolvable, falling back to built-in telemetry logger:", err);
@@ -106,11 +110,95 @@ async function createMailerTransport() {
 }
 
 /**
+ * Diagnostic tool to check SMTP connectivity and credentials
+ */
+export async function getSmtpDiagnostic(): Promise<{
+  configured: boolean;
+  host: string;
+  port: number;
+  user: string | null;
+  hasPass: boolean;
+  passLength: number;
+  verified: boolean;
+  message: string;
+}> {
+  const host = (process.env.SMTP_HOST || "smtp.gmail.com").trim();
+  const port = Number(process.env.SMTP_PORT) || 465;
+  const user = process.env.SMTP_USER?.trim() || null;
+  const pass = process.env.SMTP_PASS?.trim() || "";
+
+  if (!user || !pass) {
+    return {
+      configured: false,
+      host,
+      port,
+      user,
+      hasPass: Boolean(pass),
+      passLength: pass.length,
+      verified: false,
+      message: "В файле .env не заданы SMTP_USER или SMTP_PASS. Письма сохраняются в локальный журнал сервера.",
+    };
+  }
+
+  try {
+    const transporter = await createMailerTransport();
+    if (!transporter) {
+      return {
+        configured: true,
+        host,
+        port,
+        user,
+        hasPass: true,
+        passLength: pass.length,
+        verified: false,
+        message: "Модуль nodemailer не загружен. Установите его командой: npm install nodemailer",
+      };
+    }
+
+    // Attempt SMTP handshake & authentication verification
+    await transporter.verify();
+    return {
+      configured: true,
+      host,
+      port,
+      user,
+      hasPass: true,
+      passLength: pass.length,
+      verified: true,
+      message: `Подключение к почтовому серверу (${host}:${port}) успешно! Аутентификация пользователя ${user} подтверждена.`,
+    };
+  } catch (err: any) {
+    let friendlyError = err.message || String(err);
+    if (friendlyError.includes("535") || friendlyError.toLowerCase().includes("authentication failed") || friendlyError.toLowerCase().includes("badcredentials")) {
+      friendlyError = `Неверный логин или пароль приложения (${host}). Для Mail.ru/Gmail необходимо использовать специальный 'Пароль для внешних приложений' (16 символов), а не обычный пароль от почты.`;
+    }
+    return {
+      configured: true,
+      host,
+      port,
+      user,
+      hasPass: true,
+      passLength: pass.length,
+      verified: false,
+      message: `Ошибка подключения к ${host}: ${friendlyError}`,
+    };
+  }
+}
+
+/**
  * Sends notification emails to both k.kabaev94@gmail.com and k_kaba@mail.ru
  */
 export async function sendActivationEmailNotification(
   payload: ActivationPayload
-): Promise<{ success: boolean; error?: string; simulated?: boolean }> {
+): Promise<{
+  success: boolean;
+  emailSent: boolean;
+  error?: string;
+  simulated?: boolean;
+  messageId?: string;
+  recipients: string[];
+  statusMessage: string;
+}> {
   const now = new Date().toLocaleString("ru-RU", { timeZone: "Europe/Moscow" });
   const timeUtc = new Date().toISOString();
 
@@ -247,7 +335,7 @@ AERO-STUDIO PRO v3.0 — УВЕДОМЛЕНИЕ О НОВОЙ АКТИВАЦИИ
 
   if (transporter) {
     try {
-      await transporter.sendMail({
+      const info = await transporter.sendMail({
         from: process.env.SMTP_FROM || `"Aero-Studio Security" <${process.env.SMTP_USER}>`,
         to: SUPER_ADMIN_EMAILS.join(", "),
         subject,
@@ -257,24 +345,42 @@ AERO-STUDIO PRO v3.0 — УВЕДОМЛЕНИЕ О НОВОЙ АКТИВАЦИИ
 
       record.emailSent = true;
       saveActivationRecord(record);
-      return { success: true };
+      return {
+        success: true,
+        emailSent: true,
+        messageId: info.messageId,
+        recipients: SUPER_ADMIN_EMAILS,
+        statusMessage: `Письмо успешно доставлено почтовым сервером на адреса: ${SUPER_ADMIN_EMAILS.join(", ")}`,
+      };
     } catch (err: any) {
       console.error("[Mailer Error] Failed to send email via SMTP:", err);
+      let friendlyError = err.message || String(err);
+      if (friendlyError.includes("535") || friendlyError.toLowerCase().includes("authentication failed")) {
+        friendlyError = `Ошибка авторизации SMTP (код 535). Убедитесь, что в .env указан 16-значный 'Пароль для внешних приложений', а не обычный пароль от почты.`;
+      }
       record.emailSent = false;
-      record.emailError = err.message || String(err);
+      record.emailError = friendlyError;
       saveActivationRecord(record);
-      return { success: false, error: err.message };
+      return {
+        success: true, // Key activation is still saved and verified
+        emailSent: false,
+        error: friendlyError,
+        recipients: SUPER_ADMIN_EMAILS,
+        statusMessage: `Ключ активирован в реестре, но SMTP вернул ошибку: ${friendlyError}`,
+      };
     }
   } else {
     // SMTP is not yet configured with credentials:
-    // We log it, record it to activations_log.json and return simulated success
     record.emailSent = false;
-    record.emailError = "SMTP_USER/SMTP_PASS не заданы в .env. Запись сохранена в журнал сервера.";
+    record.emailError = "SMTP_USER/SMTP_PASS не заданы в .env. Запись зафиксирована в локальном журнале сервера.";
     saveActivationRecord(record);
     return {
       success: true,
+      emailSent: false,
       simulated: true,
-      error: "Запись об активации зафиксирована в реестре сервера. Для прямой отправки через SMTP задайте SMTP_USER/SMTP_PASS в .env.",
+      recipients: SUPER_ADMIN_EMAILS,
+      statusMessage: "Телеметрия сохранена в локальной базе сервера (data/activations_log.json). Для прямой отправки в почтовый ящик укажите SMTP_USER и SMTP_PASS в .env.",
     };
   }
 }
+
