@@ -40,14 +40,35 @@ import { LinearSolverStudio } from './components/LinearSolverStudio';
 import { EngineeringStudio } from './components/EngineeringStudio';
 import { VerticalPageScroller } from './components/VerticalPageScroller';
 import { StartupSplashLoader } from './components/StartupSplashLoader';
+import { AuthGateModal } from './components/AuthGateModal';
+import { SuperAdminConsoleModal } from './components/SuperAdminConsoleModal';
 import { MathText } from './components/MathView';
 import { analyzeDifferentialEquation } from './utils/preAnalyzer';
 import { solveLocallyCPU } from './utils/cpuSolver';
 import { solveLocallyGPU } from './utils/gpuSolver';
+import {
+  getCurrentSession,
+  setCurrentSession,
+  createSuperAdminUser,
+  logoutUser,
+  AuthUser,
+} from './utils/securityManager';
 
 const STORAGE_HISTORY_KEY = 'ode_studio_solutions_history_v1';
 
 export default function App() {
+  // Authentication & SuperUser Absolute Rights State
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
+    const session = getCurrentSession();
+    if (session) return session;
+    // Default to SuperAdmin root session for author k.kabaev94@gmail.com
+    const masterRoot = createSuperAdminUser('k.kabaev94@gmail.com');
+    setCurrentSession(masterRoot);
+    return masterRoot;
+  });
+  const [showAuthModal, setShowAuthModal] = useState<boolean>(false);
+  const [showSuperAdminModal, setShowSuperAdminModal] = useState<boolean>(false);
+
   // Main Studio Mode: 'ode' (Differential Equations) vs 'sparse_linear' (Large Linear Systems Ax = b)
   const [studioMode, setStudioMode] = useState<StudioMainMode>('sparse_linear');
 
@@ -473,6 +494,14 @@ export default function App() {
         hasSolution={Boolean(solution)}
         engine={engine}
         onChangeEngine={setEngine}
+        currentUser={currentUser}
+        onOpenAuthGate={() => setShowAuthModal(true)}
+        onOpenSuperAdminConsole={() => setShowSuperAdminModal(true)}
+        onLogout={() => {
+          logoutUser();
+          setCurrentUser(null);
+          setShowAuthModal(true);
+        }}
       />
 
       {/* Futuristic Startup Splash / Interactive Welcome Showcase */}
@@ -882,6 +911,28 @@ export default function App() {
           </div>
         </div>
       )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 4: АВТОРИЗАЦИЯ & АКТИВАЦИЯ ПО 100 КЛЮЧАМ (AUTH GATE)                */}
+      {/* ========================================================================= */}
+      <AuthGateModal
+        isOpen={showAuthModal || !currentUser}
+        allowClose={Boolean(currentUser)}
+        onClose={() => setShowAuthModal(false)}
+        onAuthenticated={(user) => {
+          setCurrentUser(user);
+          setShowAuthModal(false);
+        }}
+      />
+
+      {/* ========================================================================= */}
+      {/* MODAL 5: ПАНЕЛЬ СУПЕРПОЛЬЗОВАТЕЛЯ & БАНК 100 КЛЮЧЕЙ НА ПК                 */}
+      {/* ========================================================================= */}
+      <SuperAdminConsoleModal
+        isOpen={showSuperAdminModal}
+        onClose={() => setShowSuperAdminModal(false)}
+        currentUserEmail={currentUser?.email || 'k.kabaev94@gmail.com'}
+      />
 
       {/* Footer info */}
       <footer className="w-full border-t border-slate-800/80 bg-slate-950/80 py-4 px-4 text-center text-xs text-slate-400 flex flex-col items-center justify-center gap-1.5">

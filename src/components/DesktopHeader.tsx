@@ -12,8 +12,13 @@ import {
   Layers,
   History,
   Compass,
+  ShieldAlert,
+  ShieldCheck,
+  KeyRound,
+  LogOut,
 } from 'lucide-react';
 import { WindowId, WindowState } from '../types';
+import { AuthUser } from '../utils/securityManager';
 
 interface DesktopHeaderProps {
   windows: Record<WindowId, WindowState>;
@@ -22,6 +27,11 @@ interface DesktopHeaderProps {
   isSolving: boolean;
   hasSolution: boolean;
   historyCount?: number;
+  currentUser?: AuthUser | null;
+  onOpenAuthGate?: () => void;
+  onOpenSuperAdminConsole?: () => void;
+  onLogout?: () => void;
+  onOpenShowcase?: () => void;
 }
 
 export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
@@ -31,6 +41,11 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
   isSolving,
   hasSolution,
   historyCount = 0,
+  currentUser,
+  onOpenAuthGate,
+  onOpenSuperAdminConsole,
+  onLogout,
+  onOpenShowcase,
 }) => {
   const windowButtons: { id: WindowId; label: string; icon: React.ReactNode; badge?: string | number }[] = [
     { id: 'input', label: 'Ввод ДУ', icon: <SquareTerminal className="w-3.5 h-3.5" /> },
@@ -61,7 +76,7 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
               СИМВОЛЬНЫЙ РЕШАТЕЛЬ ДУ
             </span>
             <span className="text-[10px] px-1.5 py-0.5 rounded bg-cyan-950/80 text-cyan-400 border border-cyan-800/60 font-mono">
-              v2.6 Multi-Engine
+              v3.0 PRO
             </span>
           </div>
         </div>
@@ -104,8 +119,43 @@ export const DesktopHeader: React.FC<DesktopHeaderProps> = ({
         })}
       </nav>
 
-      {/* Right Controls: Layout & Status */}
+      {/* Right Controls: Layout, Auth & Status */}
       <div className="flex items-center gap-2">
+        {onOpenShowcase && (
+          <button
+            type="button"
+            onClick={onOpenShowcase}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-gradient-to-r from-cyan-500/20 to-indigo-500/20 hover:from-cyan-500/30 hover:to-indigo-500/30 text-cyan-200 border border-cyan-500/40 text-xs font-bold transition-all cursor-pointer"
+            title="Выйти в приветственную панель и выбрать модуль"
+          >
+            <LayoutGrid className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Выйти в меню</span>
+          </button>
+        )}
+
+        {currentUser?.isSuperAdmin && onOpenSuperAdminConsole && (
+          <button
+            type="button"
+            onClick={onOpenSuperAdminConsole}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-amber-500/20 text-amber-300 border border-amber-500/40 text-xs font-mono font-bold hover:bg-amber-500/30 transition-all cursor-pointer"
+            title="Панель суперпользователя: 100 ключей"
+          >
+            <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+            <span className="hidden xl:inline">100 Ключей</span>
+          </button>
+        )}
+
+        {currentUser && onLogout && (
+          <button
+            type="button"
+            onClick={onLogout}
+            className="p-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800 transition-colors"
+            title="Выйти"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
+        )}
+
         {/* Layout presets dropdown / buttons */}
         <div className="hidden lg:flex items-center gap-1 bg-slate-900/80 p-0.5 rounded-lg border border-slate-800 text-xs text-slate-400">
           <button

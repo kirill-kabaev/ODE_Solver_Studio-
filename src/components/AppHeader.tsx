@@ -8,8 +8,16 @@ import {
   Calculator,
   Grid,
   Rocket,
+  ShieldCheck,
+  ShieldAlert,
+  KeyRound,
+  User,
+  LogOut,
+  Fingerprint,
+  LayoutGrid,
 } from 'lucide-react';
 import { SolverEngine } from '../types';
+import { AuthUser } from '../utils/securityManager';
 
 export type StudioMainMode = 'ode' | 'sparse_linear' | 'engineering';
 
@@ -27,6 +35,10 @@ interface AppHeaderProps {
   hasSolution: boolean;
   engine: SolverEngine;
   onChangeEngine: (engine: SolverEngine) => void;
+  currentUser: AuthUser | null;
+  onOpenAuthGate: () => void;
+  onOpenSuperAdminConsole: () => void;
+  onLogout: () => void;
 }
 
 export const AppHeader: React.FC<AppHeaderProps> = ({
@@ -39,19 +51,23 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
   historyCount,
   isSolving,
   hasSolution,
+  currentUser,
+  onOpenAuthGate,
+  onOpenSuperAdminConsole,
+  onLogout,
 }) => {
   return (
     <header className="sticky top-0 z-40 w-full bg-slate-950/90 backdrop-blur-md border-b border-slate-800 shadow-lg">
       <div className="max-w-7xl mx-auto px-3 sm:px-6 h-14 flex items-center justify-between gap-2 sm:gap-4">
-        {/* Left: Brand Logo & Main Studio Mode Switcher */}
-        <div className="flex items-center gap-3">
+        {/* Left: Brand Logo & Current Active Section Badge + 'Выйти в меню' */}
+        <div className="flex items-center gap-2.5 sm:gap-3.5">
           <div
             onClick={() => {
               if (onOpenShowcase) onOpenShowcase();
               else window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             className="flex items-center gap-2 cursor-pointer select-none shrink-0 group"
-            title="Открыть интерактивную визитку и возможности платформы"
+            title="Открыть приветственную панель и выбрать модуль"
           >
             <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500 to-indigo-600 text-slate-950 font-bold shadow-md shadow-cyan-500/20 group-hover:scale-105 transition-transform">
               <Sparkles className="w-4 h-4 text-white" />
@@ -68,65 +84,93 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
             </div>
           </div>
 
-          {/* Core Mode Switcher: ODEs vs Sparse Linear Systems */}
-          <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800">
-            <button
-              type="button"
-              onClick={() => onChangeStudioMode('ode')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                studioMode === 'ode'
-                  ? 'bg-gradient-to-r from-cyan-500 to-indigo-600 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-              }`}
-            >
-              <Calculator className="w-3.5 h-3.5" />
-              <span>Решатель ДУ</span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onChangeStudioMode('sparse_linear')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                studioMode === 'sparse_linear'
-                  ? 'bg-gradient-to-r from-cyan-500 to-indigo-600 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-              }`}
-            >
-              <Grid className="w-3.5 h-3.5" />
-              <span>Решатель СЛАУ</span>
-              <span className="text-[9px] px-1 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-700/60 font-mono hidden md:inline">
-                SuiteSparse
-              </span>
-            </button>
-
-            <button
-              type="button"
-              onClick={() => onChangeStudioMode('engineering')}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                studioMode === 'engineering'
-                  ? 'bg-gradient-to-r from-cyan-500 to-indigo-600 text-slate-950 shadow-md'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800'
-              }`}
-            >
-              <Rocket className="w-3.5 h-3.5" />
-              <span>Инжиниринг</span>
-              <span className="text-[9px] px-1 py-0.2 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/60 font-mono hidden lg:inline">
-                CFD • GNC • EDA
-              </span>
-            </button>
+          {/* Current Active Section Indicator Badge */}
+          <div className="flex items-center gap-2 px-2.5 sm:px-3 py-1.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs font-semibold shadow-inner">
+            {studioMode === 'ode' && (
+              <div className="flex items-center gap-1.5 text-purple-300">
+                <Calculator className="w-3.5 h-3.5 text-purple-400" />
+                <span className="hidden xs:inline">Раздел:</span>
+                <span className="font-bold text-white">Решатель ДУ</span>
+              </div>
+            )}
+            {studioMode === 'sparse_linear' && (
+              <div className="flex items-center gap-1.5 text-cyan-300">
+                <Grid className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="hidden xs:inline">Раздел:</span>
+                <span className="font-bold text-white">Решатель СЛАУ</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 border border-cyan-700/60 font-mono hidden md:inline">
+                  SuiteSparse
+                </span>
+              </div>
+            )}
+            {studioMode === 'engineering' && (
+              <div className="flex items-center gap-1.5 text-indigo-300">
+                <Rocket className="w-3.5 h-3.5 text-indigo-400" />
+                <span className="hidden xs:inline">Раздел:</span>
+                <span className="font-bold text-white">Инжиниринг</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-950 text-indigo-300 border border-indigo-700/60 font-mono hidden md:inline">
+                  CFD • GNC • EDA
+                </span>
+              </div>
+            )}
           </div>
-        </div>
 
-        {/* Right Controls based on Mode */}
-        <div className="flex items-center gap-1.5 shrink-0">
+          {/* Dedicated "Выйти в меню" Button that returns to the Welcome Tiles Screen */}
           {onOpenShowcase && (
             <button
+              type="button"
               onClick={onOpenShowcase}
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-cyan-500/10 to-indigo-500/10 hover:from-cyan-500/20 hover:to-indigo-500/20 text-cyan-300 border border-cyan-500/30 text-xs font-bold transition-all cursor-pointer shadow-sm"
-              title="Открыть интерактивную визитку и презентацию возможностей"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500/15 via-indigo-500/15 to-purple-500/15 hover:from-cyan-500/25 hover:to-indigo-500/25 text-cyan-200 hover:text-white border border-cyan-500/40 hover:border-cyan-400 text-xs font-bold transition-all shadow-md shadow-cyan-950/40 cursor-pointer active:scale-95 group"
+              title="Выйти в приветственную панель и выбрать другой раздел"
             >
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-              <span className="hidden md:inline">Визитка</span>
+              <LayoutGrid className="w-3.5 h-3.5 text-cyan-400 group-hover:scale-110 transition-transform" />
+              <span>Выйти в меню</span>
+            </button>
+          )}
+        </div>
+
+        {/* Right Controls & Auth Header Area */}
+        <div className="flex items-center gap-1.5 shrink-0">
+          {currentUser?.isSuperAdmin ? (
+            <button
+              type="button"
+              onClick={onOpenSuperAdminConsole}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-orange-500/20 to-amber-500/20 hover:from-amber-500/30 hover:to-orange-500/30 text-amber-300 border border-amber-500/50 text-xs font-mono font-bold transition-all cursor-pointer shadow-md shadow-amber-950/40 animate-pulse"
+              title="Открыть панель суперпользователя и банк 100 ключей"
+            >
+              <ShieldAlert className="w-3.5 h-3.5 text-amber-400" />
+              <span className="hidden sm:inline">100 Ключей / ROOT</span>
+              <span className="text-[9px] px-1.5 py-0.2 rounded bg-amber-500 text-slate-950 font-black">
+                ROOT
+              </span>
+            </button>
+          ) : currentUser ? (
+            <div
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs font-mono text-cyan-300"
+              title={`Лицензия привязана: ${currentUser.email}`}
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="hidden md:inline">{currentUser.email.split('@')[0]}</span>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={onOpenAuthGate}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-slate-950 font-bold text-xs shadow-md shadow-cyan-950/50 transition-all cursor-pointer"
+            >
+              <KeyRound className="w-3.5 h-3.5" />
+              <span>Войти / Ключ</span>
+            </button>
+          )}
+
+          {currentUser && (
+            <button
+              type="button"
+              onClick={onLogout}
+              className="p-1.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-rose-400 border border-slate-800 transition-colors cursor-pointer"
+              title="Выйти из учетной записи"
+            >
+              <LogOut className="w-3.5 h-3.5" />
             </button>
           )}
 
@@ -165,25 +209,6 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
                   <span>Проверка</span>
                 </button>
               )}
-
-              <div className="hidden sm:flex items-center gap-1.5 px-2 py-1 rounded-lg bg-slate-900 border border-slate-800 text-xs">
-                {isSolving ? (
-                  <div className="flex items-center gap-1.5 text-amber-400 font-medium">
-                    <span className="w-2 h-2 rounded-full bg-amber-400 animate-ping" />
-                    <span className="text-[11px]">Решение...</span>
-                  </div>
-                ) : hasSolution ? (
-                  <div className="flex items-center gap-1.5 text-emerald-400 font-medium">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" />
-                    <span className="text-[11px]">Готово</span>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-1.5 text-slate-500">
-                    <span className="w-2 h-2 rounded-full bg-slate-600" />
-                    <span className="text-[11px]">Ожидание</span>
-                  </div>
-                )}
-              </div>
             </>
           ) : (
             <>
@@ -218,3 +243,4 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
     </header>
   );
 };
+

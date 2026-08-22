@@ -6,6 +6,7 @@ import {
   Layers,
   Database,
   Calculator,
+  Rocket,
   Activity,
   ArrowRight,
   CheckCircle2,
@@ -234,144 +235,116 @@ export const StartupSplashLoader: React.FC<StartupSplashLoaderProps> = ({
         </div>
 
         {/* ========================================================================= */}
-        {/* BENTO-GRID SHOWCASE CARDS: "ЧТО ЖЕ ЖДЕТ ПОЛЬЗОВАТЕЛЯ ВНУТРИ"              */}
+        {/* BENTO-GRID SHOWCASE TILES: "ВЫБЕРИТЕ РАЗДЕЛ ДЛЯ РАБОТЫ"                   */}
         {/* ========================================================================= */}
-        <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Card 1: Sparse Linear Systems Ax = b */}
-          <div
-            onClick={() => setSelectedHighlight('sparse')}
-            className={`p-5 rounded-2xl border transition-all flex flex-col justify-between gap-3 cursor-pointer relative overflow-hidden group shadow-lg ${
-              selectedHighlight === 'sparse'
-                ? 'bg-gradient-to-b from-cyan-950/40 to-slate-900/90 border-cyan-500/60 shadow-cyan-500/10'
-                : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
-                <Database className="w-5 h-5" />
-              </div>
-              <span className="px-2 py-0.5 rounded-md bg-cyan-950 text-cyan-300 border border-cyan-800 text-[10px] font-mono font-bold">
-                N до 41.2M+
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <h3 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors flex items-center gap-1.5">
-                <span>СЛАУ Огромных Систем</span>
-                <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Решение экстремальных разреженных матриц <MathText text="$Ax = b$" /> из коллекции Texas A&M (131+ систем) в форматах CSR/COO с визуализацией структуры ненулевых элементов.
-              </p>
-            </div>
-
-            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
-              <span>Параллельный SpMV</span>
-              <span className="text-cyan-400 font-bold">CSR & Matrix Market</span>
-            </div>
+        <div className="w-full flex flex-col gap-3">
+          <div className="flex items-center justify-between px-1">
+            <h2 className="text-xs sm:text-sm font-bold text-slate-300 font-mono flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-cyan-400" />
+              <span>НАЖМИТЕ НА ПЛИТКУ ДЛЯ ВХОДА В РАЗДЕЛ:</span>
+            </h2>
+            <span className="text-[11px] text-slate-500 font-mono">
+              3 независимых вычислительных модуля
+            </span>
           </div>
 
-          {/* Card 2: 3-Stage Pipeline */}
-          <div
-            onClick={() => setSelectedHighlight('pipeline')}
-            className={`p-5 rounded-2xl border transition-all flex flex-col justify-between gap-3 cursor-pointer relative overflow-hidden group shadow-lg ${
-              selectedHighlight === 'pipeline'
-                ? 'bg-gradient-to-b from-indigo-950/40 to-slate-900/90 border-indigo-500/60 shadow-indigo-500/10'
-                : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">
-                <Zap className="w-5 h-5" />
-              </div>
-              <span className="px-2 py-0.5 rounded-md bg-indigo-950 text-indigo-300 border border-indigo-800 text-[10px] font-mono font-bold">
-                CUDA & METIS
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <h3 className="text-sm font-bold text-white group-hover:text-indigo-300 transition-colors flex items-center gap-1.5">
-                <span>3-х Стадийный Конвейер</span>
-                <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                <MathText text="$\text{AMD/RCM} \longrightarrow \text{ILU/AMG} \longrightarrow \text{GMRES/BiCGSTAB}$" />: сжатие ленты матрицы, многосеточный V-cycle и Крыловское ускорение на GPU NVIDIA RTX.
-              </p>
-            </div>
-
-            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
-              <span>Сжатие числа <MathText text="$\kappa(A)$" /></span>
-              <span className="text-indigo-400 font-bold">12x – 25x быстрее</span>
-            </div>
-          </div>
-
-          {/* Card 3: ODE & 3D Math Physics */}
-          <div
-            onClick={() => setSelectedHighlight('ode')}
-            className={`p-5 rounded-2xl border transition-all flex flex-col justify-between gap-3 cursor-pointer relative overflow-hidden group shadow-lg ${
-              selectedHighlight === 'ode'
-                ? 'bg-gradient-to-b from-purple-950/40 to-slate-900/90 border-purple-500/60 shadow-purple-500/10'
-                : 'bg-slate-900/60 border-slate-800 hover:border-slate-700'
-            }`}
-          >
-            <div className="flex items-center justify-between">
-              <div className="p-2.5 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40">
-                <Calculator className="w-5 h-5" />
-              </div>
-              <span className="px-2 py-0.5 rounded-md bg-purple-950 text-purple-300 border border-purple-800 text-[10px] font-mono font-bold">
-                Символьный CAS
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-1">
-              <h3 className="text-sm font-bold text-white group-hover:text-purple-300 transition-colors flex items-center gap-1.5">
-                <span>2D ОДУ и 3D УрМатФиз</span>
-                <ArrowRight className="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-              </h3>
-              <p className="text-xs text-slate-400 leading-relaxed">
-                Пошаговый аналитический вывод решений ОДУ, векторное поле направлений с RK4 интегратором и вращаемые 3D воксельные карты уравнений теплопроводности и волн.
-              </p>
-            </div>
-
-            <div className="pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] font-mono text-slate-400">
-              <span>Задача Коши + 3D Heatmap</span>
-              <span className="text-purple-400 font-bold">KaTeX Формулы</span>
-            </div>
-          </div>
-        </div>
-
-        {/* ========================================================================= */}
-        {/* FAST ACTION LAUNCH BUTTONS                                               */}
-        {/* ========================================================================= */}
-        <div className="flex items-center gap-3 flex-wrap justify-center pt-2">
-          <button
-            type="button"
-            onClick={() => handleLaunch('sparse_linear')}
-            className="px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 via-sky-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 text-slate-950 font-black text-xs sm:text-sm tracking-wide shadow-xl shadow-cyan-500/25 flex items-center gap-2.5 cursor-pointer active:scale-95 transition-all"
-          >
-            <Zap className="w-4 h-4" />
-            <span>Запустить СЛАУ Сверхбольших Систем (Ax = b)</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-
-          <button
-            type="button"
-            onClick={() => handleLaunch('ode')}
-            className="px-5 py-3 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-700 hover:border-cyan-500 text-white font-bold text-xs sm:text-sm flex items-center gap-2 cursor-pointer active:scale-95 transition-all shadow-md"
-          >
-            <Calculator className="w-4 h-4 text-cyan-400" />
-            <span>Решатель Дифференциальных Уравнений</span>
-          </button>
-
-          {isCompleted && (
-            <button
-              type="button"
-              onClick={() => handleLaunch()}
-              className="px-4 py-3 rounded-xl bg-slate-950 hover:bg-slate-900 border border-slate-800 text-slate-300 hover:text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+          <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-4">
+            {/* Card 1: ODE Diff Equations */}
+            <div
+              onClick={() => handleLaunch('ode')}
+              className="p-5 rounded-2xl border transition-all flex flex-col justify-between gap-3.5 cursor-pointer relative overflow-hidden group shadow-lg bg-gradient-to-b from-purple-950/40 via-slate-900/90 to-slate-950/90 border-purple-500/40 hover:border-purple-400 hover:shadow-xl hover:shadow-purple-500/20 hover:-translate-y-1 active:scale-[0.99]"
             >
-              <span>Войти сразу</span>
-            </button>
-          )}
+              <div className="flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/40 group-hover:scale-110 group-hover:bg-purple-500/30 transition-all">
+                  <Calculator className="w-6 h-6 text-purple-300" />
+                </div>
+                <span className="px-2.5 py-1 rounded-md bg-purple-950 text-purple-300 border border-purple-700/80 text-[10px] font-mono font-bold">
+                  Символьный CAS + 3D
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <h3 className="text-lg font-bold text-white group-hover:text-purple-300 transition-colors flex items-center justify-between">
+                  <span>Решатель ДУ</span>
+                  <ArrowRight className="w-5 h-5 text-purple-400 group-hover:translate-x-1 transition-transform" />
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Аналитическое пошаговое решение ОДУ, задача Коши, фазовые портреты с интегратором RK4 и 3D волновые уравнения / уравнения теплопроводности.
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono">
+                <span className="text-slate-400">Коши • 3D Heatmap</span>
+                <span className="px-3 py-1 rounded-lg bg-purple-500/20 group-hover:bg-purple-500 group-hover:text-slate-950 text-purple-300 font-bold transition-colors flex items-center gap-1.5">
+                  Войти ⟶
+                </span>
+              </div>
+            </div>
+
+            {/* Card 2: Sparse Linear Systems Ax = b */}
+            <div
+              onClick={() => handleLaunch('sparse_linear')}
+              className="p-5 rounded-2xl border transition-all flex flex-col justify-between gap-3.5 cursor-pointer relative overflow-hidden group shadow-lg bg-gradient-to-b from-cyan-950/40 via-slate-900/90 to-slate-950/90 border-cyan-500/40 hover:border-cyan-400 hover:shadow-xl hover:shadow-cyan-500/20 hover:-translate-y-1 active:scale-[0.99]"
+            >
+              <div className="flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 group-hover:scale-110 group-hover:bg-cyan-500/30 transition-all">
+                  <Database className="w-6 h-6 text-cyan-300" />
+                </div>
+                <span className="px-2.5 py-1 rounded-md bg-cyan-950 text-cyan-300 border border-cyan-700/80 text-[10px] font-mono font-bold">
+                  N до 41.2M+
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <h3 className="text-lg font-bold text-white group-hover:text-cyan-300 transition-colors flex items-center justify-between">
+                  <span>Решатель СЛАУ</span>
+                  <ArrowRight className="w-5 h-5 text-cyan-400 group-hover:translate-x-1 transition-transform" />
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Решение экстремальных разреженных матриц <MathText text="$Ax = b$" /> из коллекции Texas A&M SuiteSparse в форматах CSR/COO с 3-стадийным GPU CUDA конвейером.
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono">
+                <span className="text-slate-400">SuiteSparse • AMD • AMG</span>
+                <span className="px-3 py-1 rounded-lg bg-cyan-500/20 group-hover:bg-cyan-500 group-hover:text-slate-950 text-cyan-300 font-bold transition-colors flex items-center gap-1.5">
+                  Войти ⟶
+                </span>
+              </div>
+            </div>
+
+            {/* Card 3: Engineering Studio */}
+            <div
+              onClick={() => handleLaunch('engineering')}
+              className="p-5 rounded-2xl border transition-all flex flex-col justify-between gap-3.5 cursor-pointer relative overflow-hidden group shadow-lg bg-gradient-to-b from-indigo-950/40 via-slate-900/90 to-slate-950/90 border-indigo-500/40 hover:border-indigo-400 hover:shadow-xl hover:shadow-indigo-500/20 hover:-translate-y-1 active:scale-[0.99]"
+            >
+              <div className="flex items-center justify-between">
+                <div className="p-3 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 group-hover:scale-110 group-hover:bg-indigo-500/30 transition-all">
+                  <Rocket className="w-6 h-6 text-indigo-300" />
+                </div>
+                <span className="px-2.5 py-1 rounded-md bg-indigo-950 text-indigo-300 border border-indigo-700/80 text-[10px] font-mono font-bold">
+                  CFD • GNC • EDA
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-1.5">
+                <h3 className="text-lg font-bold text-white group-hover:text-indigo-300 transition-colors flex items-center justify-between">
+                  <span>Инжиниринг</span>
+                  <ArrowRight className="w-5 h-5 text-indigo-400 group-hover:translate-x-1 transition-transform" />
+                </h3>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  3D Аэродинамика крыла VLM, аэродинамика воздушных винтов BEM, орбитальная баллистика GNC и схемотехника электрических RLC цепей EDA.
+                </p>
+              </div>
+
+              <div className="pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs font-mono">
+                <span className="text-slate-400">VLM • BEM • Orbit • RLC</span>
+                <span className="px-3 py-1 rounded-lg bg-indigo-500/20 group-hover:bg-indigo-500 group-hover:text-slate-950 text-indigo-300 font-bold transition-colors flex items-center gap-1.5">
+                  Войти ⟶
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -389,7 +362,7 @@ export const StartupSplashLoader: React.FC<StartupSplashLoaderProps> = ({
         </div>
 
         <div className="flex items-center gap-3">
-          <span>Нажмите любую кнопку для мгновенного входа</span>
+          <span>Нажмите на любую плитку выше для мгновенного входа в раздел</span>
         </div>
       </div>
     </div>
