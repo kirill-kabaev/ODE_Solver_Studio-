@@ -14,9 +14,11 @@ import {
   Grid,
   Disc,
   FileText,
+  Radio,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
+import { UAVDroneStudioModule } from './uav/UAVDroneStudioModule';
 import { CFDWindTunnel } from './CFDWindTunnel';
 import { PressureDistributionGraph } from './PressureDistributionGraph';
 import { FlutterSimulator } from './FlutterSimulator';
@@ -30,7 +32,7 @@ import { AeroReportExportStudio } from './AeroReportExportStudio';
 import { EngineeringPresetCatalog, EngineeringPreset, ENGINEERING_PRESETS } from './EngineeringPresetCatalog';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
 
-export type AeroSubTab = 'presets' | 'visual_studio' | 'physics_solvers' | 'export_report' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
+export type AeroSubTab = 'presets' | 'visual_studio' | 'uav_studio' | 'physics_solvers' | 'export_report' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
 
 interface AerodynamicsModuleProps {
   onTabChange?: (tab: AeroSubTab) => void;
@@ -116,6 +118,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
         >
           <Sparkles className="w-4 h-4 text-cyan-400" />
           <span>✦ 3D Визуальная Лаборатория (UX & Срезы)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabSelect('uav_studio')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'uav_studio'
+              ? 'bg-gradient-to-r from-teal-400 via-cyan-500 to-indigo-600 text-slate-950 shadow-md font-black ring-1 ring-teal-400/50'
+              : 'text-teal-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-teal-900/50'
+          }`}
+        >
+          <Radio className="w-4 h-4 text-teal-400" />
+          <span>🚁 Студия БПЛА & Дроны (TWR, ВМГ, Дальность)</span>
         </button>
 
         <button
@@ -250,6 +265,11 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           initialMach={activeMach}
           initialAlpha={activeAlpha}
         />
+      )}
+
+      {/* Sub-tab: UAV & Drone Propulsion and Flight Dynamics Studio */}
+      {activeTab === 'uav_studio' && (
+        <UAVDroneStudioModule />
       )}
 
       {/* Sub-tab: Advanced Aero Solvers Lab (Physics & Solvers) */}

@@ -398,6 +398,21 @@ export const INITIAL_ROADMAP_FEATURES: RoadmapFeatureItem[] = [
     targetMilestone: 'Искусственный Интеллект & AI CAE',
     mathBasis: '\\mathcal{L}_{\\text{PINN}} = \\|\\mathbf{u} \\cdot \\nabla \\mathbf{u} + \\frac{1}{\\rho} \\nabla p - \\nu \\nabla^2 \\mathbf{u}\\|^2 + \\|\\nabla \\cdot \\mathbf{u}\\|^2',
   },
+  {
+    id: 'feat_uav_propulsion_thermal_flight_envelope',
+    title: '23. Комплексный расчет пропульсии БПЛА, полетной огибающей и теплового баланса BLDC',
+    category: 'Двигатели & Пропульсия',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Дроны / VTOL',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Полный инженерный модуль согласования винтомоторной группы (ВМГ: BLDC мотор, пропеллер, регулятор ESC, LiPo/Li-Ion батарея). Расчет времени зависания, дальности и потребной мощности от поступательной скорости с учетом скоса потока (Glauert), ветроустойчивости (углов балансировки) и стационарной температуры обмоток моторов.',
+    engineeringImpact: 'Критично для беспилотных систем, VTOL-конвертопланов и FPV-комплексов: гарантирует предотвращение перегрева магнитов моторов и точный расчет автономности с учетом ветра.',
+    autoDetected: true,
+    defaultStatus: 'completed',
+    targetMilestone: 'БПЛА & Силовые Установки',
+    mathBasis: 'P_{\\text{hover}} = \\frac{T^{3/2}}{\\sqrt{2 \\rho A} \\cdot \\text{FM} \\cdot \\eta_{\\text{BLDC}} \\cdot \\eta_{\\text{ESC}}}, \\quad T_{\\text{motor}} = T_{\\text{amb}} + (I^2 R_m + P_{\\text{core}}) R_{\\text{th}}',
+  },
 ];
 
 interface FutureRoadmapModalProps {
