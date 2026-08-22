@@ -19,6 +19,7 @@ import {
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
 import { UAVDroneStudioModule } from './uav/UAVDroneStudioModule';
+import { UAVNavigationEWModule } from './uav/UAVNavigationEWModule';
 import { CFDWindTunnel } from './CFDWindTunnel';
 import { PressureDistributionGraph } from './PressureDistributionGraph';
 import { FlutterSimulator } from './FlutterSimulator';
@@ -32,7 +33,7 @@ import { AeroReportExportStudio } from './AeroReportExportStudio';
 import { EngineeringPresetCatalog, EngineeringPreset, ENGINEERING_PRESETS } from './EngineeringPresetCatalog';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
 
-export type AeroSubTab = 'presets' | 'visual_studio' | 'uav_studio' | 'physics_solvers' | 'export_report' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
+export type AeroSubTab = 'presets' | 'visual_studio' | 'uav_studio' | 'uav_ew_nav' | 'physics_solvers' | 'export_report' | 'vlm' | 'bem' | 'status_monitor' | 'wind_tunnel' | 'flutter' | '6dof' | 'architecture';
 
 interface AerodynamicsModuleProps {
   onTabChange?: (tab: AeroSubTab) => void;
@@ -130,7 +131,20 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           }`}
         >
           <Radio className="w-4 h-4 text-teal-400" />
-          <span>🚁 Студия БПЛА & Дроны (TWR, ВМГ, Дальность)</span>
+          <span>🚁 Студия БПЛА & ВМГ (TWR, Дальность)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => handleTabSelect('uav_ew_nav')}
+          className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeTab === 'uav_ew_nav'
+              ? 'bg-gradient-to-r from-teal-400 via-emerald-500 to-cyan-500 text-slate-950 shadow-md font-black ring-1 ring-emerald-400/50'
+              : 'text-emerald-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-emerald-900/50'
+          }`}
+        >
+          <Compass className="w-4 h-4 text-emerald-400" />
+          <span>🛰️ РЭБ-Навигация & Автопилот EKF3</span>
         </button>
 
         <button
@@ -270,6 +284,11 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
       {/* Sub-tab: UAV & Drone Propulsion and Flight Dynamics Studio */}
       {activeTab === 'uav_studio' && (
         <UAVDroneStudioModule />
+      )}
+
+      {/* Sub-tab: UAV GNSS-Denied Navigation, EKF3 & EW Jamming Resistance */}
+      {activeTab === 'uav_ew_nav' && (
+        <UAVNavigationEWModule />
       )}
 
       {/* Sub-tab: Advanced Aero Solvers Lab (Physics & Solvers) */}

@@ -413,6 +413,21 @@ export const INITIAL_ROADMAP_FEATURES: RoadmapFeatureItem[] = [
     targetMilestone: 'БПЛА & Силовые Установки',
     mathBasis: 'P_{\\text{hover}} = \\frac{T^{3/2}}{\\sqrt{2 \\rho A} \\cdot \\text{FM} \\cdot \\eta_{\\text{BLDC}} \\cdot \\eta_{\\text{ESC}}}, \\quad T_{\\text{motor}} = T_{\\text{amb}} + (I^2 R_m + P_{\\text{core}}) R_{\\text{th}}',
   },
+  {
+    id: 'feat_uav_gnss_denied_ekf3_ew_jamming',
+    title: '24. Навигация БПЛА в условиях РЭБ: 24-состоятельный EKF3, оптический поток и защита от спуфинга',
+    category: 'Космос & Авионика',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Дроны / VTOL',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Моделирование радиоэлектронного подавления (РЭБ GPS L1/L2) и спуфинга координат. Комплексирование ИНС тактического класса с оптическим потоком (Optical Flow PMW3901), визуальной одометрией (VIO) и 4-лучевой CRPA-антенной. Фильтрация аномалий по критерию хи-квадрат (Chi-Square gating).',
+    engineeringImpact: 'Критически важно для выживаемости и точного возврата домой (RTH) БПЛА и FPV-дронов при полном отключении спутниковой навигации в зонах активного радиоэлектронного подавления.',
+    autoDetected: true,
+    defaultStatus: 'completed',
+    targetMilestone: 'БПЛА & РЭБ-Навигация',
+    mathBasis: '\\mathbf{x}_{k} = f(\\mathbf{x}_{k-1}, \\mathbf{u}_k) + \\mathbf{w}_k, \\quad \\mathbf{K}_k = \\mathbf{P}_k^- \\mathbf{H}_k^T (\\mathbf{H}_k \\mathbf{P}_k^- \\mathbf{H}_k^T + \\mathbf{R}_k)^{-1}, \\quad d_{\\chi^2} = \\mathbf{y}_k^T \\mathbf{S}_k^{-1} \\mathbf{y}_k < \\gamma',
+  },
 ];
 
 interface FutureRoadmapModalProps {
