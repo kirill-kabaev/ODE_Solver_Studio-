@@ -17,6 +17,13 @@ import {
   ShieldAlert,
   Server,
   Zap,
+  FileText,
+  Scale,
+  ChevronDown,
+  ChevronUp,
+  CheckSquare,
+  Square,
+  ExternalLink,
 } from 'lucide-react';
 import {
   authenticateWithCredentials,
@@ -26,6 +33,7 @@ import {
   AuthUser,
 } from '../utils/securityManager';
 import { SUPER_USER_EMAILS, ENCRYPTED_HARDWARE_CONFIG } from '../config/securityConfig';
+import { UserLicenseAgreementModal } from './UserLicenseAgreementModal';
 
 interface AuthGateModalProps {
   isOpen: boolean;
@@ -48,6 +56,11 @@ export const AuthGateModal: React.FC<AuthGateModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+
+  // Legal agreement state
+  const [agreementAccepted, setAgreementAccepted] = useState(false);
+  const [isAgreementModalOpen, setIsAgreementModalOpen] = useState(false);
+  const [showTelemetryDetails, setShowTelemetryDetails] = useState(false);
 
   const hwInfo = generateDeviceHardwareFingerprint();
 
@@ -91,12 +104,18 @@ export const AuthGateModal: React.FC<AuthGateModalProps> = ({
     e.preventDefault();
     setErrorMessage(null);
     setSuccessMessage(null);
+
+    if (!agreementAccepted) {
+      setErrorMessage('Для активации ключа необходимо принять условия Пользовательского соглашения и дать согласие на передачу данных устройства.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const res = await activateWithLicenseKey(email, password, licenseKey);
       if (res.success && res.user) {
-        setSuccessMessage('Ключ успешно активирован! Ваша учетная запись создана.');
+        setSuccessMessage('Ключ успешно активирован! Аппаратные данные переданы правообладателю, учетная запись создана.');
         setTimeout(() => {
           onAuthenticated(res.user!);
         }, 700);
@@ -373,20 +392,95 @@ export const AuthGateModal: React.FC<AuthGateModalProps> = ({
                 />
               </div>
 
+              {/* Legal Consent & Telemetry Accordion */}
+              <div className="p-3 rounded-2xl bg-slate-950/80 border border-slate-800 space-y-2.5">
+                <div className="flex items-start gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => setAgreementAccepted(!agreementAccepted)}
+                    className="mt-0.5 text-cyan-400 hover:text-cyan-300 transition-colors cursor-pointer shrink-0"
+                  >
+                    {agreementAccepted ? (
+                      <CheckSquare className="w-5 h-5 text-emerald-400" />
+                    ) : (
+                      <Square className="w-5 h-5 text-slate-500 hover:text-slate-300" />
+                    )}
+                  </button>
+
+                  <div className="text-[11px] text-slate-300 leading-snug space-y-1">
+                    <label
+                      onClick={() => setAgreementAccepted(!agreementAccepted)}
+                      className="cursor-pointer select-none font-medium block"
+                    >
+                      Я подтверждаю согласие с{' '}
+                      <span className="text-cyan-400 font-bold underline">
+                        Пользовательским Лицензионным Соглашением
+                      </span>{' '}
+                      и даю безоговорочное согласие на передачу аппаратно-технических параметров моего устройства (MAC/HW-ID, CPU/GPU, IP, время) Правообладателю (К. Кабаев) для привязки лицензии.
+                    </label>
+
+                    <div className="flex items-center gap-3 pt-0.5 text-[10px] font-mono">
+                      <button
+                        type="button"
+                        onClick={() => setIsAgreementModalOpen(true)}
+                        className="text-cyan-400 hover:text-cyan-300 hover:underline flex items-center gap-1 cursor-pointer"
+                      >
+                        <FileText className="w-3 h-3" />
+                        <span>Читать полный текст EULA</span>
+                        <ExternalLink className="w-2.5 h-2.5" />
+                      </button>
+
+                      <span className="text-slate-600">•</span>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowTelemetryDetails(!showTelemetryDetails)}
+                        className="text-slate-400 hover:text-slate-200 flex items-center gap-1 cursor-pointer"
+                      >
+                        <Cpu className="w-3 h-3 text-indigo-400" />
+                        <span>Состав передаваемых данных</span>
+                        {showTelemetryDetails ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Telemetry live inspection drawer */}
+                {showTelemetryDetails && (
+                  <div className="mt-2 p-3 rounded-xl bg-slate-900 border border-slate-800 text-[10px] font-mono text-slate-300 space-y-1.5 animate-fadeIn">
+                    <div className="font-bold text-cyan-300 flex items-center justify-between border-b border-slate-800 pb-1">
+                      <span>ПАРАМЕТРЫ ТЕЛЕМЕТРИИ ВАШЕГО ПК:</span>
+                      <span className="text-emerald-400 font-bold">✓ ГОТОВЫ К ОТПРАВКЕ</span>
+                    </div>
+                    <div className="grid grid-cols-1 gap-1 text-slate-400">
+                      <div><span className="text-slate-200">MAC / HW-ID:</span> <span className="text-indigo-300">{hwInfo.displayMac} / {hwInfo.fingerprint}</span></div>
+                      <div><span className="text-slate-200">Процессор (Ядер):</span> {hwInfo.platform.cores} логических потоков CPU</div>
+                      <div><span className="text-slate-200">Платформа/ОС:</span> {hwInfo.platform.platform} ({hwInfo.platform.architecture})</div>
+                      <div><span className="text-slate-200">GPU Renderer:</span> {hwInfo.platform.gpuRenderer}</div>
+                      <div><span className="text-slate-200">Получатели:</span> {SUPER_USER_EMAILS.join(', ')}</div>
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <button
                 type="submit"
-                disabled={isLoading}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-amber-500 via-orange-500 to-cyan-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 font-black text-sm shadow-lg shadow-amber-950/60 transition-all flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 mt-2"
+                disabled={isLoading || !agreementAccepted}
+                className={`w-full py-3 rounded-xl font-black text-sm shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer mt-2 ${
+                  agreementAccepted
+                    ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-cyan-500 hover:from-amber-400 hover:to-orange-400 text-slate-950 shadow-amber-950/60 active:scale-95'
+                    : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed opacity-60'
+                }`}
               >
                 {isLoading ? (
                   <>
                     <span className="w-4 h-4 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
-                    <span>Активация лицензии...</span>
+                    <span>Активация & Передача данных...</span>
                   </>
                 ) : (
                   <>
                     <ShieldCheck className="w-4 h-4" />
-                    <span>Активировать Ключ и Войти</span>
+                    <span>Активировать Ключ и Передать Данные</span>
                   </>
                 )}
               </button>
@@ -400,6 +494,13 @@ export const AuthGateModal: React.FC<AuthGateModalProps> = ({
           <span>© 2026 K. Kabaev. All Rights Reserved.</span>
         </div>
       </div>
+
+      {/* User License Agreement Modal */}
+      <UserLicenseAgreementModal
+        isOpen={isAgreementModalOpen}
+        onClose={() => setIsAgreementModalOpen(false)}
+        onAccept={() => setAgreementAccepted(true)}
+      />
     </div>
   );
 };

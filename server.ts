@@ -5,6 +5,10 @@ import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
 import { detectSystemGpus } from "./server/hardware";
+import {
+  sendActivationEmailNotification,
+  getActivationRecords,
+} from "./server/mailer";
 
 dotenv.config();
 
@@ -41,6 +45,81 @@ app.get("/api/hardware/gpus", async (req, res) => {
     res.json({ success: true, gpus });
   } catch (err: any) {
     res.status(500).json({ success: false, error: err.message || "Failed to query system GPUs", gpus: [] });
+  }
+});
+
+// License Activation Notification Endpoint
+app.post("/api/license/notify-activation", async (req, res) => {
+  try {
+    const {
+      email,
+      licenseKey,
+      keyNumber,
+      deviceFingerprint,
+      displayMac,
+      macEncryptedSignature,
+      platformCores,
+      platformArch,
+      platformGpu,
+      agreementAccepted,
+      agreementVersion,
+    } = req.body;
+    const clientIp = req.headers["x-forwarded-for"] || req.socket.remoteAddress || "127.0.0.1";
+    const userAgent = req.headers["user-agent"] || "Browser Client";
+
+    if (!email || !licenseKey) {
+      return res.status(400).json({ success: false, error: "Email и LicenseKey обязательны." });
+    }
+
+    const result = await sendActivationEmailNotification({
+      email,
+      licenseKey,
+      keyNumber,
+      deviceFingerprint,
+      displayMac,
+      macEncryptedSignature,
+      platformCores,
+      platformArch,
+      platformGpu,
+      agreementAccepted,
+      agreementVersion,
+      userAgent: typeof userAgent === "string" ? userAgent : userAgent[0],
+      clientIp: typeof clientIp === "string" ? clientIp : clientIp[0],
+      timestamp: new Date().toISOString(),
+    });
+
+    res.json({ success: true, ...result });
+  } catch (err: any) {
+    console.error("Failed to process activation notification:", err);
+    res.status(500).json({ success: false, error: err.message || "Ошибка отправки уведомления" });
+  }
+});
+
+// Get activations history log for SuperAdmin
+app.get("/api/license/activations", (req, res) => {
+  try {
+    const records = getActivationRecords();
+    res.json({ success: true, records });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message, records: [] });
+  }
+});
+
+// Test Email notification
+app.post("/api/license/test-email", async (req, res) => {
+  try {
+    const result = await sendActivationEmailNotification({
+      email: "test.colleague@example.com",
+      licenseKey: "AERO-PRO-TEST-7K9A-4M2X",
+      keyNumber: 1,
+      deviceFingerprint: "HW-ID-TEST-DESKTOP-SECURE",
+      displayMac: "00:50:56:C0:A4:7B",
+      userAgent: "Тестовая проверка системы уведомлений Aero-Studio Pro",
+      clientIp: "127.0.0.1",
+    });
+    res.json({ success: true, result });
+  } catch (err: any) {
+    res.status(500).json({ success: false, error: err.message });
   }
 });
 

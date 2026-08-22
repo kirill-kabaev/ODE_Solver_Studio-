@@ -72,17 +72,30 @@ export async function sha256(message: string): Promise<string> {
   return (hash >>> 0).toString(16).padStart(8, '0') + '_sha256_mock_compat';
 }
 
-/**
- * Генерация стабильного аппаратного отпечатка устройства / MAC-сигнатуры
- */
-export function generateDeviceHardwareFingerprint(): {
+export interface DeviceHardwareInfo {
   fingerprint: string;
   macEncryptedSignature: string;
   displayMac: string;
-} {
+  platform: {
+    cores: number;
+    architecture: string;
+    gpuRenderer: string;
+    platform: string;
+  };
+}
+
+/**
+ * Генерация стабильного аппаратного отпечатка устройства / MAC-сигнатуры
+ */
+export function generateDeviceHardwareFingerprint(): DeviceHardwareInfo {
   let navInfo = 'AERO_SEC_TERMINAL_2026';
+  let cores = 8;
+  let platformStr = 'Win32/Linux/x64';
+
   if (typeof navigator !== 'undefined') {
-    navInfo = `${navigator.userAgent}_${navigator.language}_${screen.width}x${screen.height}_${navigator.hardwareConcurrency || 8}`;
+    cores = navigator.hardwareConcurrency || 8;
+    platformStr = navigator.platform || 'x86_64 Desktop';
+    navInfo = `${navigator.userAgent}_${navigator.language}_${typeof screen !== 'undefined' ? `${screen.width}x${screen.height}` : '1920x1080'}_${cores}`;
   }
 
   let hash = 0;
@@ -95,10 +108,35 @@ export function generateDeviceHardwareFingerprint(): {
   const macSuffix = hexHash.slice(0, 4).toUpperCase();
   const displayMac = `00:50:56:C0:${macSuffix.slice(0, 2)}:${macSuffix.slice(2, 4)}`;
 
+  let gpuRenderer = 'NVIDIA / AMD / Intel GPU (WebGL 2.0 DirectCompute)';
+  if (typeof document !== 'undefined') {
+    try {
+      const canvas = document.createElement('canvas');
+      const gl = (canvas.getContext('webgl') || canvas.getContext('experimental-webgl')) as any;
+      if (gl) {
+        const debugInfo = gl.getExtension('WEBGL_debug_renderer_info');
+        if (debugInfo) {
+          const unmasked = gl.getParameter(debugInfo.UNMASKED_RENDERER_WEBGL);
+          if (unmasked) {
+            gpuRenderer = String(unmasked);
+          }
+        }
+      }
+    } catch {
+      // Ignore in sandbox
+    }
+  }
+
   return {
     fingerprint: `HW-ID-${hexHash.toUpperCase()}-SECURE`,
     macEncryptedSignature: `ENC-MAC-[${displayMac}]-SALT-${ENCRYPTED_HARDWARE_CONFIG.hardwareFingerprintSalt.slice(0, 8)}`,
     displayMac,
+    platform: {
+      cores,
+      architecture: 'x86_64 / Multithreaded',
+      gpuRenderer,
+      platform: platformStr,
+    },
   };
 }
 
@@ -390,6 +428,32 @@ export async function activateWithLicenseKey(
       hasInfiniteCompute: false,
     },
   };
+
+  // Неблокирующая отправка уведомления на сервер и почты суперпользователя
+  try {
+    fetch('/api/license/notify-activation', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: cleanEmail,
+        licenseKey: cleanKey,
+        keyNumber: keyRecord.keyNumber,
+        deviceFingerprint: hw.fingerprint,
+        displayMac: hw.displayMac,
+        macEncryptedSignature: hw.macEncryptedSignature,
+        platformCores: hw.platform.cores,
+        platformArch: hw.platform.architecture,
+        platformGpu: hw.platform.gpuRenderer,
+        agreementAccepted: true,
+        agreementVersion: 'EULA_v3.0_2026',
+        timestamp: new Date().toISOString(),
+      }),
+    }).catch((err) => {
+      console.warn('Notification endpoint non-critical error:', err);
+    });
+  } catch (err) {
+    console.warn('Failed to dispatch background activation alert', err);
+  }
 
   setCurrentSession(authedUser);
   return { success: true, user: authedUser };
