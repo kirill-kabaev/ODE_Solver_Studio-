@@ -33,6 +33,8 @@ import {
 } from 'lucide-react';
 import { MathView, MathText } from '../MathView';
 import { createHardware2DContext } from '../../utils/gpuHardwareEnforcer';
+import { VirtualJoystick, JoystickMode, JoystickValue } from '../telemetry/VirtualJoystick';
+import { UniversalCockpitHUDModal } from '../telemetry/UniversalCockpitHUDModal';
 
 export type VisualStudioMode = 'cut_plane' | 'vortex_q' | 'smoke_stream' | 'probe' | 'comparator';
 export type SlicingAxis = 'X' | 'Y' | 'Z';
@@ -131,10 +133,31 @@ export const Interactive3DAeroStudio: React.FC<Interactive3DAeroStudioProps> = (
   const [showWireframe, setShowWireframe] = useState<boolean>(true);
   const [showSurface, setShowSurface] = useState<boolean>(true);
   const [autoRotate, setAutoRotate] = useState<boolean>(false);
+  const [showVirtualJoystick, setShowVirtualJoystick] = useState<boolean>(false);
+  const [isCockpitOpen, setIsCockpitOpen] = useState<boolean>(false);
+  const [joystickMode, setJoystickMode] = useState<JoystickMode>('camera_orbit');
   const autoRotateRef = useRef<boolean>(autoRotate);
   useEffect(() => {
     autoRotateRef.current = autoRotate;
   }, [autoRotate]);
+
+  const handleJoystickChange = useCallback(
+    (val: JoystickValue) => {
+      if (!val.active && val.distance === 0) return;
+      setAutoRotate(false);
+      if (joystickMode === 'camera_orbit') {
+        rotYRef.current = (rotYRef.current + val.x * 2.8) % 360;
+        rotXRef.current = Math.max(-85, Math.min(85, rotXRef.current - val.y * 2.8));
+      } else if (joystickMode === 'aero_flow') {
+        setAlpha((prev) => parseFloat(Math.max(-4, Math.min(22, prev + val.y * 0.15)).toFixed(2)));
+        setMach((prev) => parseFloat(Math.max(0.1, Math.min(2.5, prev + val.x * 0.01)).toFixed(3)));
+      } else if (joystickMode === 'target_guidance') {
+        panRef.current.x += val.x * 4;
+        panRef.current.y -= val.y * 4;
+      }
+    },
+    [joystickMode]
+  );
 
   // Particle System Ref for 60fps smoke advection
   const particlesRef = useRef<Particle3D[]>([]);
@@ -878,16 +901,43 @@ export const Interactive3DAeroStudio: React.FC<Interactive3DAeroStudioProps> = (
           </button>
         </div>
 
-        {/* Quick Screenshot / Export Button */}
-        <button
-          type="button"
-          onClick={handleExportScreenshot}
-          className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 font-bold transition-all cursor-pointer shrink-0"
-          title="Экспортировать снимок 3D визуализации высокого разрешения"
-        >
-          <Camera className="w-3.5 h-3.5 text-cyan-400" />
-          <span>Снимок 3D</span>
-        </button>
+        {/* Quick Screenshot & Cockpit Fullscreen Buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowVirtualJoystick(!showVirtualJoystick)}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-bold text-xs transition-all cursor-pointer ${
+              showVirtualJoystick
+                ? 'bg-cyan-500 text-slate-950 border-cyan-300 font-black shadow-lg shadow-cyan-950/50'
+                : 'bg-slate-800 hover:bg-slate-700 text-cyan-300 border-slate-700'
+            }`}
+            title="Включить наэкранный визуальный джойстик"
+          >
+            <Crosshair className="w-3.5 h-3.5" />
+            <span>Джойстик</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsCockpitOpen(true)}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:brightness-110 text-slate-950 font-black text-xs transition-all cursor-pointer shadow-lg shadow-cyan-950/60 border border-cyan-300"
+            title="Открыть полноэкранный экран всех характеристик, регуляторов и навигации"
+          >
+            <Compass className="w-3.5 h-3.5 text-slate-950" />
+            <span>Экран Телеметрии</span>
+            <Maximize2 className="w-3 h-3 text-slate-950" />
+          </button>
+
+          <button
+            type="button"
+            onClick={handleExportScreenshot}
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white border border-slate-700 font-bold text-xs transition-all cursor-pointer shrink-0"
+            title="Экспортировать снимок 3D визуализации высокого разрешения"
+          >
+            <Camera className="w-3.5 h-3.5 text-cyan-400" />
+            <span>Снимок</span>
+          </button>
+        </div>
       </div>
 
       {/* Main 3D Canvas Viewport + Control Sidebar Layout */}
@@ -1002,6 +1052,19 @@ export const Interactive3DAeroStudio: React.FC<Interactive3DAeroStudioProps> = (
                 <span className="text-[9px] text-slate-500 block">
                   Координаты: X={probePos.x} | Y={probePos.y} | Z={probePos.z}
                 </span>
+              </div>
+            )}
+
+            {/* Interactive On-Canvas Virtual Joystick Overlay */}
+            {showVirtualJoystick && (
+              <div className="absolute bottom-3 right-3 z-30 animate-slideUp">
+                <VirtualJoystick
+                  mode={joystickMode}
+                  onModeChange={setJoystickMode}
+                  onChange={handleJoystickChange}
+                  size={120}
+                  showThrottle={false}
+                />
               </div>
             )}
           </div>
@@ -1255,6 +1318,15 @@ export const Interactive3DAeroStudio: React.FC<Interactive3DAeroStudioProps> = (
           </div>
         </div>
       </div>
+
+      {/* Universal Telemetry & Joystick Cockpit */}
+      <UniversalCockpitHUDModal
+        isOpen={isCockpitOpen}
+        onClose={() => setIsCockpitOpen(false)}
+        initialDomain="3d_aero_studio"
+        initialMach={mach}
+        initialAlpha={alpha}
+      />
     </div>
   );
 };

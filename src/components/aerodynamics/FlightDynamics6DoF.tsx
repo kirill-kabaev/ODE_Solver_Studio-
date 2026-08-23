@@ -16,6 +16,8 @@ import {
 import { MathView, MathText } from '../MathView';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
 import { createHardware2DContext } from '../../utils/gpuHardwareEnforcer';
+import { VirtualJoystick, JoystickMode, JoystickValue } from '../telemetry/VirtualJoystick';
+import { UniversalCockpitHUDModal } from '../telemetry/UniversalCockpitHUDModal';
 
 interface FlightDynamics6DoFProps {}
 
@@ -33,7 +35,20 @@ export const FlightDynamics6DoF: React.FC<FlightDynamics6DoFProps> = () => {
   const [rudder, setRudder] = useState<number>(0.0);     // delta_r (deg)
 
   const [isSimulating, setIsSimulating] = useState<boolean>(true);
+  const [isCockpitOpen, setIsCockpitOpen] = useState<boolean>(false);
   const pfdCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  const handleJoystickFlight = (val: JoystickValue) => {
+    if (!val.active && val.distance === 0) {
+      setElevator(0);
+      setAileron(0);
+      return;
+    }
+    // Joystick Y controls Elevator (-15 to +15)
+    setElevator(parseFloat((-val.y * 15).toFixed(1)));
+    // Joystick X controls Ailerons (-20 to +20)
+    setAileron(parseFloat((val.x * 20).toFixed(1)));
+  };
 
   // Dynamic Trajectory State (6-DoF Integrated with RK4)
   const [history, setHistory] = useState<Array<{ t: number; pitch: number; roll: number; q: number }>>([]);
@@ -262,6 +277,14 @@ export const FlightDynamics6DoF: React.FC<FlightDynamics6DoFProps> = () => {
               <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono border border-cyan-800">
                 HDG {yaw}°
               </span>
+              <button
+                type="button"
+                onClick={() => setIsCockpitOpen(true)}
+                className="px-2 py-0.5 rounded bg-gradient-to-r from-cyan-500 to-indigo-600 text-slate-950 font-bold text-[10px] shadow cursor-pointer hover:brightness-110"
+                title="Открыть полноэкранный кокпит со всеми характеристиками"
+              >
+                🕹️ Кокпит HUD
+              </button>
             </div>
           </div>
 
@@ -269,36 +292,55 @@ export const FlightDynamics6DoF: React.FC<FlightDynamics6DoFProps> = () => {
             <canvas ref={pfdCanvasRef} width={340} height={280} className="w-full h-full object-contain" />
           </div>
 
-          {/* Quick Impulse Buttons */}
-          <div className="grid grid-cols-3 gap-1.5 pt-1">
-            <button
-              onClick={() => {
-                setElevator(-4.0);
-                setTimeout(() => setElevator(0), 1200);
-              }}
-              className="py-1.5 px-2 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-[10px] font-mono text-cyan-300 transition-colors cursor-pointer text-center"
-            >
-              Кабрирование ↑
-            </button>
-            <button
-              onClick={() => {
-                setAileron(5.0);
-                setTimeout(() => setAileron(0), 1200);
-              }}
-              className="py-1.5 px-2 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-[10px] font-mono text-amber-300 transition-colors cursor-pointer text-center"
-            >
-              Крен вправо →
-            </button>
-            <button
-              onClick={() => {
-                setElevator(0);
-                setAileron(0);
-                setRudder(0);
-              }}
-              className="py-1.5 px-2 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-[10px] font-mono text-slate-300 transition-colors cursor-pointer text-center"
-            >
-              Горизонт ⟲
-            </button>
+          {/* Integrated Virtual Flight Yoke Joystick & Quick Buttons */}
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-slate-800">
+            <div className="w-full sm:w-auto flex justify-center">
+              <VirtualJoystick
+                mode="flight_yoke"
+                onChange={handleJoystickFlight}
+                onThrottleChange={setThrottle}
+                size={110}
+                showThrottle={true}
+                throttle={throttle}
+              />
+            </div>
+
+            <div className="flex-1 grid grid-cols-1 gap-1.5 w-full">
+              <div className="grid grid-cols-3 gap-1">
+                <button
+                  onClick={() => {
+                    setElevator(-4.0);
+                    setTimeout(() => setElevator(0), 1200);
+                  }}
+                  className="py-1.5 px-2 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-[10px] font-mono text-cyan-300 transition-colors cursor-pointer text-center"
+                >
+                  Кабрирование ↑
+                </button>
+                <button
+                  onClick={() => {
+                    setAileron(5.0);
+                    setTimeout(() => setAileron(0), 1200);
+                  }}
+                  className="py-1.5 px-2 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-[10px] font-mono text-amber-300 transition-colors cursor-pointer text-center"
+                >
+                  Крен вправо →
+                </button>
+                <button
+                  onClick={() => {
+                    setElevator(0);
+                    setAileron(0);
+                    setRudder(0);
+                  }}
+                  className="py-1.5 px-2 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-[10px] font-mono text-slate-300 transition-colors cursor-pointer text-center"
+                >
+                  Горизонт ⟲
+                </button>
+              </div>
+
+              <div className="p-2 rounded-lg bg-slate-950/80 border border-slate-800 text-[10px] text-slate-400">
+                <span className="text-cyan-400 font-bold">Подсказка управления:</span> перетягивайте ручку штурвала или используйте клавиши <strong className="text-white">W/S</strong> (тангаж), <strong className="text-white">A/D</strong> (крен), <strong className="text-white">Shift/Ctrl</strong> (тяга).
+              </div>
+            </div>
           </div>
         </div>
 
@@ -415,6 +457,15 @@ export const FlightDynamics6DoF: React.FC<FlightDynamics6DoFProps> = () => {
           </div>
         </div>
       </div>
+
+      {/* Universal Telemetry & Joystick Cockpit */}
+      <UniversalCockpitHUDModal
+        isOpen={isCockpitOpen}
+        onClose={() => setIsCockpitOpen(false)}
+        initialDomain="flight_6dof"
+        initialMach={parseFloat((airspeed / 340).toFixed(2))}
+        initialAlpha={pitch}
+      />
     </div>
   );
 };

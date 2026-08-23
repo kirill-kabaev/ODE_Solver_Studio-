@@ -16,6 +16,8 @@ import {
 import { MathText, MathView } from '../MathView';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
 import { createHardware2DContext } from '../../utils/gpuHardwareEnforcer';
+import { VirtualJoystick, JoystickMode, JoystickValue } from '../telemetry/VirtualJoystick';
+import { UniversalCockpitHUDModal } from '../telemetry/UniversalCockpitHUDModal';
 
 export type AirfoilId = 'naca0012' | 'naca4412' | 'supercritical' | 'diamond' | 'ogive';
 
@@ -100,8 +102,39 @@ export const CFDWindTunnel: React.FC<CFDWindTunnelProps> = () => {
   const [showBoundaryLayer, setShowBoundaryLayer] = useState<boolean>(true);
   const [showGridMesh, setShowGridMesh] = useState<boolean>(true);
   const [selectedTooltip, setSelectedTooltip] = useState<string | null>(null);
+  const [showVirtualJoystick, setShowVirtualJoystick] = useState<boolean>(false);
+  const [isCockpitOpen, setIsCockpitOpen] = useState<boolean>(false);
+  const [joystickMode, setJoystickMode] = useState<JoystickMode>('aero_flow');
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const isDraggingCanvasRef = useRef<boolean>(false);
+  const dragStartPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
+
+  const handleJoystickChange = (val: JoystickValue) => {
+    if (!val.active && val.distance === 0) return;
+    setAlpha((prev) => parseFloat(Math.max(-5, Math.min(25, prev - val.y * 0.2)).toFixed(2)));
+    setMach((prev) => parseFloat(Math.max(0.05, Math.min(3.0, prev + val.x * 0.015)).toFixed(3)));
+  };
+
+  const handleCanvasMouseDown = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    isDraggingCanvasRef.current = true;
+    dragStartPosRef.current = { x: e.clientX, y: e.clientY };
+  };
+
+  const handleCanvasMouseMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDraggingCanvasRef.current) return;
+    const dx = e.clientX - dragStartPosRef.current.x;
+    const dy = e.clientY - dragStartPosRef.current.y;
+    dragStartPosRef.current = { x: e.clientX, y: e.clientY };
+
+    // dy changes alpha, dx changes Mach
+    setAlpha((prev) => parseFloat(Math.max(-5, Math.min(25, prev - dy * 0.1)).toFixed(2)));
+    setMach((prev) => parseFloat(Math.max(0.05, Math.min(3.0, prev + dx * 0.005)).toFixed(3)));
+  };
+
+  const handleCanvasMouseUp = () => {
+    isDraggingCanvasRef.current = false;
+  };
 
   // Standard Atmosphere (ISA) Calculations at Altitude H
   const isa = useMemo(() => {
@@ -544,6 +577,24 @@ export const CFDWindTunnel: React.FC<CFDWindTunnelProps> = () => {
             </div>
 
             <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setShowVirtualJoystick(!showVirtualJoystick)}
+                className={`text-[10px] px-2.5 py-1 rounded-full font-mono font-bold border transition-colors cursor-pointer ${
+                  showVirtualJoystick ? 'bg-cyan-500 text-slate-950 border-cyan-400 font-black' : 'bg-slate-800 text-cyan-300 border-slate-700'
+                }`}
+                title="Включить наэкранный виртуальный джойстик"
+              >
+                🕹️ Джойстик
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsCockpitOpen(true)}
+                className="text-[10px] px-2.5 py-1 rounded-full font-mono font-black bg-gradient-to-r from-cyan-500 to-indigo-600 text-slate-950 border border-cyan-300 shadow hover:brightness-110 cursor-pointer"
+                title="Открыть полноэкранный кокпит со всеми характеристиками"
+              >
+                Кокпит HUD ↗
+              </button>
               <span className={`text-[10px] px-2.5 py-1 rounded-full font-mono font-bold border ${flowRegime.badge}`}>
                 {flowRegime.label}
               </span>
@@ -557,7 +608,22 @@ export const CFDWindTunnel: React.FC<CFDWindTunnelProps> = () => {
 
           {/* Interactive Flow Canvas */}
           <div className="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 h-80 sm:h-96 shadow-inner">
-            <canvas ref={canvasRef} width={800} height={420} className="w-full h-full object-cover" />
+            <canvas
+              ref={canvasRef}
+              width={800}
+              height={420}
+              onMouseDown={handleCanvasMouseDown}
+              onMouseMove={handleCanvasMouseMove}
+              onMouseUp={handleCanvasMouseUp}
+              onMouseLeave={handleCanvasMouseUp}
+              className="w-full h-full object-cover cursor-crosshair active:cursor-grabbing"
+              title="Перетягивайте мышью для изменения угла атаки и скорости потока"
+            />
+
+            {/* Mouse Dragging Helper Label */}
+            <div className="absolute bottom-2 left-3 bg-slate-950/75 backdrop-blur-sm px-2 py-1 rounded border border-slate-800 text-[9px] font-mono text-slate-400 pointer-events-none">
+              🖱️ Зажмите мышь на трубе: перетягивание по Y изменяет угол атаки $\alpha$, по X — число Маха $M$.
+            </div>
 
             {/* Canvas Layers Overlay Toggles */}
             <div className="absolute top-3 right-3 flex items-center gap-1.5 bg-slate-950/85 backdrop-blur-md p-1.5 rounded-xl border border-slate-800 text-[10px] font-mono">
@@ -602,6 +668,19 @@ export const CFDWindTunnel: React.FC<CFDWindTunnelProps> = () => {
                 Сетка FVM
               </button>
             </div>
+
+            {/* Virtual Joystick Overlay on Wind Tunnel */}
+            {showVirtualJoystick && (
+              <div className="absolute bottom-3 right-3 z-30 animate-slideUp">
+                <VirtualJoystick
+                  mode={joystickMode}
+                  onModeChange={setJoystickMode}
+                  onChange={handleJoystickChange}
+                  size={110}
+                  showThrottle={false}
+                />
+              </div>
+            )}
           </div>
 
           {/* Interactive Aerodynamic Parameter Sliders */}
@@ -834,6 +913,15 @@ export const CFDWindTunnel: React.FC<CFDWindTunnelProps> = () => {
           </div>
         </div>
       </div>
+
+      {/* Universal Telemetry & Joystick Cockpit */}
+      <UniversalCockpitHUDModal
+        isOpen={isCockpitOpen}
+        onClose={() => setIsCockpitOpen(false)}
+        initialDomain="cfd_wind_tunnel"
+        initialMach={mach}
+        initialAlpha={alpha}
+      />
     </div>
   );
 };

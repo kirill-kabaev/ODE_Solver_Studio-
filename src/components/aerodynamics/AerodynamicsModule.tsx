@@ -55,6 +55,8 @@ import { Interactive3DAeroStudio } from './Interactive3DAeroStudio';
 import { AdvancedAeroSolversLab } from './AdvancedAeroSolversLab';
 import { AeroReportExportStudio } from './AeroReportExportStudio';
 import { EngineeringPresetCatalog, EngineeringPreset, ENGINEERING_PRESETS } from './EngineeringPresetCatalog';
+import { UniversalCockpitHUDModal, CockpitSystemDomain } from '../telemetry/UniversalCockpitHUDModal';
+import { FloatingCockpitLauncher } from '../telemetry/FloatingCockpitLauncher';
 
 // 6 Master Aerodynamic Domains
 export type AeroDomainCategory =
@@ -281,6 +283,8 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
     converged: true,
   });
 
+  const [isCockpitOpen, setIsCockpitOpen] = useState<boolean>(false);
+
   const handleCategorySelect = (category: AeroDomainCategory) => {
     setActiveCategory(category);
     if (category === 'general_aero') {
@@ -346,6 +350,16 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
               Выберите целевой класс летательного аппарата или фундаментальный солвер:
             </span>
           </div>
+
+          <button
+            type="button"
+            onClick={() => setIsCockpitOpen(true)}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 text-slate-950 text-xs font-black shadow-lg shadow-cyan-950/40 hover:brightness-110 transition-all border border-cyan-300 cursor-pointer"
+            title="Открыть полноэкранный экран телеметрии, регуляторов и виртуального джойстика"
+          >
+            <Compass className="w-3.5 h-3.5" />
+            <span>🕹️ Экран Телеметрии & Джойстик</span>
+          </button>
         </div>
 
         {/* 6 Grid Cards for Categories */}
@@ -821,6 +835,22 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
 
       {/* 6. SPACE LAUNCH VEHICLES & RE-ENTRY VIEW */}
       {activeCategory === 'space_launch_reentry' && <SpaceLaunchAerodynamicsModule />}
+
+      {/* Floating HUD Launcher Bar */}
+      <FloatingCockpitLauncher
+        currentDomain={activeCategory === 'uav_systems' ? 'uav_guidance' : activeCategory === 'supersonic_aviation' ? 'supersonic_mach' : '3d_aero_studio'}
+        mach={activeMach}
+        alpha={activeAlpha}
+      />
+
+      {/* Universal Fullscreen Telemetry & Joystick Cockpit */}
+      <UniversalCockpitHUDModal
+        isOpen={isCockpitOpen}
+        onClose={() => setIsCockpitOpen(false)}
+        initialDomain={activeCategory === 'uav_systems' ? 'uav_guidance' : activeCategory === 'supersonic_aviation' ? 'supersonic_mach' : '3d_aero_studio'}
+        initialMach={activeMach}
+        initialAlpha={activeAlpha}
+      />
     </div>
   );
 };
