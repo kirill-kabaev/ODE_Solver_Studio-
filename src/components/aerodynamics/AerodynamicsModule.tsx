@@ -39,6 +39,7 @@ import { UAVAeroacousticsModule } from './uav/UAVAeroacousticsModule';
 import { UAVFaultToleranceModule } from './uav/UAVFaultToleranceModule';
 import { UAVHybridIcingModule } from './uav/UAVHybridIcingModule';
 import { UAVLoiteringDiveModule } from './uav/UAVLoiteringDiveModule';
+import { UAVDsmacTercomModule } from './uav/UAVDsmacTercomModule';
 import { BiplaneAn2Module } from './civil/BiplaneAn2Module';
 import { CommercialAirlinerModule } from './civil/CommercialAirlinerModule';
 import { SupersonicAviationModule } from './supersonic/SupersonicAviationModule';
@@ -78,6 +79,7 @@ export type AeroSubTab =
   | 'uav_fault_tolerance'
   | 'uav_hybrid_icing'
   | 'uav_loitering_dive'
+  | 'uav_dsmac_tercom'
   | 'physics_solvers'
   | 'export_report'
   | 'vlm'
@@ -126,11 +128,11 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '11 Систем',
+    tag: '12 Систем',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'Силовые установки, РЭБ-навигация, радиолинк, Pro-Nav, VTOL, рой, OctoMap, FW-H шум, отказ моторов, гибриды и пикирование Ланцетов',
+    description: 'Силовые установки, РЭБ-навигация, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, FW-H шум, отказ моторов, гибриды и пикирование Ланцетов',
     defaultSubTab: 'uav_studio',
   },
   {
@@ -630,6 +632,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
             <Crosshair className="w-3.5 h-3.5 text-rose-400" />
             <span>🎯 Пикирование & Баллистика (Ланцет)</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_dsmac_tercom')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_dsmac_tercom'
+                ? 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-slate-950 shadow-md font-black ring-1 ring-emerald-400/50'
+                : 'text-emerald-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-emerald-900/50'
+            }`}
+          >
+            <Compass className="w-3.5 h-3.5 text-emerald-400" />
+            <span>🛰️ DSMAC / TERCOM & Дубинс</span>
+          </button>
         </div>
       )}
 
@@ -724,6 +739,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           {activeUAVSubTab === 'uav_fault_tolerance' && <UAVFaultToleranceModule />}
           {activeUAVSubTab === 'uav_hybrid_icing' && <UAVHybridIcingModule />}
           {activeUAVSubTab === 'uav_loitering_dive' && <UAVLoiteringDiveModule />}
+          {activeUAVSubTab === 'uav_dsmac_tercom' && <UAVDsmacTercomModule />}
         </>
       )}
 
