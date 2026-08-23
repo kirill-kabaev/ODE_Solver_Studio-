@@ -1748,7 +1748,7 @@ export const VortexLatticeModule: React.FC = () => {
   <UniversalCockpitHUDModal
     isOpen={isCockpitOpen}
     onClose={() => setIsCockpitOpen(false)}
-    initialDomain="3d_aero_studio"
+    initialDomain="vlm_3d"
     initialMach={parseFloat((velocity / 340).toFixed(2))}
     initialAlpha={alpha}
   />

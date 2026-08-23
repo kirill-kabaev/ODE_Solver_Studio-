@@ -292,7 +292,7 @@ export const PressureDistributionGraph: React.FC<PressureDistributionGraphProps>
       <UniversalCockpitHUDModal
         isOpen={isCockpitOpen}
         onClose={() => setIsCockpitOpen(false)}
-        initialDomain="cfd_wind_tunnel"
+        initialDomain="cp_distribution"
         initialMach={mach}
         initialAlpha={alpha}
       />
