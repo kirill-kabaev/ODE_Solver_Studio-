@@ -13,6 +13,8 @@ import {
 import { MathText, MathView } from '../MathView';
 import { AirfoilId } from './CFDWindTunnel';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
+import { UniversalCockpitHUDModal } from '../telemetry/UniversalCockpitHUDModal';
+import { FullscreenGraphButton } from '../telemetry/FullscreenGraphButton';
 
 interface PressureDistributionGraphProps {
   mach?: number;
@@ -26,6 +28,7 @@ export const PressureDistributionGraph: React.FC<PressureDistributionGraphProps>
   airfoilId = 'naca4412',
 }) => {
   const [showExplanation, setShowExplanation] = useState<boolean>(true);
+  const [isCockpitOpen, setIsCockpitOpen] = useState<boolean>(false);
 
   // Compute 50 points of Cp distribution along chord x/c in [0, 1]
   const cpPoints = useMemo(() => {
@@ -248,6 +251,13 @@ export const PressureDistributionGraph: React.FC<PressureDistributionGraphProps>
             <span className="text-slate-300">Площадь петли = Подъемная сила $C_L$</span>
           </div>
         </div>
+
+        {/* Bottom-Right Fullscreen Overlay Button */}
+        <FullscreenGraphButton
+          onClick={() => setIsCockpitOpen(true)}
+          label="Во весь экран"
+          subLabel="График C_p"
+        />
       </div>
 
       {/* Deep Explanations Section */}
@@ -277,6 +287,15 @@ export const PressureDistributionGraph: React.FC<PressureDistributionGraphProps>
           </div>
         </div>
       )}
+
+      {/* Universal Fullscreen Telemetry & Joystick Cockpit */}
+      <UniversalCockpitHUDModal
+        isOpen={isCockpitOpen}
+        onClose={() => setIsCockpitOpen(false)}
+        initialDomain="cfd_wind_tunnel"
+        initialMach={mach}
+        initialAlpha={alpha}
+      />
     </div>
   );
 };

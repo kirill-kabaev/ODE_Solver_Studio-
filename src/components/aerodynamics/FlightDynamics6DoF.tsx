@@ -18,6 +18,7 @@ import { HandbookTopicId } from '../EngineeringHandbookModal';
 import { createHardware2DContext } from '../../utils/gpuHardwareEnforcer';
 import { VirtualJoystick, JoystickMode, JoystickValue } from '../telemetry/VirtualJoystick';
 import { UniversalCockpitHUDModal } from '../telemetry/UniversalCockpitHUDModal';
+import { FullscreenGraphButton } from '../telemetry/FullscreenGraphButton';
 
 interface FlightDynamics6DoFProps {}
 
@@ -277,19 +278,16 @@ export const FlightDynamics6DoF: React.FC<FlightDynamics6DoFProps> = () => {
               <span className="text-[10px] px-2 py-0.5 rounded bg-cyan-950 text-cyan-300 font-mono border border-cyan-800">
                 HDG {yaw}°
               </span>
-              <button
-                type="button"
-                onClick={() => setIsCockpitOpen(true)}
-                className="px-2 py-0.5 rounded bg-gradient-to-r from-cyan-500 to-indigo-600 text-slate-950 font-bold text-[10px] shadow cursor-pointer hover:brightness-110"
-                title="Открыть полноэкранный кокпит со всеми характеристиками"
-              >
-                🕹️ Кокпит HUD
-              </button>
             </div>
           </div>
 
           <div className="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950 h-72 flex items-center justify-center shadow-inner">
             <canvas ref={pfdCanvasRef} width={340} height={280} className="w-full h-full object-contain" />
+            <FullscreenGraphButton
+              onClick={() => setIsCockpitOpen(true)}
+              label="Во весь экран"
+              subLabel="6-DoF HUD"
+            />
           </div>
 
           {/* Integrated Virtual Flight Yoke Joystick & Quick Buttons */}

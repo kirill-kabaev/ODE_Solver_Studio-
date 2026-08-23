@@ -16,6 +16,8 @@ import {
 import { MathView, MathText } from '../MathView';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
 import { createHardware2DContext } from '../../utils/gpuHardwareEnforcer';
+import { UniversalCockpitHUDModal } from '../telemetry/UniversalCockpitHUDModal';
+import { FullscreenGraphButton } from '../telemetry/FullscreenGraphButton';
 
 interface FlutterSimulatorProps {}
 
@@ -29,6 +31,7 @@ export const FlutterSimulator: React.FC<FlutterSimulatorProps> = () => {
 
   const [isRunning, setIsRunning] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'visual' | 'theory' | 'matrix'>('visual');
+  const [isCockpitOpen, setIsCockpitOpen] = useState<boolean>(false);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
@@ -324,6 +327,13 @@ export const FlutterSimulator: React.FC<FlutterSimulatorProps> = () => {
               <RotateCcw className="w-3.5 h-3.5" />
             </button>
           </div>
+
+          {/* Bottom-Right Fullscreen Overlay Button */}
+          <FullscreenGraphButton
+            onClick={() => setIsCockpitOpen(true)}
+            label="Во весь экран"
+            subLabel="Флаттер"
+          />
         </div>
 
         {/* 3. Interactive Parameter Controls */}
@@ -481,6 +491,14 @@ export const FlutterSimulator: React.FC<FlutterSimulatorProps> = () => {
           </ul>
         </div>
       </div>
+
+      {/* Universal Fullscreen Telemetry & Joystick Cockpit */}
+      <UniversalCockpitHUDModal
+        isOpen={isCockpitOpen}
+        onClose={() => setIsCockpitOpen(false)}
+        initialDomain="flutter_fsi"
+        initialMach={parseFloat((velocity / 340).toFixed(2))}
+      />
     </div>
   );
 };

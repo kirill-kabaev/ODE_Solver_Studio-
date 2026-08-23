@@ -25,6 +25,8 @@ import {
 import { MathView, MathText } from '../MathView';
 import { WingGeometryEditor, ExtendedWingGeometryConfig, DEFAULT_WING_GEOMETRY } from './WingGeometryEditor';
 import { createHardware2DContext } from '../../utils/gpuHardwareEnforcer';
+import { UniversalCockpitHUDModal } from '../telemetry/UniversalCockpitHUDModal';
+import { FullscreenGraphButton } from '../telemetry/FullscreenGraphButton';
 
 // ==========================================
 // 3D VLM GEOMETRIC DATA STRUCTURES & TYPES
@@ -796,6 +798,7 @@ export const VortexLatticeModule: React.FC = () => {
   const [alpha, setAlpha] = useState<number>(WING_PRESETS[0].defaultAlpha);
   const [velocity, setVelocity] = useState<number>(75.0); // m/s (~270 km/h)
   const [density, setDensity] = useState<number>(1.225); // kg/m^3
+  const [isCockpitOpen, setIsCockpitOpen] = useState<boolean>(false);
 
   // 3D Canvas Controls in Stable Refs (Zero Re-render Loop Pattern)
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -1422,6 +1425,13 @@ export const VortexLatticeModule: React.FC = () => {
                 {showWakeFilaments ? <Eye className="w-2.5 h-2.5 text-indigo-400" /> : <EyeOff className="w-2.5 h-2.5" />}
               </button>
             </div>
+
+            {/* Bottom-Right Fullscreen Overlay Button */}
+            <FullscreenGraphButton
+              onClick={() => setIsCockpitOpen(true)}
+              label="Во весь экран"
+              subLabel="VLM 3D"
+            />
           </div>
 
           {/* Colormap Selector & Legend */}
@@ -1693,12 +1703,17 @@ export const VortexLatticeModule: React.FC = () => {
         </div>
 
         {/* 2D Canvas Curve Plotter */}
-        <div className="bg-slate-950 rounded-xl p-4 border border-slate-800">
+        <div className="relative bg-slate-950 rounded-xl p-4 border border-slate-800">
           <SectionalGraphCanvas
             sections={vlmResults.sections}
             mode={activeGraphTab}
             CL={vlmResults.liftCoeff}
             efficiency={vlmResults.efficiencyFactor}
+          />
+          <FullscreenGraphButton
+            onClick={() => setIsCockpitOpen(true)}
+            label="Во весь экран"
+            subLabel="Эпюра"
           />
         </div>
 
@@ -1728,6 +1743,15 @@ export const VortexLatticeModule: React.FC = () => {
       </div>
     </>
   )}
+
+  {/* Universal Fullscreen Telemetry & Joystick Cockpit */}
+  <UniversalCockpitHUDModal
+    isOpen={isCockpitOpen}
+    onClose={() => setIsCockpitOpen(false)}
+    initialDomain="3d_aero_studio"
+    initialMach={parseFloat((velocity / 340).toFixed(2))}
+    initialAlpha={alpha}
+  />
 </div>
   );
 };

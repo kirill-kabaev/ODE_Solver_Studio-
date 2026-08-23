@@ -35,6 +35,7 @@ import { MathView, MathText } from '../MathView';
 import { createHardware2DContext } from '../../utils/gpuHardwareEnforcer';
 import { VirtualJoystick, JoystickMode, JoystickValue } from '../telemetry/VirtualJoystick';
 import { UniversalCockpitHUDModal } from '../telemetry/UniversalCockpitHUDModal';
+import { FullscreenGraphButton } from '../telemetry/FullscreenGraphButton';
 
 export type VisualStudioMode = 'cut_plane' | 'vortex_q' | 'smoke_stream' | 'probe' | 'comparator';
 export type SlicingAxis = 'X' | 'Y' | 'Z';
@@ -901,33 +902,8 @@ export const Interactive3DAeroStudio: React.FC<Interactive3DAeroStudioProps> = (
           </button>
         </div>
 
-        {/* Quick Screenshot & Cockpit Fullscreen Buttons */}
+        {/* Quick Screenshot Button */}
         <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => setShowVirtualJoystick(!showVirtualJoystick)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl border font-bold text-xs transition-all cursor-pointer ${
-              showVirtualJoystick
-                ? 'bg-cyan-500 text-slate-950 border-cyan-300 font-black shadow-lg shadow-cyan-950/50'
-                : 'bg-slate-800 hover:bg-slate-700 text-cyan-300 border-slate-700'
-            }`}
-            title="Включить наэкранный визуальный джойстик"
-          >
-            <Crosshair className="w-3.5 h-3.5" />
-            <span>Джойстик</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setIsCockpitOpen(true)}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:brightness-110 text-slate-950 font-black text-xs transition-all cursor-pointer shadow-lg shadow-cyan-950/60 border border-cyan-300"
-            title="Открыть полноэкранный экран всех характеристик, регуляторов и навигации"
-          >
-            <Compass className="w-3.5 h-3.5 text-slate-950" />
-            <span>Экран Телеметрии</span>
-            <Maximize2 className="w-3 h-3 text-slate-950" />
-          </button>
-
           <button
             type="button"
             onClick={handleExportScreenshot}
@@ -935,7 +911,7 @@ export const Interactive3DAeroStudio: React.FC<Interactive3DAeroStudioProps> = (
             title="Экспортировать снимок 3D визуализации высокого разрешения"
           >
             <Camera className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Снимок</span>
+            <span>Снимок 3D</span>
           </button>
         </div>
       </div>
@@ -1057,7 +1033,7 @@ export const Interactive3DAeroStudio: React.FC<Interactive3DAeroStudioProps> = (
 
             {/* Interactive On-Canvas Virtual Joystick Overlay */}
             {showVirtualJoystick && (
-              <div className="absolute bottom-3 right-3 z-30 animate-slideUp">
+              <div className="absolute bottom-14 right-3 z-30 animate-slideUp">
                 <VirtualJoystick
                   mode={joystickMode}
                   onModeChange={setJoystickMode}
@@ -1067,6 +1043,15 @@ export const Interactive3DAeroStudio: React.FC<Interactive3DAeroStudioProps> = (
                 />
               </div>
             )}
+
+            {/* Bottom-Right Fullscreen & Joystick Overlay Controls */}
+            <FullscreenGraphButton
+              onClick={() => setIsCockpitOpen(true)}
+              label="Во весь экран"
+              subLabel="Кокпит HUD"
+              onToggleJoystick={() => setShowVirtualJoystick(!showVirtualJoystick)}
+              isJoystickActive={showVirtualJoystick}
+            />
           </div>
         </div>
 
