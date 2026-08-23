@@ -38,6 +38,7 @@ import { UAVObstacleAvoidanceModule } from './uav/UAVObstacleAvoidanceModule';
 import { UAVAeroacousticsModule } from './uav/UAVAeroacousticsModule';
 import { UAVFaultToleranceModule } from './uav/UAVFaultToleranceModule';
 import { UAVHybridIcingModule } from './uav/UAVHybridIcingModule';
+import { UAVLoiteringDiveModule } from './uav/UAVLoiteringDiveModule';
 import { BiplaneAn2Module } from './civil/BiplaneAn2Module';
 import { CommercialAirlinerModule } from './civil/CommercialAirlinerModule';
 import { SupersonicAviationModule } from './supersonic/SupersonicAviationModule';
@@ -76,6 +77,7 @@ export type AeroSubTab =
   | 'uav_acoustics'
   | 'uav_fault_tolerance'
   | 'uav_hybrid_icing'
+  | 'uav_loitering_dive'
   | 'physics_solvers'
   | 'export_report'
   | 'vlm'
@@ -124,11 +126,11 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '10 Систем',
+    tag: '11 Систем',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'Силовые установки, РЭБ-навигация EKF3, радиолинк, Pro-Nav, VTOL, рой, OctoMap, FW-H шум, отказ моторов FTC & гибриды',
+    description: 'Силовые установки, РЭБ-навигация, радиолинк, Pro-Nav, VTOL, рой, OctoMap, FW-H шум, отказ моторов, гибриды и пикирование Ланцетов',
     defaultSubTab: 'uav_studio',
   },
   {
@@ -615,6 +617,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
             <Flame className="w-3.5 h-3.5 text-teal-400" />
             <span>⚡ Гибридная СУ, Лед & EDF</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_loitering_dive')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_loitering_dive'
+                ? 'bg-gradient-to-r from-rose-500 via-amber-500 to-red-500 text-white shadow-md font-black ring-1 ring-rose-400/50'
+                : 'text-rose-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-rose-900/50'
+            }`}
+          >
+            <Crosshair className="w-3.5 h-3.5 text-rose-400" />
+            <span>🎯 Пикирование & Баллистика (Ланцет)</span>
+          </button>
         </div>
       )}
 
@@ -708,6 +723,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
           {activeUAVSubTab === 'uav_acoustics' && <UAVAeroacousticsModule />}
           {activeUAVSubTab === 'uav_fault_tolerance' && <UAVFaultToleranceModule />}
           {activeUAVSubTab === 'uav_hybrid_icing' && <UAVHybridIcingModule />}
+          {activeUAVSubTab === 'uav_loitering_dive' && <UAVLoiteringDiveModule />}
         </>
       )}
 

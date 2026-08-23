@@ -31,6 +31,7 @@ import {
   CheckSquare,
   FileSpreadsheet,
 } from 'lucide-react';
+import { MathView, MathText } from './MathView';
 
 export type PriorityLevel = 'p0_urgent' | 'p1_high' | 'p2_medium' | 'p3_rnd';
 export type VehicleClass = 'all' | 'uav' | 'light_crop' | 'airliner' | 'supersonic' | 'rocket_space';
@@ -588,8 +589,8 @@ export const INITIAL_ROADMAP_FEATURES: RoadmapFeatureItem[] = [
     priorityLabel: 'P1: Высокий приоритет',
     description: 'Расчет аэродинамической устойчивости, балансировочных углов рулей и аэроупругости складных Х-образных крыльев при крутом терминальном пикировании на скоростях 180–300 км/ч под углами до 90°. Расчет аэродинамического сопротивления воздушного винта в режиме авторотации/торможения.',
     engineeringImpact: 'Гарантирует высокоточную стабилизацию и отсутствие флагманского разрушения консолей дронов-камикадзе на финальном участке наведения на цель.',
-    autoDetected: false,
-    defaultStatus: 'planned',
+    autoDetected: true,
+    defaultStatus: 'completed',
     targetMilestone: 'БПЛА & Высокоскоростное Пикирование',
     mathBasis: 'm \\frac{dV}{dt} = -D + mg \\sin\\gamma - T_{\\text{windmilling}}, \\quad n_y = \\frac{L}{mg} + \\cos\\gamma \\le n_{y,\\max}',
   },
@@ -668,6 +669,159 @@ export const INITIAL_ROADMAP_FEATURES: RoadmapFeatureItem[] = [
     targetMilestone: 'БПЛА & Нестационарная Аэродинамика',
     mathBasis: '\\beta(\\psi) = a_0 - a_1 \\cos\\psi - b_1 \\sin\\psi, \\quad H = \\frac{1}{2} \\rho (\\Omega R)^2 A \\left( \\frac{\\sigma C_{d0}}{8} \\mu + \\frac{\\sigma a}{8} \\frac{\\mu \\theta_0}{1 + \\dots} \\right)',
   },
+  // ==========================================
+  // САПР, ИИ-ГЕНЕРАТИВНЫЙ ДИЗАЙН & 3D КОНСТРУКТОР СБОРКИ БПЛА
+  // ==========================================
+  {
+    id: 'feat_uav_generative_mdo_optimizer',
+    title: '41. Автоматический Генеративный Дизайн & Многокритериальная Оптимизация БПЛА по ТЗ (MDO / Genetic Pareto Optimizer)',
+    category: 'Динамика & СУ',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Генеративный Дизайн',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Автоматический синтез оптимальной геометрии планера (размах, хорда, профиль, удлинение AR) и силовой установки по входному ТЗ (полезная нагрузка, дальность, время барражирования, лимит MTOW). Построение фронта Парето и выбор оптимального компромисса между дальностью и массой.',
+    engineeringImpact: 'Устраняет необходимость ручного перебора параметров: инженер за секунды получает 3 оптимальных варианта планера под конкретную задачу.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'САПР: Фаза 1 (Генеративный ИИ)',
+    mathBasis: '\\min_{\\mathbf{x}} \\{ -R(\\mathbf{x}), m_{\\text{tot}}(\\mathbf{x}) \\} \\quad \\text{s.t.} \\quad V_{\\text{stall}} \\le 45 \\text{ км/ч}, \\, 10\\% \\le \\text{SM} \\le 15\\%',
+  },
+  {
+    id: 'feat_uav_3d_cad_assembly_gizmo',
+    title: '42. Интерактивный 3D CAD-Конструктор Сборочного Узла БПЛА (Three.js TransformControls & Drag-and-Drop)',
+    category: 'Прочность & Вес',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / САПР Сборки',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Интерактивная 3D-среда компоновки узлов дрона (аккумуляторы, автопилот, моторы, подвес камеры, парашют) с манипуляторами перемещения Gizmo (оси X, Y, Z), привязкой к направляющим фюзеляжа и визуализацией каркаса планера.',
+    engineeringImpact: 'Позволяет компоновать реальный беспилотник внутри прозрачного фюзеляжа в браузере так же удобно, как в SolidWorks или Fusion 360.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'САПР: Фаза 2 (3D Сборка)',
+    mathBasis: '\\mathbf{r}_{\\text{world}} = \\mathbf{T}_{\\text{assembly}} \\cdot \\mathbf{r}_{\\text{local}}, \\quad \\text{RaycastIntersect}(x,y) \\to \\text{SnapToGrid}',
+  },
+  {
+    id: 'feat_uav_dynamic_cg_inertia_tensor',
+    title: '43. Динамический расчет Центра Тяжести (CG) и Тензора Инерции (Huygens-Steiner Tensor Ixx, Iyy, Izz)',
+    category: 'Динамика & СУ',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Масс-Инерция',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Мгновенный пересчет пространственного центра масс и полного тензора инерции 3x3 при любом перемещении компонентов сборки по формулам параллельного переноса осей Гюйгенса-Штейнера. Визуализация красной сферы CG и эллипсоида инерции.',
+    engineeringImpact: 'Исключает аварии из-за неверной центровки и формирует точные массово-инерционные параметры для настройки полетного контроллера.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'САПР: Фаза 2 (3D Сборка)',
+    mathBasis: '\\mathbf{R}_{\\text{cg}} = \\frac{\\sum m_i \\mathbf{r}_i}{\\sum m_i}, \\quad I_{xx} = \\sum [I_{xx,i} + m_i(y_i^2 + z_i^2)]',
+  },
+  {
+    id: 'feat_uav_static_margin_autotuning',
+    title: '44. Авто-балансировщик Продольной Статической Устойчивости (Neutral Point x_np & Static Margin Auto-Tuning)',
+    category: 'Динамика & СУ',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА Самолетного Типа',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Алгоритм автоматического сдвига батарейного отсека и полезной нагрузки вдоль фюзеляжа для удержания запаса статической устойчивости (Static Margin) строго в диапазоне 10–14% от средней аэродинамической хорды (MAC) относительно нейтральной точки.',
+    engineeringImpact: 'Гарантирует устойчивый и предсказуемый полет без склонности к клевкам носом или неуправляемому кабрированию/штопору.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'САПР: Фаза 1 (Генеративный ИИ)',
+    mathBasis: '\\text{SM} = \\frac{x_{\\text{np}} - x_{\\text{cg}}}{\\bar{c}} \\times 100\\%, \\quad x_{\\text{np}} = x_{\\text{ac,w}} + \\frac{C_{L\\alpha,h}}{C_{L\\alpha,w}} \\eta_h \\frac{S_h}{S_w} l_h',
+  },
+  {
+    id: 'feat_uav_vmg_prop_motor_match_solver',
+    title: '45. Автоматический подбор ВМГ по кривым эффективности (Motor-Prop Matching & Cruise Efficiency Global Min)',
+    category: 'Двигатели & Пропульсия',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / ВМГ Оптимизатор',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Автоматический подбор оптимальной связки «Бесколлекторный Мотор (KV, $R_i, I_0$) + Пропеллер (диаметр D, шаг P, дисковое заполнение) + Регулятор ESC» из базы данных (T-Motor, Sunnysky, APC) под крейсерскую скорость с КПД силовой установки свыше 82%.',
+    engineeringImpact: 'Максимизирует дальность полета за счет исключения перегрева моторов и работы пропеллера в зоне пиковой тяговой отдачи.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'САПР: Фаза 1 (Генеративный ИИ)',
+    mathBasis: '\\eta_{\\text{sys}} = \\eta_{\\text{motor}}(I) \\cdot \\eta_{\\text{prop}}(J), \\quad J = \\frac{V_\\infty}{n \\cdot D}, \\quad P_{\\text{elec}} = U \\cdot I',
+  },
+  {
+    id: 'feat_uav_collision_wiring_harness',
+    title: '46. Проверка Коллизий, Зазоров и Трассировка Силовой Проводки (Collision Detection & AWG Voltage Drop)',
+    category: 'Прочность & Вес',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / САПР Сборки',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Пространственная проверка пересечений 3D-тел компонентов (Axis-Aligned Bounding Box / OBB collision), расчет зазоров между кончиками винтов и фюзеляжем (минимум 15 мм), автоматический расчет сечения силовых проводов (AWG) и падения напряжения $\\Delta U = 2 I L \\rho / S$.',
+    engineeringImpact: 'Предотвращает механические заклинивания и прогары бортовой проводки дрона под высокими токами.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'САПР: Фаза 2 (3D Сборка)',
+    mathBasis: '\\Delta U = I_{\\max} \\cdot \\frac{2 \\cdot L \\cdot \\rho_{\\text{Cu}}}{S_{\\text{AWG}}} \\le 0.03 \\cdot U_{\\text{bat}}, \\quad \\text{OBB}_A \\cap \\text{OBB}_B = \\emptyset',
+  },
+  {
+    id: 'feat_uav_dxf_stl_production_export',
+    title: '47. Сквозной Экспорт для ЧПУ & 3D-Печати (DXF Ribs/Spars Laser Cut & STL Motor-Mount / Fuselage Shells)',
+    category: 'Прочность & Вес',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Производство',
+    priority: 'p2_medium',
+    priorityLabel: 'P2: Средний приоритет',
+    description: 'Автоматическая генерация векторных чертежей сечений нервюр и лонжеронов с пазами под сборку в формате `.DXF` для лазерного ЧПУ-раскроя фанеры/бальзы/карбона, а также экспорт оболочек моторам и носовых обтекателей в формат `.STL` для 3D-печати.',
+    engineeringImpact: 'Сокращает путь от виртуального проекта до готового физического планера на столе до 1–2 дней.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'САПР: Фаза 3 (Производство)',
+    mathBasis: '\\mathbf{P}_{\\text{rib}}(x) = \\text{Airfoil}(x) \\times c_i + \\text{JointNotch}(w_{\\text{spar}}, h_{\\text{spar}})',
+  },
+  {
+    id: 'feat_uav_ardupilot_px4_param_generator',
+    title: '48. Генератор Конфигураций Автопилотов ArduPilot / PX4 (.param Mixer Matrix & PID Tuning Seeds)',
+    category: 'Космос & Авионика',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Авионика',
+    priority: 'p2_medium',
+    priorityLabel: 'P2: Средний приоритет',
+    description: 'Автоматический расчет начальных коэффициентов ПИД-регуляторов ($P, I, D, FF$), матрицы микширования моторов и сервоприводов на основе рассчитанного тензора инерции и площадей элевонов. Экспорт готового файла параметров `.param` для QGroundControl и Mission Planner.',
+    engineeringImpact: 'Позволяет безопасно поднять спроектированный БПЛА в первый полет без опасной раскачки по осям.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'САПР: Фаза 4 (Автопилоты & HIL)',
+    mathBasis: 'K_p = \\frac{2 \\zeta \\omega_n I_{xx}}{K_{\\text{actuator}}}, \\quad \\mathbf{u}_{\\text{motors}} = \\mathbf{B}^{\\dagger} \\cdot \\mathbf{\\tau}_{\\text{cmd}}',
+  },
+  {
+    id: 'feat_uav_hil_sitl_virtual_windtunnel',
+    title: '49. Виртуальный Полетный Симулятор HIL / SITL в Аэродинамической Трубе (WebHID Gamepad RC-Control)',
+    category: 'Динамика & СУ',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / HIL Симулятор',
+    priority: 'p3_rnd',
+    priorityLabel: 'P3: Перспективно & R&D',
+    description: 'Интеграция виртуального полета спроектированного БПЛА в браузере с управлением от реального пульта радиоуправления (через USB Gamepad / WebHID API). 6-DoF нелинейная динамика с визуализацией срыва потока и ветровых порывов.',
+    engineeringImpact: 'Обеспечивает виртуальный облет дрона инженером-испытателем еще до изготовления физического прототипа.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'САПР: Фаза 4 (Автопилоты & HIL)',
+    mathBasis: '\\dot{\\mathbf{v}} = \\frac{\\mathbf{F}_{\\text{aero}} + \\mathbf{F}_{\\text{prop}}}{m} - \\mathbf{\\omega} \\times \\mathbf{v} + \\mathbf{g}, \\quad \\dot{\\mathbf{\\omega}} = \\mathbf{I}^{-1}(\\mathbf{M} - \\mathbf{\\omega} \\times \\mathbf{I}\\mathbf{\\omega})',
+  },
+  {
+    id: 'feat_uav_cloud_fea_spar_buckling',
+    title: '50. Параметрический FEA-Анализ Прочности Лонжерона и Обшивки (Bending Moment & Skin Buckling)',
+    category: 'Прочность & Вес',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Прочность',
+    priority: 'p3_rnd',
+    priorityLabel: 'P3: Перспективно & R&D',
+    description: 'Расчет эпюр перерезывающих сил $Q(z)$ и изгибающих моментов $M(z)$ консоли крыла при расчетной перегрузке $n_y = +6g$. Расчет толщины карбоновой трубки лонжерона и критических напряжений потери устойчивости тонкой обшивки (Skin Buckling).',
+    engineeringImpact: 'Гарантирует прочность крыла при резких маневрах и выходе из пикирования с минимальной массой конструкции.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'САПР: Фаза 3 (Производство)',
+    mathBasis: '\\sigma_{\\max} = \\frac{M(z) \\cdot y_{\\max}}{I_z} \\le [\\sigma_{\\text{allow}}], \\quad \\tau_{\\text{cr}} = k_s \\frac{\\pi^2 E}{12(1-\\nu^2)} \\left(\\frac{t}{b}\\right)^2',
+  },
 ];
 
 interface FutureRoadmapModalProps {
@@ -713,7 +867,7 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
   const [selectedVehicleClass, setSelectedVehicleClass] = useState<VehicleClass>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'matrix' | 'features_list' | 'add_feature'>('matrix');
+  const [activeTab, setActiveTab] = useState<'matrix' | 'cad_constructor' | 'features_list' | 'add_feature'>('matrix');
 
   // New feature form state
   const [newTitle, setNewTitle] = useState('');
@@ -947,11 +1101,17 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
       ).length;
       const total = stageFeatures.length;
       const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+      const p0Total = stageFeatures.filter((f) => f.priority === 'p0_urgent').length;
+      const p0Done = stageFeatures.filter(
+        (f) => f.priority === 'p0_urgent' && featureStatuses[f.id] === 'completed'
+      ).length;
       return {
         ...st,
         total,
         completed,
         percent: pct,
+        p0Total,
+        p0Done,
         features: stageFeatures,
       };
     });
@@ -1091,7 +1251,7 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
           </div>
 
           {/* Quick Tab Switcher */}
-          <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-mono">
+          <div className="flex items-center gap-1 bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-mono flex-wrap">
             <button
               type="button"
               onClick={() => setActiveTab('matrix')}
@@ -1102,6 +1262,18 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
               }`}
             >
               Матрица 5 Классов ЛА
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('cad_constructor')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                activeTab === 'cad_constructor'
+                  ? 'bg-gradient-to-r from-amber-500 to-rose-500 text-slate-950 font-bold shadow-md'
+                  : 'text-amber-400 hover:text-amber-200 bg-amber-500/10 border border-amber-500/20'
+              }`}
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>🛠️ 3D САПР & ИИ-Конструктор (4 Фазы)</span>
             </button>
             <button
               type="button"
@@ -1153,45 +1325,42 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
                     <div
                       key={v.id}
                       onClick={() => {
-                        setSelectedVehicleClass(isSelected ? 'all' : v.id);
+                        setSelectedVehicleClass(v.id);
                         setActiveTab('features_list');
                       }}
-                      className={`relative overflow-hidden rounded-2xl border p-4 sm:p-5 transition-all cursor-pointer group hover:scale-[1.01] bg-slate-950/80 ${
+                      className={`group p-4 sm:p-5 rounded-2xl border bg-gradient-to-br transition-all cursor-pointer hover:scale-[1.01] hover:shadow-xl ${
                         isSelected
-                          ? 'border-cyan-400 ring-2 ring-cyan-500/20 shadow-xl'
-                          : 'border-slate-800 hover:border-slate-700'
+                          ? 'border-cyan-400 ring-2 ring-cyan-500/40 bg-slate-900 shadow-cyan-950/40'
+                          : `${v.color} hover:border-slate-600 bg-slate-950/60`
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3 mb-3">
-                        <div className="flex items-center gap-2.5">
-                          <div className={`p-2.5 rounded-xl border ${v.color}`}>
+                        <div className="flex items-center gap-3">
+                          <div className={`p-2.5 rounded-xl border ${isSelected ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300' : 'bg-slate-900 border-slate-700 text-slate-300'}`}>
                             <Icon className="w-5 h-5" />
                           </div>
                           <div>
                             <h4 className="text-sm font-bold text-white group-hover:text-cyan-300 transition-colors">
                               {v.name}
                             </h4>
-                            <span className="text-[10px] text-slate-400 font-mono">
-                              {v.subtitle}
-                            </span>
+                            <p className="text-[11px] text-slate-400 font-mono">{v.subtitle}</p>
                           </div>
                         </div>
-                        <span className="text-xs font-mono font-bold text-cyan-400 bg-cyan-950/80 border border-cyan-800/60 px-2 py-0.5 rounded-full">
-                          {v.percent}%
+                        <span className="text-xs font-mono font-bold text-cyan-400 px-2 py-0.5 rounded-lg bg-slate-900 border border-slate-800">
+                          {v.completed}/{v.total}
                         </span>
                       </div>
 
-                      <p className="text-xs text-slate-300 mb-4 line-clamp-3 leading-relaxed">
+                      <p className="text-xs text-slate-400 leading-relaxed mb-4">
                         {v.desc}
                       </p>
 
-                      {/* Progress bar */}
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between text-[11px] font-mono text-slate-400">
-                          <span>Готовность модулей</span>
-                          <span>{v.completed} из {v.total}</span>
+                      <div className="space-y-1.5 font-mono text-xs">
+                        <div className="flex justify-between text-[11px] text-slate-400">
+                          <span>Готовность дисциплины:</span>
+                          <span className="font-bold text-slate-200">{v.percent}%</span>
                         </div>
-                        <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                        <div className="w-full h-1.5 bg-slate-800 rounded-full overflow-hidden">
                           <div
                             className={`h-full ${v.accent} transition-all duration-500`}
                             style={{ width: `${v.percent}%` }}
@@ -1199,32 +1368,34 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
                         </div>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-400 group-hover:text-cyan-300">
-                        <span className="font-mono text-[11px]">Посмотреть {v.total} фич</span>
-                        <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
+                      <div className="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400 font-mono">
+                        <span>P0 задачи: <strong className="text-amber-300">{v.p0Done}/{v.p0Total}</strong></span>
+                        <span className="flex items-center gap-1 text-cyan-400 group-hover:translate-x-1 transition-transform">
+                          Открыть задачи <ArrowRight className="w-3 h-3" />
+                        </span>
                       </div>
                     </div>
                   );
                 })}
               </div>
 
-              {/* Engineering Synthesis Box */}
-              <div className="rounded-2xl border border-indigo-500/30 bg-gradient-to-r from-indigo-950/40 via-slate-950 to-slate-900 p-4 sm:p-5">
+              {/* Design-to-Fly principle banner */}
+              <div className="p-4 rounded-2xl bg-gradient-to-r from-indigo-950/60 via-slate-900 to-purple-950/60 border border-indigo-500/30">
                 <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 shrink-0">
-                    <Sparkles className="w-5 h-5" />
+                  <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 shrink-0 mt-0.5">
+                    <Shield className="w-4 h-4" />
                   </div>
                   <div>
                     <h4 className="text-sm font-bold text-indigo-300 mb-1">
                       Принцип Полноты Инженерного Цикла (Design-to-Fly)
                     </h4>
                     <p className="text-xs text-slate-300 leading-relaxed">
-                      Чтобы летательный аппарат поднялся в воздух и успешно выполнил миссию, студия закрывает 5 критических инженерных фаз:
-                      <strong className="text-cyan-300"> Геометрия & Профили</strong> $\to$
-                      <strong className="text-cyan-300"> 3D Несущие Силы & Моменты</strong> $\to$
-                      <strong className="text-cyan-300"> Продольная/Боковая Устойчивость & Центровка</strong> $\to$
-                      <strong className="text-cyan-300"> Тяговооруженность ВМГ / ЖРД</strong> $\to$
-                      <strong className="text-cyan-300"> Прочность & Флаттер</strong>.
+                      Чтобы летательный аппарат поднялся в воздух и успешно выполнил миссию, студия закрывает 5 критических инженерных фаз:{' '}
+                      <strong className="text-cyan-300">Геометрия & Профили</strong> <span className="text-indigo-400 font-bold">→</span>{' '}
+                      <strong className="text-cyan-300">3D Несущие Силы & Моменты</strong> <span className="text-indigo-400 font-bold">→</span>{' '}
+                      <strong className="text-cyan-300">Продольная/Боковая Устойчивость & Центровка</strong> <span className="text-indigo-400 font-bold">→</span>{' '}
+                      <strong className="text-cyan-300">Тяговооруженность ВМГ / ЖРД</strong> <span className="text-indigo-400 font-bold">→</span>{' '}
+                      <strong className="text-cyan-300">Прочность & Флаттер</strong>.
                     </p>
                   </div>
                 </div>
@@ -1232,7 +1403,233 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
             </div>
           )}
 
-          {/* TAB 2: FULL FEATURES LIST WITH INTERACTIVE CHECKBOXES */}
+          {/* TAB 2: 3D CAD & GENERATIVE CONSTRUCTOR 4-PHASE ROADMAP */}
+          {activeTab === 'cad_constructor' && (
+            <div className="space-y-6 animate-fadeIn font-mono">
+              {/* Header Hero Banner */}
+              <div className="p-5 rounded-3xl bg-gradient-to-r from-amber-950/90 via-slate-900 to-rose-950/80 border border-amber-500/40 shadow-2xl space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400">
+                      <Sparkles className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                        <span>Генеративный 3D CAD & Конструктор Сборочного Узла БПЛА</span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          Digital Twin & CAE
+                        </span>
+                      </h3>
+                      <p className="text-xs text-slate-300">
+                        Поэтапная дорожная карта: от автоматического синтеза по ТЗ до 3D-компоновки, генерации файлов для ЧПУ и полетной симуляции ArduPilot
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="px-3 py-1 rounded-xl bg-slate-950 border border-slate-800 text-amber-400 text-xs font-bold">
+                      10 Специализированных Фич (#41–#50)
+                    </span>
+                  </div>
+                </div>
+
+                {/* Visual End-to-End Pipeline */}
+                <div className="p-3.5 rounded-2xl bg-slate-950/80 border border-slate-800 flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-300">
+                  <div className="flex items-center gap-1.5 text-amber-300 font-bold">
+                    <span className="w-5 h-5 rounded-full bg-amber-500/20 text-center leading-5 text-[10px] border border-amber-500/40">1</span>
+                    <span>Входное ТЗ</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-600 hidden sm:block" />
+                  <div className="flex items-center gap-1.5 text-cyan-300 font-bold">
+                    <span className="w-5 h-5 rounded-full bg-cyan-500/20 text-center leading-5 text-[10px] border border-cyan-500/40">2</span>
+                    <span>MDO-Оптимизатор</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-600 hidden sm:block" />
+                  <div className="flex items-center gap-1.5 text-emerald-300 font-bold">
+                    <span className="w-5 h-5 rounded-full bg-emerald-500/20 text-center leading-5 text-[10px] border border-emerald-500/40">3</span>
+                    <span>3D CAD Сборка & CG</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-600 hidden sm:block" />
+                  <div className="flex items-center gap-1.5 text-purple-300 font-bold">
+                    <span className="w-5 h-5 rounded-full bg-purple-500/20 text-center leading-5 text-[10px] border border-purple-500/40">4</span>
+                    <span>ЧПУ / 3D-Печать DXF/STL</span>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-slate-600 hidden sm:block" />
+                  <div className="flex items-center gap-1.5 text-rose-300 font-bold">
+                    <span className="w-5 h-5 rounded-full bg-rose-500/20 text-center leading-5 text-[10px] border border-rose-500/40">5</span>
+                    <span>ArduPilot SITL / Fly</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 4 PHASES BREAKDOWN GRID */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                
+                {/* PHASE 1: GENERATIVE AI & MDO */}
+                <div className="p-5 rounded-3xl bg-slate-900 border border-amber-500/30 shadow-xl space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                        <Cpu className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-black text-white">ФАЗА 1: Генеративный ИИ-Синтез по ТЗ</h4>
+                        <span className="text-[10px] text-amber-400 font-bold">MDO & Оптимизация Бреге (P0 Срочно)</span>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                      Фичи #41, #44, #45
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Инженер вводит только целевые требования (полезная нагрузка, дальность, время барражирования, лимит MTOW), а генетический алгоритм автоматически синтезирует оптимальный планер и ВМГ:
+                  </p>
+
+                  <ul className="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                    <li><strong className="text-amber-300">#41 MDO Pareto Optimizer:</strong> Многокритериальный поиск глобального минимума массы и максимума дальности полета.</li>
+                    <li><strong className="text-amber-300">#44 Auto-CG & Static Margin:</strong> Автоматический сдвиг батареи и полезной нагрузки для строгого запаса центровки <MathView math="\text{SM} = 10\dots14\%" />.</li>
+                    <li><strong className="text-amber-300">#45 Motor-Prop Matcher:</strong> Подбор связки мотор (KV, <MathView math="R_i" />) + пропеллер (<MathView math="D, P" />) из базы под КПД &gt;82%.</li>
+                  </ul>
+
+                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400 space-y-1">
+                    <span className="text-amber-400 font-bold">Математический фундамент:</span>
+                    <div className="py-1 text-slate-100 overflow-x-auto">
+                      <MathView math="R = \frac{E_{\text{bat}}}{m_{\text{tot}} \cdot g} \cdot \left(\frac{L}{D}\right) \cdot \eta_{\text{sys}}, \quad \text{SM} = \frac{x_{\text{np}} - x_{\text{cg}}}{\bar{c}} \times 100\%" block />
+                    </div>
+                  </div>
+                </div>
+
+                {/* PHASE 2: INTERACTIVE 3D CAD ASSEMBLY */}
+                <div className="p-5 rounded-3xl bg-slate-900 border border-cyan-500/30 shadow-xl space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                        <Layers className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-black text-white">ФАЗА 2: Интерактивный 3D CAD Сборки</h4>
+                        <span className="text-[10px] text-cyan-400 font-bold">Three.js Gizmo & Масс-Инерция (P0-P1)</span>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                      Фичи #42, #43, #46
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Полноценная САПР-среда компоновки узлов внутри прозрачного каркаса фюзеляжа с динамическим контролем физических параметров:
+                  </p>
+
+                  <ul className="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                    <li><strong className="text-cyan-300">#42 3D Gizmo Drag-and-Drop:</strong> Перемещение АКБ, автопилота, моторов и ОЭС с привязкой по направляющим.</li>
+                    <li><strong className="text-cyan-300">#43 Динамический Тензор Инерции:</strong> Мгновенный пересчет <MathView math="I_{xx}, I_{yy}, I_{zz}" /> по теореме Гюйгенса-Штейнера при сдвиге любого узла.</li>
+                    <li><strong className="text-cyan-300">#46 Проверка Коллизий & AWG Проводка:</strong> Контроль зазоров винтов (OBB) и падения напряжения в кабелях питания.</li>
+                  </ul>
+
+                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400 space-y-1">
+                    <span className="text-cyan-400 font-bold">Математический фундамент:</span>
+                    <div className="py-1 text-slate-100 overflow-x-auto">
+                      <MathView math="\mathbf{R}_{\text{cg}} = \frac{\sum m_i \mathbf{r}_i}{\sum m_i}, \quad I_{xx} = \sum [I_{xx,i} + m_i(y_i^2 + z_i^2)]" block />
+                    </div>
+                  </div>
+                </div>
+
+                {/* PHASE 3: DIGITAL MANUFACTURING & CNC EXPORT */}
+                <div className="p-5 rounded-3xl bg-slate-900 border border-purple-500/30 shadow-xl space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                        <FileSpreadsheet className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-black text-white">ФАЗА 3: Производство & ЧПУ / 3D-Печать</h4>
+                        <span className="text-[10px] text-purple-400 font-bold">DXF, STL, Спецификация BOM (P2)</span>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-purple-500/20 text-purple-300 border border-purple-500/40">
+                      Фичи #47, #50
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Сквозной экспорт геометрии для физического изготовления планера на станках с ЧПУ и 3D-принтерах:
+                  </p>
+
+                  <ul className="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                    <li><strong className="text-purple-300">#47 Экспорт DXF & STL:</strong> Генерация чертежей нервюр и лонжеронов с замками под лазерный раскрой фанеры/карбона и STL моторам.</li>
+                    <li><strong className="text-purple-300">#50 Параметрический FEA-Анализ:</strong> Расчет прочности карбонового лонжерона и обшивки при перегрузках <MathView math="n_y = +6g" />.</li>
+                    <li><strong className="text-purple-300">Интерактивный BOM (Спецификация):</strong> Список покупных изделий с артикулами, массами и ценами.</li>
+                  </ul>
+
+                  <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400">
+                    <span className="text-purple-400 font-bold">Инженерный результат:</span>
+                    <p className="mt-0.5 text-[11px] text-slate-300">
+                      Готовые производственные файлы для отправки на лазерный станок и 3D-принтер за 1 клик.
+                    </p>
+                  </div>
+                </div>
+
+                {/* PHASE 4: DIGITAL TWIN & AUTOPILOT HIL */}
+                <div className="p-5 rounded-3xl bg-slate-900 border border-rose-500/30 shadow-xl space-y-3">
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
+                    <div className="flex items-center gap-2">
+                      <div className="p-2 rounded-xl bg-rose-500/20 text-rose-400 border border-rose-500/30">
+                        <Zap className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <h4 className="text-sm font-black text-white">ФАЗА 4: Цифровой Двойник & ArduPilot/PX4</h4>
+                        <span className="text-[10px] text-rose-400 font-bold">HIL / SITL & WebHID RC-Пульт (P2-P3)</span>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">
+                      Фичи #48, #49
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed">
+                    Замыкание виртуального планера с реальной авионикой и полетным симулятором:
+                  </p>
+
+                  <ul className="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                    <li><strong className="text-rose-300">#48 Генератор ArduPilot/PX4 `.param`:</strong> Расчет ПИД-коэффициентов и матрицы микширования моторов под рассчитанный тензор инерции.</li>
+                    <li><strong className="text-rose-300">#49 HIL/SITL Симулятор в Трубе:</strong> Виртуальный облет БПЛА с подключением реального пульта управления через USB Gamepad / WebHID.</li>
+                  </ul>
+
+                  <div className="p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400">
+                    <span className="text-rose-400 font-bold">Инженерный результат:</span>
+                    <p className="mt-0.5 font-mono text-[10px] text-slate-300">
+                      Безопасный первый вылет без крашей за счет предварительной калибровки коэффициентов регулятора.
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* Action Button to switch to filtered features list */}
+              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-xs font-bold text-white">Готовы приступить к реализации?</h4>
+                  <p className="text-[11px] text-slate-400">Перейдите к полному списку, чтобы отслеживать прогресс выполнения каждой из 10 фич САПР.</p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategory('all');
+                    setSelectedVehicleClass('uav');
+                    setActiveTab('features_list');
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-slate-950 font-bold text-xs hover:from-amber-400 hover:to-rose-400 cursor-pointer shadow-lg shadow-amber-950/40"
+                >
+                  <span>Открыть задачи САПР (#41–#50)</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: FULL FEATURES LIST WITH INTERACTIVE CHECKBOXES */}
           {activeTab === 'features_list' && (
             <div className="space-y-4 animate-fadeIn">
               
@@ -1380,7 +1777,8 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
                                 </div>
                                 {f.mathBasis && (
                                   <div className="text-[10px] font-mono text-indigo-300 pt-1 border-t border-slate-800">
-                                    📐 Мат. базис: {f.mathBasis}
+                                    <span className="font-bold text-indigo-400">📐 Мат. базис: </span>
+                                    <MathText text={f.mathBasis} />
                                   </div>
                                 )}
                               </div>

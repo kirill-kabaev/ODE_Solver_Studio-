@@ -33,6 +33,7 @@ import { PerformanceCurvesCanvas } from './PerformanceCurvesCanvas';
 import { DroneFlightEnvelope } from './DroneFlightEnvelope';
 import { DuctedFanAnalysis } from './DuctedFanAnalysis';
 import { BladeGeometryCanvas } from './BladeGeometryCanvas';
+import { MathView, MathText } from '../../MathView';
 
 export const BladeElementMomentumModule: React.FC = () => {
   // Preset Selection State
@@ -634,49 +635,52 @@ export const BladeElementMomentumModule: React.FC = () => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-mono">
-              <div className="bg-slate-950/70 p-4 rounded-xl border border-slate-800 space-y-2">
+              <div className="bg-slate-950/70 p-4 rounded-xl border border-slate-800 space-y-2.5">
                 <span className="text-cyan-400 font-bold text-sm block">1. Дисковая Теория Импульса (1D)</span>
-                <p className="text-slate-300 leading-relaxed">
-                  Тяга $dT$ и крутящий момент $dQ$ на кольцевом элементе радиуса $r$ шириной $dr$:
+                <p className="text-slate-300 leading-relaxed font-sans text-xs">
+                  <MathText text="Тяга $dT$ и крутящий момент $dQ$ на кольцевом элементе радиуса $r$ шириной $dr$:" />
                 </p>
-                <div className="bg-slate-900 p-2.5 rounded-lg text-emerald-300 text-[11px] overflow-x-auto whitespace-pre">
-                  {"$$dT_{mom} = 4 \\pi \\rho r V_\\infty^2 (1 + a) a F \\, dr$$\n$$dQ_{mom} = 4 \\pi \\rho r^3 V_\\infty \\Omega (1 + a) a' F \\, dr$$"}
+                <div className="bg-slate-900 p-3 rounded-lg text-emerald-300 text-xs overflow-x-auto space-y-1.5 border border-slate-800">
+                  <MathView math="dT_{\text{mom}} = 4 \pi \rho r V_\infty^2 (1 + a) a F \, dr" block />
+                  <MathView math="dQ_{\text{mom}} = 4 \pi \rho r^3 V_\infty \Omega (1 + a) a' F \, dr" block />
                 </div>
-                <p className="text-slate-400 text-[11px]">
-                  где $a$ — коэффициент осевой индукции, $a'$ — коэффициент тангенциальной закрутки струи, $F$ — суммарный фактор потерь Прандтля.
+                <p className="text-slate-400 text-[11px] font-sans">
+                  <MathText text="где $a$ — коэффициент осевой индукции, $a'$ — коэффициент тангенциальной закрутки струи, $F$ — суммарный фактор потерь Прандтля." />
                 </p>
               </div>
 
-              <div className="bg-slate-950/70 p-4 rounded-xl border border-slate-800 space-y-2">
+              <div className="bg-slate-950/70 p-4 rounded-xl border border-slate-800 space-y-2.5">
                 <span className="text-purple-400 font-bold text-sm block">2. Аэродинамика Элемента Лопасти</span>
-                <p className="text-slate-300 leading-relaxed">
-                  Треугольник скоростей в сечении $r$ и аэродинамические силы на $B$ лопастях:
+                <p className="text-slate-300 leading-relaxed font-sans text-xs">
+                  <MathText text="Треугольник скоростей в сечении $r$ и аэродинамические силы на $B$ лопастях:" />
                 </p>
-                <div className="bg-slate-900 p-2.5 rounded-lg text-purple-300 text-[11px] overflow-x-auto whitespace-pre">
-                  {"$$\\tan\\phi = \\frac{V_\\infty (1 + a)}{\\Omega r (1 - a')}, \\quad \\alpha = \\theta(r) - \\phi$$\n$$dT_{be} = \\frac{1}{2} \\rho V_{rel}^2 B c(r) (C_l \\cos\\phi - C_d \\sin\\phi) \\, dr$$"}
+                <div className="bg-slate-900 p-3 rounded-lg text-purple-300 text-xs overflow-x-auto space-y-1.5 border border-slate-800">
+                  <MathView math="\tan\phi = \frac{V_\infty (1 + a)}{\Omega r (1 - a')}, \quad \alpha = \theta(r) - \phi" block />
+                  <MathView math="dT_{\text{be}} = \frac{1}{2} \rho V_{\text{rel}}^2 B c(r) (C_l \cos\phi - C_d \sin\phi) \, dr" block />
                 </div>
-                <p className="text-slate-400 text-[11px]">
-                  где $\phi$ — угол скоса набегающего потока, $\alpha$ — эффективный угол атаки профиля, $c(r)$ — локальная хорда.
+                <p className="text-slate-400 text-[11px] font-sans">
+                  <MathText text="где $\phi$ — угол скоса набегающего потока, $\alpha$ — эффективный угол атаки профиля, $c(r)$ — локальная хорда." />
                 </p>
               </div>
 
-              <div className="bg-slate-950/70 p-4 rounded-xl border border-slate-800 space-y-2">
+              <div className="bg-slate-950/70 p-4 rounded-xl border border-slate-800 space-y-2.5">
                 <span className="text-amber-400 font-bold text-sm block">3. Поправка Глауэрта на Турбулентный След</span>
-                <p className="text-slate-300 leading-relaxed">
-                  При высокой нагрузке на винт ($a &gt; 0.33$) теория импульса расходится. Применяется квадратичная аппроксимация Глауэрта–Бюля:
+                <p className="text-slate-300 leading-relaxed font-sans text-xs">
+                  <MathText text="При высокой нагрузке на винт ($a > 0.33$) классическая теория импульса расходится. Применяется квадратичная аппроксимация Глауэрта–Бюля:" />
                 </p>
-                <div className="bg-slate-900 p-2.5 rounded-lg text-amber-300 text-[11px] overflow-x-auto whitespace-pre">
-                  {"$$C_T = 4 F \\left[ a_c^2 + (1 - 2 a_c) a \\right], \\quad a_c \\approx 0.33$$"}
+                <div className="bg-slate-900 p-3 rounded-lg text-amber-300 text-xs overflow-x-auto border border-slate-800">
+                  <MathView math="C_T = 4 F \left[ a_c^2 + (1 - 2 a_c) a \right], \quad a_c \approx 0.33" block />
                 </div>
               </div>
 
-              <div className="bg-slate-950/70 p-4 rounded-xl border border-slate-800 space-y-2">
+              <div className="bg-slate-950/70 p-4 rounded-xl border border-slate-800 space-y-2.5">
                 <span className="text-emerald-400 font-bold text-sm block">4. Концевые Потери Прандтля (Tip Loss)</span>
-                <p className="text-slate-300 leading-relaxed">
-                  Учет утечки давления через законцовки и перетекания вихрей:
+                <p className="text-slate-300 leading-relaxed font-sans text-xs">
+                  <MathText text="Учет утечки давления через законцовки и перетекания вихрей:" />
                 </p>
-                <div className="bg-slate-900 p-2.5 rounded-lg text-cyan-300 text-[11px] overflow-x-auto whitespace-pre">
-                  {"$$F_{tip} = \\frac{2}{\\pi} \\arccos\\left(\\exp\\left(-\\frac{B (R - r)}{2 R \\sin\\phi}\\right)\\right)$$\n$$F = F_{tip} \\cdot F_{hub}$$"}
+                <div className="bg-slate-900 p-3 rounded-lg text-cyan-300 text-xs overflow-x-auto space-y-1.5 border border-slate-800">
+                  <MathView math="F_{\text{tip}} = \frac{2}{\pi} \arccos\left(\exp\left(-\frac{B (R - r)}{2 R \sin\phi}\right)\right)" block />
+                  <MathView math="F = F_{\text{tip}} \cdot F_{\text{hub}}" block />
                 </div>
               </div>
             </div>
