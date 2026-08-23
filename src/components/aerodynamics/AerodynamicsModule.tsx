@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import {
   Wind,
   Layers,
@@ -191,9 +191,19 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
 
 interface AerodynamicsModuleProps {
   onTabChange?: (tab: AeroSubTab) => void;
+  targetCategory?: AeroDomainCategory;
+  targetSubTab?: AeroSubTab;
+  targetPresetId?: string;
+  navigationKey?: number;
 }
 
-export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabChange }) => {
+export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
+  onTabChange,
+  targetCategory,
+  targetSubTab,
+  targetPresetId,
+  navigationKey,
+}) => {
   const [activeCategory, setActiveCategory] = useState<AeroDomainCategory>('general_aero');
   const [activeGeneralSubTab, setActiveGeneralSubTab] = useState<AeroSubTab>('presets');
   const [activeUAVSubTab, setActiveUAVSubTab] = useState<AeroSubTab>('uav_studio');
@@ -201,6 +211,63 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({ onTabCha
   const [selectedPreset, setSelectedPreset] = useState<EngineeringPreset>(ENGINEERING_PRESETS[0]);
   const [activeMach, setActiveMach] = useState<number>(ENGINEERING_PRESETS[0].mach);
   const [activeAlpha, setActiveAlpha] = useState<number>(ENGINEERING_PRESETS[0].alpha);
+
+  // Sync external search navigation commands
+  useEffect(() => {
+    if (navigationKey === undefined) return;
+
+    if (targetCategory) {
+      setActiveCategory(targetCategory);
+    }
+
+    if (targetSubTab) {
+      const uavSubTabs: AeroSubTab[] = [
+        'uav_studio',
+        'uav_ew_nav',
+        'uav_rf_link',
+        'uav_guidance',
+        'uav_vtol',
+        'uav_swarm',
+        'uav_avoidance',
+        'uav_acoustics',
+        'uav_fault_tolerance',
+        'uav_hybrid_icing',
+        'uav_loitering_dive',
+        'uav_dsmac_tercom',
+      ];
+
+      if (uavSubTabs.includes(targetSubTab)) {
+        setActiveUAVSubTab(targetSubTab);
+        if (!targetCategory) setActiveCategory('uav_systems');
+      } else {
+        setActiveGeneralSubTab(targetSubTab);
+        if (!targetCategory) setActiveCategory('general_aero');
+      }
+      onTabChange?.(targetSubTab);
+    }
+
+    if (targetPresetId) {
+      const foundPreset = ENGINEERING_PRESETS.find((p) => p.id === targetPresetId);
+      if (foundPreset) {
+        setSelectedPreset(foundPreset);
+        setActiveMach(foundPreset.mach);
+        setActiveAlpha(foundPreset.alpha);
+        setLatest3DData({
+          mach: foundPreset.mach,
+          alpha: foundPreset.alpha,
+          liftCoeff: foundPreset.targetCl,
+          dragCoeff: foundPreset.targetCd,
+          momentCoeff: foundPreset.targetCm,
+          cellsCount: foundPreset.meshCells,
+          iterations: 60,
+          timestamp: 'Пресет применен через глобальный поиск',
+          converged: true,
+        });
+        setActiveGeneralSubTab('status_monitor');
+        onTabChange?.('status_monitor');
+      }
+    }
+  }, [navigationKey, targetCategory, targetSubTab, targetPresetId, onTabChange]);
 
   const [latest3DData, setLatest3DData] = useState<Aerodynamic3DData | null>({
     mach: ENGINEERING_PRESETS[0].mach,

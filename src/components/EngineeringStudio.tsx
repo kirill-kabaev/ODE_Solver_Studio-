@@ -22,12 +22,17 @@ import {
   Radio,
   FileCode2,
   BookOpen,
+  Search,
+  CornerDownLeft,
+  Filter,
 } from 'lucide-react';
 import { MathText } from './MathView';
-import { AerodynamicsModule } from './aerodynamics/AerodynamicsModule';
+import { AerodynamicsModule, AeroDomainCategory, AeroSubTab } from './aerodynamics/AerodynamicsModule';
 import { EngineeringHandbookModal, HandbookTopicId } from './EngineeringHandbookModal';
 import { FutureRoadmapModal } from './FutureRoadmapModal';
 import { NvidiaHardwareEnforcerBar } from './NvidiaHardwareEnforcerBar';
+import { EngineeringGlobalSearchModal } from './EngineeringGlobalSearchModal';
+import { EngineeringSearchItem, ENGINEERING_SEARCH_ITEMS } from './engineeringSearchIndex';
 
 export type EngineeringDomain = 'aero' | 'space' | 'eda';
 
@@ -36,11 +41,70 @@ export const EngineeringStudio: React.FC = () => {
   const [activeAeroTab, setActiveAeroTab] = useState<string>('presets');
   const [isHandbookOpen, setIsHandbookOpen] = useState<boolean>(false);
   const [isRoadmapOpen, setIsRoadmapOpen] = useState<boolean>(false);
+  const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [handbookTopicId, setHandbookTopicId] = useState<HandbookTopicId>('presets');
+
+  // Search Navigation state passed to AerodynamicsModule
+  const [searchTargetCategory, setSearchTargetCategory] = useState<AeroDomainCategory | undefined>(undefined);
+  const [searchTargetSubTab, setSearchTargetSubTab] = useState<AeroSubTab | undefined>(undefined);
+  const [searchTargetPresetId, setSearchTargetPresetId] = useState<string | undefined>(undefined);
+  const [navigationKey, setNavigationKey] = useState<number>(0);
+  const [toastMessage, setToastMessage] = useState<{ title: string; badge: string } | null>(null);
+
+  // Global hotkey for Search: Ctrl+K / Cmd+K or "/"
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setIsSearchOpen((prev) => !prev);
+      } else if (e.key === '/' && !['INPUT', 'TEXTAREA'].includes((e.target as HTMLElement)?.tagName)) {
+        e.preventDefault();
+        setIsSearchOpen(true);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   const handleAeroTabChange = useCallback((tab: string) => {
     setActiveAeroTab((prev) => (prev !== tab ? tab : prev));
   }, []);
+
+  const handleNavigateFromSearch = (item: EngineeringSearchItem) => {
+    setActiveDomain(item.domain);
+
+    if (item.domain === 'aero') {
+      setSearchTargetCategory(item.category);
+      setSearchTargetSubTab(item.subTab);
+      setSearchTargetPresetId(item.presetId);
+      setNavigationKey((k) => k + 1);
+    }
+
+    setToastMessage({ title: item.title, badge: item.badge });
+    setTimeout(() => {
+      setToastMessage(null);
+    }, 4500);
+
+    // Smooth scroll down to main content
+    const el = document.getElementById('engineering-workspace-root');
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const handleQuickTagClick = (tagQuery: string) => {
+    const matched = ENGINEERING_SEARCH_ITEMS.find(
+      (item) =>
+        item.title.toLowerCase().includes(tagQuery.toLowerCase()) ||
+        item.shortTitle.toLowerCase().includes(tagQuery.toLowerCase()) ||
+        item.keywords.some((k) => k.toLowerCase().includes(tagQuery.toLowerCase()))
+    );
+    if (matched) {
+      handleNavigateFromSearch(matched);
+    } else {
+      setIsSearchOpen(true);
+    }
+  };
 
   const getActiveTopic = (): { topicId: HandbookTopicId; label: string } => {
     if (activeDomain === 'space') {
@@ -85,14 +149,14 @@ export const EngineeringStudio: React.FC = () => {
   const activeTopicInfo = getActiveTopic();
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-4 space-y-6 animate-fadeIn">
+    <div id="engineering-workspace-root" className="w-full max-w-7xl mx-auto px-2 sm:px-4 py-4 space-y-6 animate-fadeIn">
       {/* Top Banner: Engineering Mission & Mathematical Backing */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-indigo-950 border border-slate-800 p-4 sm:p-6 shadow-xl">
         <div className="absolute -right-16 -top-16 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute right-1/3 -bottom-16 w-48 h-48 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
 
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="space-y-1.5">
+          <div className="space-y-1.5 flex-1">
             <div className="flex items-center gap-2">
               <span className="px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1">
                 <Rocket className="w-3 h-3" /> Прикладной Модуль Инжиниринга
@@ -113,22 +177,36 @@ export const EngineeringStudio: React.FC = () => {
 
           <div className="flex flex-col gap-2 self-start md:self-auto shrink-0">
             <div className="flex items-center gap-2 flex-wrap">
-              {/* Single Unified Info & Handbook Trigger Button with Active Section Detection */}
+              {/* Global Search Button */}
+              <button
+                type="button"
+                onClick={() => setIsSearchOpen(true)}
+                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-400 text-slate-950 font-black text-xs shadow-lg shadow-cyan-950/60 transition-all cursor-pointer border border-cyan-400/40 group"
+                title="Глобальный поиск по всем разделам, формулам и модулям инжиниринга (Ctrl+K)"
+              >
+                <Search className="w-4 h-4 text-slate-950 group-hover:scale-110 transition-transform" />
+                <span>Глобальный Поиск</span>
+                <span className="px-1.5 py-0.5 rounded bg-slate-950/30 text-[10px] font-mono font-bold tracking-tight text-slate-950">
+                  Ctrl+K
+                </span>
+              </button>
+
+              {/* Single Unified Info & Handbook Trigger Button */}
               <button
                 type="button"
                 onClick={handleOpenCurrentHandbook}
-                className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 via-indigo-500 to-purple-600 hover:from-cyan-400 hover:to-indigo-400 text-slate-950 font-black text-xs shadow-lg shadow-cyan-950/60 transition-all cursor-pointer border border-cyan-400/40"
+                className="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-bold text-xs shadow-md transition-all cursor-pointer border border-slate-700"
                 title={`Открыть научно-технический справочник: ${activeTopicInfo.label}`}
               >
-                <Info className="w-4 h-4 text-slate-950" />
-                <span>Инфо & Справочник</span>
-                <span className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-slate-950/25 text-[10px] font-mono font-bold tracking-tight">
+                <Info className="w-4 h-4 text-cyan-400" />
+                <span>Справочник</span>
+                <span className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-slate-950/60 text-[10px] font-mono text-cyan-300">
                   [{activeTopicInfo.label}]
                 </span>
               </button>
 
-              <div className="flex items-center gap-2 bg-slate-950/70 p-1.5 rounded-xl border border-slate-800">
-                <div className="flex flex-col text-right pr-2 hidden lg:flex">
+              <div className="flex items-center gap-2 bg-slate-950/70 p-1.5 rounded-xl border border-slate-800 hidden lg:flex">
+                <div className="flex flex-col text-right pr-2">
                   <span className="text-[10px] text-slate-400 font-mono">Вычислительное Ядро</span>
                   <span className="text-xs font-bold text-cyan-300 font-mono">CSR + AMG + RK4</span>
                 </div>
@@ -136,7 +214,7 @@ export const EngineeringStudio: React.FC = () => {
               </div>
             </div>
 
-            {/* Temporary Development Stage Button: Future Roadmap */}
+            {/* Development Roadmap Button */}
             <button
               type="button"
               onClick={() => setIsRoadmapOpen(true)}
@@ -154,8 +232,59 @@ export const EngineeringStudio: React.FC = () => {
           </div>
         </div>
 
+        {/* Quick Search Bar & Popular Jump Pills */}
+        <div className="mt-4 pt-3 border-t border-slate-800/80 space-y-2.5">
+          <div
+            onClick={() => setIsSearchOpen(true)}
+            className="flex items-center justify-between gap-3 p-2.5 sm:p-3 rounded-xl bg-slate-950/90 border border-cyan-500/30 hover:border-cyan-400/60 transition-all cursor-pointer shadow-inner group"
+          >
+            <div className="flex items-center gap-2.5 text-xs text-slate-400 flex-1">
+              <Search className="w-4 h-4 text-cyan-400 group-hover:scale-110 transition-transform shrink-0" />
+              <span className="truncate">
+                Поиск по функционалу: DSMAC, TERCOM, Флаттер, Ламберт, Ан-2, 6-DoF, BEM, Pro-Nav, РЭБ, TMR, OctoMap...
+              </span>
+            </div>
+            <div className="flex items-center gap-1 text-[11px] font-mono text-slate-400 bg-slate-900 px-2 py-1 rounded-lg border border-slate-800 shrink-0">
+              <span>Нажмите</span>
+              <kbd className="px-1.5 py-0.5 bg-slate-950 border border-slate-700 rounded text-cyan-300 font-bold">
+                Ctrl+K
+              </kbd>
+            </div>
+          </div>
+
+          {/* Quick jump pills */}
+          <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-xs">
+            <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider shrink-0 pr-1">
+              Быстрый переход:
+            </span>
+            {[
+              { label: '🛰️ DSMAC/TERCOM', query: 'dsmac' },
+              { label: '📡 РЭБ & GNSS', query: 'рэб' },
+              { label: '✈️ Ан-2 Кукурузник', query: 'ан-2' },
+              { label: '🎯 Pro-Nav Наведение', query: 'pronav' },
+              { label: '⚠️ Флаттер FSI', query: 'флаттер' },
+              { label: '🌀 VLM Решетка', query: 'vlm' },
+              { label: '⚙️ BEM Пропеллеры', query: 'bem' },
+              { label: '🧱 3D OctoMap', query: 'octomap' },
+              { label: '🚀 Задача Ламберта', query: 'ламберт' },
+              { label: '⚡ TMR Авионика', query: 'tmr' },
+              { label: '🔥 Ланцет Пикирование', query: 'ланцет' },
+              { label: '🔊 FW-H Шум', query: 'fw-h' },
+            ].map((chip) => (
+              <button
+                key={chip.label}
+                type="button"
+                onClick={() => handleQuickTagClick(chip.query)}
+                className="px-2 py-1 rounded-lg bg-slate-950/70 hover:bg-cyan-950/80 text-slate-300 hover:text-cyan-300 border border-slate-800 hover:border-cyan-700/60 font-mono text-[11px] whitespace-nowrap transition-all cursor-pointer"
+              >
+                {chip.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Domain Navigation Tabs */}
-        <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-2 border-t border-slate-800/80 pt-4">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 border-t border-slate-800/80 pt-4">
           <button
             onClick={() => setActiveDomain('aero')}
             className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left cursor-pointer ${
@@ -218,6 +347,32 @@ export const EngineeringStudio: React.FC = () => {
         </div>
       </div>
 
+      {/* Floating Transition Confirmation Toast */}
+      {toastMessage && (
+        <div className="p-3 rounded-xl bg-gradient-to-r from-cyan-950 via-slate-900 to-indigo-950 border border-cyan-500/60 shadow-xl flex items-center justify-between gap-3 animate-fadeIn text-xs font-mono">
+          <div className="flex items-center gap-2.5">
+            <div className="p-1.5 rounded-lg bg-cyan-500 text-slate-950 font-bold">
+              <CheckCircle2 className="w-4 h-4" />
+            </div>
+            <div>
+              <div className="font-bold text-white flex items-center gap-2">
+                <span>Переход выполнен: {toastMessage.title}</span>
+                <span className="text-[10px] px-2 py-0.2 rounded-full bg-cyan-900 text-cyan-200 border border-cyan-700">
+                  {toastMessage.badge}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400">Модуль успешно активирован и готов к расчетам.</p>
+            </div>
+          </div>
+          <button
+            onClick={() => setToastMessage(null)}
+            className="text-slate-400 hover:text-white text-xs cursor-pointer px-2 py-1"
+          >
+            ✕
+          </button>
+        </div>
+      )}
+
       {/* GPU Hardware Acceleration & Discrete NVIDIA Enforcer Bar */}
       <NvidiaHardwareEnforcerBar />
 
@@ -225,10 +380,25 @@ export const EngineeringStudio: React.FC = () => {
       {activeDomain === 'aero' && (
         <AerodynamicsModule
           onTabChange={handleAeroTabChange}
+          targetCategory={searchTargetCategory}
+          targetSubTab={searchTargetSubTab}
+          targetPresetId={searchTargetPresetId}
+          navigationKey={navigationKey}
         />
       )}
       {activeDomain === 'space' && <OrbitalGNCModule />}
       {activeDomain === 'eda' && <MicroelectronicsEDAModule />}
+
+      {/* Global Search Modal */}
+      <EngineeringGlobalSearchModal
+        isOpen={isSearchOpen}
+        onClose={() => setIsSearchOpen(false)}
+        onNavigate={handleNavigateFromSearch}
+        onOpenHandbookTopic={(topicId) => {
+          setHandbookTopicId(topicId);
+          setIsHandbookOpen(true);
+        }}
+      />
 
       {/* Full Interactive Engineering Handbook Modal */}
       <EngineeringHandbookModal
