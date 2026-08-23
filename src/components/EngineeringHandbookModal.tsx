@@ -3156,7 +3156,13 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
   const [globalSearchTab, setGlobalSearchTab] = useState<string>('all');
   const [highlightedElementId, setHighlightedElementId] = useState<string | null>(null);
   const [isQuickDropdownOpen, setIsQuickDropdownOpen] = useState<boolean>(false);
+  const [quickLineSelectedIndex, setQuickLineSelectedIndex] = useState<number>(0);
   const globalSearchInputRef = useRef<HTMLInputElement>(null);
+
+  // Reset selected quick line index when query changes
+  useEffect(() => {
+    setQuickLineSelectedIndex(0);
+  }, [globalSearchQuery]);
 
   // Keyboard shortcut for Global Search (Ctrl+K or /)
   useEffect(() => {
@@ -3280,12 +3286,28 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
   };
 
   // Global Search Indexer & Match Engine with Line-Level Discovery
-  const globalSearchResults = useMemo(() => {
+  const { globalSearchResults, allMatchedLines, topQuickLines } = useMemo(() => {
     const rawQuery = globalSearchQuery.trim().toLowerCase();
-    if (!rawQuery) return [];
+    if (!rawQuery) {
+      return { globalSearchResults: [], allMatchedLines: [], topQuickLines: [] };
+    }
 
     const rawNormalized = rawQuery.replace(/[_\\{}$]/g, '');
     const terms = rawQuery.split(/\s+/).filter(Boolean);
+
+    interface MatchedLineItem {
+      lineId: string;
+      typeLabel: string;
+      typeColor: string;
+      snippet: string;
+      itemTitle: string;
+      locationPath: string;
+      domElementId: string;
+      isExact: boolean;
+      score: number;
+      onSelectLine: () => void;
+    }
+
     const results: Array<{
       id: string;
       category: 'chapter' | 'decoder' | 'recipe' | 'zone';
@@ -3297,21 +3319,22 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
       snippet: string;
       proTip?: string;
       score: number;
-      matchedLines: Array<{
-        lineId: string;
-        typeLabel: string;
-        typeColor: string;
-        snippet: string;
-        domElementId: string;
-        onSelectLine: () => void;
-      }>;
+      matchedLines: MatchedLineItem[];
       onSelect: () => void;
     }> = [];
+
+    const isExactMatch = (text?: string): boolean => {
+      if (!text || !rawQuery) return false;
+      const lower = text.toLowerCase();
+      const lowerNorm = lower.replace(/[_\\{}$]/g, '');
+      return lower.includes(rawQuery) || (rawNormalized.length > 1 && lowerNorm.includes(rawNormalized));
+    };
 
     const calcScore = (text: string, weight: number): number => {
       if (!text) return 0;
       const lower = text.toLowerCase();
       const lowerNorm = lower.replace(/[_\\{}$]/g, '');
+      const exact = lower.includes(rawQuery) || (rawNormalized.length > 1 && lowerNorm.includes(rawNormalized));
       let matchCount = 0;
       for (const t of terms) {
         const tNorm = t.replace(/[_\\{}$]/g, '');
@@ -3319,13 +3342,19 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
           matchCount += 1;
         }
       }
-      return matchCount > 0 ? matchCount * weight + (lower.includes(rawQuery) || lowerNorm.includes(rawNormalized) ? weight * 2 : 0) : 0;
+      if (exact) {
+        return weight * 4 + matchCount * weight;
+      }
+      return matchCount > 0 ? matchCount * weight : 0;
     };
 
     const isMatch = (text?: string): boolean => {
       if (!text) return false;
       const lower = text.toLowerCase();
       const lowerNorm = lower.replace(/[_\\{}$]/g, '');
+      if (lower.includes(rawQuery) || (rawNormalized.length > 1 && lowerNorm.includes(rawNormalized))) {
+        return true;
+      }
       return terms.some((t) => {
         const tNorm = t.replace(/[_\\{}$]/g, '');
         return lower.includes(t) || (tNorm.length > 1 && lowerNorm.includes(tNorm));
@@ -3341,23 +3370,38 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
       score += calcScore(topic.summary, 25);
       score += calcScore(topic.physicalSignificance?.join(' ') || '', 20);
 
-      const matchedLines: Array<{
-        lineId: string;
-        typeLabel: string;
-        typeColor: string;
-        snippet: string;
-        domElementId: string;
-        onSelectLine: () => void;
-      }> = [];
+      const matchedLines: MatchedLineItem[] = [];
+
+      // Check Title
+      if (isMatch(topic.title)) {
+        const exact = isExactMatch(topic.title);
+        matchedLines.push({
+          lineId: `${topic.id}-title`,
+          typeLabel: exact ? '⚡ Точный заголовок' : 'Заголовок главы',
+          typeColor: 'bg-indigo-950 text-indigo-300 border-indigo-700',
+          snippet: topic.title,
+          itemTitle: `Глава: ${topic.title}`,
+          locationPath: `Справочник → ${topic.categoryLabel}`,
+          domElementId: `section-topic-${topic.id}-header`,
+          isExact: exact,
+          score: exact ? 200 : 80,
+          onSelectLine: () => handleJumpToLine('chapters', topic.id, `section-topic-${topic.id}-header`),
+        });
+      }
 
       // Check Purpose
       if (isMatch(topic.purpose)) {
+        const exact = isExactMatch(topic.purpose);
         matchedLines.push({
           lineId: `${topic.id}-purpose`,
-          typeLabel: 'Назначение & Смысл',
+          typeLabel: exact ? '⚡ Точное назначение' : 'Назначение & Смысл',
           typeColor: 'bg-cyan-950 text-cyan-300 border-cyan-700',
           snippet: topic.purpose,
+          itemTitle: `Глава: ${topic.title}`,
+          locationPath: `Справочник → ${topic.categoryLabel}`,
           domElementId: `section-topic-${topic.id}-purpose`,
+          isExact: exact,
+          score: exact ? 180 : 70,
           onSelectLine: () => handleJumpToLine('chapters', topic.id, `section-topic-${topic.id}-purpose`),
         });
       }
@@ -3365,12 +3409,17 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
       // Check Physical Significance
       topic.physicalSignificance?.forEach((item, idx) => {
         if (isMatch(item)) {
+          const exact = isExactMatch(item);
           matchedLines.push({
             lineId: `${topic.id}-phys-${idx}`,
-            typeLabel: `Физическая роль #${idx + 1}`,
+            typeLabel: exact ? `⚡ Точная роль #${idx + 1}` : `Физическая роль #${idx + 1}`,
             typeColor: 'bg-emerald-950 text-emerald-300 border-emerald-700',
             snippet: item,
+            itemTitle: `Глава: ${topic.title}`,
+            locationPath: `Справочник → ${topic.categoryLabel}`,
             domElementId: `section-topic-${topic.id}-phys-${idx}`,
+            isExact: exact,
+            score: exact ? 170 : 60,
             onSelectLine: () => handleJumpToLine('chapters', topic.id, `section-topic-${topic.id}-phys-${idx}`),
           });
         }
@@ -3383,24 +3432,34 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
         score += calcScore(topic.mathematics.derivationSteps?.join(' ') || '', 15);
 
         if (isMatch(topic.mathematics.governingEquationLatex) || isMatch(topic.mathematics.description)) {
+          const exact = isExactMatch(topic.mathematics.governingEquationLatex) || isExactMatch(topic.mathematics.description);
           matchedLines.push({
             lineId: `${topic.id}-math`,
-            typeLabel: 'Уравнение & Математика',
+            typeLabel: exact ? '⚡ Точное уравнение (LaTeX)' : 'Уравнение & Математика',
             typeColor: 'bg-indigo-950 text-indigo-300 border-indigo-700',
-            snippet: topic.mathematics.governingEquationLatex + ' — ' + topic.mathematics.description,
+            snippet: `${topic.mathematics.governingEquationLatex} — ${topic.mathematics.description}`,
+            itemTitle: `Глава: ${topic.title}`,
+            locationPath: `Справочник → ${topic.categoryLabel}`,
             domElementId: `section-topic-${topic.id}-math`,
+            isExact: exact,
+            score: exact ? 190 : 75,
             onSelectLine: () => handleJumpToLine('chapters', topic.id, `section-topic-${topic.id}-math`),
           });
         }
 
         topic.mathematics.derivationSteps?.forEach((step, idx) => {
           if (isMatch(step)) {
+            const exact = isExactMatch(step);
             matchedLines.push({
               lineId: `${topic.id}-derivation-${idx}`,
-              typeLabel: `Численный шаг #${idx + 1}`,
+              typeLabel: exact ? `⚡ Точный шаг #${idx + 1}` : `Численный шаг #${idx + 1}`,
               typeColor: 'bg-purple-950 text-purple-300 border-purple-700',
               snippet: step,
+              itemTitle: `Глава: ${topic.title}`,
+              locationPath: `Справочник → ${topic.categoryLabel}`,
               domElementId: `section-topic-${topic.id}-derivation-${idx}`,
+              isExact: exact,
+              score: exact ? 160 : 55,
               onSelectLine: () => handleJumpToLine('chapters', topic.id, `section-topic-${topic.id}-derivation-${idx}`),
             });
           }
@@ -3408,12 +3467,17 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
 
         topic.mathematics.boundaryConditions?.forEach((bc, idx) => {
           if (isMatch(bc)) {
+            const exact = isExactMatch(bc);
             matchedLines.push({
               lineId: `${topic.id}-bc-${idx}`,
-              typeLabel: `Граничное условие #${idx + 1}`,
+              typeLabel: exact ? `⚡ Точное гран. условие #${idx + 1}` : `Граничное условие #${idx + 1}`,
               typeColor: 'bg-amber-950 text-amber-300 border-amber-700',
               snippet: bc,
+              itemTitle: `Глава: ${topic.title}`,
+              locationPath: `Справочник → ${topic.categoryLabel}`,
               domElementId: `section-topic-${topic.id}-bc-${idx}`,
+              isExact: exact,
+              score: exact ? 160 : 55,
               onSelectLine: () => handleJumpToLine('chapters', topic.id, `section-topic-${topic.id}-bc-${idx}`),
             });
           }
@@ -3426,12 +3490,17 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
         topic.uiWalkthrough.controls?.forEach((c, idx) => {
           score += calcScore(c.name + ' ' + c.role + ' ' + (c.recommended || ''), 20);
           if (isMatch(c.name) || isMatch(c.role) || isMatch(c.recommended || '')) {
+            const exact = isExactMatch(c.name) || isExactMatch(c.role) || isExactMatch(c.recommended || '');
             matchedLines.push({
               lineId: `${topic.id}-ctrl-${idx}`,
-              typeLabel: `Ползунок UI: ${c.name}`,
+              typeLabel: exact ? `⚡ Ползунок: ${c.name}` : `Ползунок UI: ${c.name}`,
               typeColor: 'bg-cyan-950 text-cyan-300 border-cyan-700',
               snippet: `${c.role} (Рекомендация: ${c.recommended || 'штатный диапазон'})`,
+              itemTitle: `Глава: ${topic.title}`,
+              locationPath: `Справочник → ${topic.categoryLabel}`,
               domElementId: `section-topic-${topic.id}-control-${idx}`,
+              isExact: exact,
+              score: exact ? 175 : 65,
               onSelectLine: () => handleJumpToLine('chapters', topic.id, `section-topic-${topic.id}-control-${idx}`),
             });
           }
@@ -3440,12 +3509,17 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
         topic.uiWalkthrough.readouts?.forEach((r, idx) => {
           score += calcScore(r.name + ' ' + r.unit + ' ' + r.interpretation, 20);
           if (isMatch(r.name) || isMatch(r.unit) || isMatch(r.interpretation)) {
+            const exact = isExactMatch(r.name) || isExactMatch(r.interpretation);
             matchedLines.push({
               lineId: `${topic.id}-readout-${idx}`,
-              typeLabel: `Индикатор: ${r.name} [${r.unit}]`,
+              typeLabel: exact ? `⚡ Индикатор: ${r.name}` : `Индикатор: ${r.name} [${r.unit}]`,
               typeColor: 'bg-emerald-950 text-emerald-300 border-emerald-700',
               snippet: r.interpretation,
+              itemTitle: `Глава: ${topic.title}`,
+              locationPath: `Справочник → ${topic.categoryLabel}`,
               domElementId: `section-topic-${topic.id}-readout-${idx}`,
+              isExact: exact,
+              score: exact ? 175 : 65,
               onSelectLine: () => handleJumpToLine('chapters', topic.id, `section-topic-${topic.id}-readout-${idx}`),
             });
           }
@@ -3458,12 +3532,17 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
         topic.engineeringWorkflow.steps?.forEach((st) => {
           score += calcScore(st.title + ' ' + st.action + ' ' + st.uiTarget + ' ' + st.expectedResult, 20);
           if (isMatch(st.title) || isMatch(st.action) || isMatch(st.uiTarget) || isMatch(st.expectedResult)) {
+            const exact = isExactMatch(st.title) || isExactMatch(st.action) || isExactMatch(st.expectedResult);
             matchedLines.push({
               lineId: `${topic.id}-workflow-step-${st.stepNumber}`,
-              typeLabel: `Шаг ${st.stepNumber}: ${st.title}`,
+              typeLabel: exact ? `⚡ Шаг ${st.stepNumber}: ${st.title}` : `Шаг ${st.stepNumber}: ${st.title}`,
               typeColor: 'bg-amber-950 text-amber-300 border-amber-700',
               snippet: `Действие: ${st.action} → Результат: ${st.expectedResult}`,
+              itemTitle: `Глава: ${topic.title}`,
+              locationPath: `Справочник → ${topic.categoryLabel}`,
               domElementId: `section-topic-${topic.id}-step-${st.stepNumber}`,
+              isExact: exact,
+              score: exact ? 170 : 60,
               onSelectLine: () => handleJumpToLine('chapters', topic.id, `section-topic-${topic.id}-step-${st.stepNumber}`),
             });
           }
@@ -3472,12 +3551,17 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
         topic.engineeringWorkflow.pitfallsAndTroubleshooting?.forEach((pf, idx) => {
           score += calcScore(pf.issue + ' ' + pf.resolution, 15);
           if (isMatch(pf.issue) || isMatch(pf.resolution)) {
+            const exact = isExactMatch(pf.issue) || isExactMatch(pf.resolution);
             matchedLines.push({
               lineId: `${topic.id}-trouble-${idx}`,
-              typeLabel: `Отказ & Решение #${idx + 1}`,
+              typeLabel: exact ? `⚡ Отказ: ${pf.issue}` : `Отказ & Решение #${idx + 1}`,
               typeColor: 'bg-rose-950 text-rose-300 border-rose-700',
               snippet: `Проблема: ${pf.issue} | Решение: ${pf.resolution}`,
+              itemTitle: `Глава: ${topic.title}`,
+              locationPath: `Справочник → ${topic.categoryLabel}`,
               domElementId: `section-topic-${topic.id}-trouble-${idx}`,
+              isExact: exact,
+              score: exact ? 165 : 55,
               onSelectLine: () => handleJumpToLine('chapters', topic.id, `section-topic-${topic.id}-trouble-${idx}`),
             });
           }
@@ -3486,12 +3570,17 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
         topic.engineeringWorkflow.bestPractices?.forEach((bp, idx) => {
           score += calcScore(bp, 10);
           if (isMatch(bp)) {
+            const exact = isExactMatch(bp);
             matchedLines.push({
               lineId: `${topic.id}-bestpractice-${idx}`,
-              typeLabel: `Best Practice #${idx + 1}`,
+              typeLabel: exact ? `⚡ Best Practice #${idx + 1}` : `Best Practice #${idx + 1}`,
               typeColor: 'bg-cyan-950 text-cyan-300 border-cyan-700',
               snippet: bp,
+              itemTitle: `Глава: ${topic.title}`,
+              locationPath: `Справочник → ${topic.categoryLabel}`,
               domElementId: `section-topic-${topic.id}-bestpractice-${idx}`,
+              isExact: exact,
+              score: exact ? 155 : 50,
               onSelectLine: () => handleJumpToLine('chapters', topic.id, `section-topic-${topic.id}-bestpractice-${idx}`),
             });
           }
@@ -3502,18 +3591,24 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
       topic.references?.forEach((ref, idx) => {
         score += calcScore(ref.authors + ' ' + ref.title + ' ' + ref.publisher, 15);
         if (isMatch(ref.authors) || isMatch(ref.title) || isMatch(ref.publisher)) {
+          const exact = isExactMatch(ref.authors) || isExactMatch(ref.title) || isExactMatch(ref.publisher);
           matchedLines.push({
             lineId: `${topic.id}-ref-${idx}`,
-            typeLabel: `Источник: ${ref.authors} (${ref.year})`,
+            typeLabel: exact ? `⚡ Источник: ${ref.authors}` : `Источник: ${ref.authors} (${ref.year})`,
             typeColor: 'bg-purple-950 text-purple-300 border-purple-700',
             snippet: `«${ref.title}» — ${ref.publisher}`,
+            itemTitle: `Глава: ${topic.title}`,
+            locationPath: `Справочник → ${topic.categoryLabel}`,
             domElementId: `section-topic-${topic.id}-reference-${idx}`,
+            isExact: exact,
+            score: exact ? 150 : 45,
             onSelectLine: () => handleJumpToLine('chapters', topic.id, `section-topic-${topic.id}-reference-${idx}`),
           });
         }
       });
 
       if (score > 0 || matchedLines.length > 0) {
+        matchedLines.sort((a, b) => b.score - a.score);
         const topTargetDom = matchedLines.length > 0 ? matchedLines[0].domElementId : `section-topic-${topic.id}-header`;
         results.push({
           id: `chapter_${topic.id}`,
@@ -3525,7 +3620,7 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
           snippet: topic.summary || topic.purpose,
           proTip: topic.physicalSignificance?.[0] || topic.engineeringWorkflow?.goal,
           matchedLines,
-          score: Math.max(score, matchedLines.length * 20),
+          score: Math.max(score, matchedLines.reduce((acc, m) => acc + m.score, 0)),
           onSelect: () => handleJumpToLine('chapters', topic.id, topTargetDom),
         });
       }
@@ -3542,49 +3637,74 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
       score += calcScore(item.howToConfigure, 20);
       score += calcScore(item.howToObtain, 20);
 
-      const matchedLines: Array<{
-        lineId: string;
-        typeLabel: string;
-        typeColor: string;
-        snippet: string;
-        domElementId: string;
-        onSelectLine: () => void;
-      }> = [];
+      const matchedLines: MatchedLineItem[] = [];
+
+      if (isMatch(item.name)) {
+        const exact = isExactMatch(item.name);
+        matchedLines.push({
+          lineId: `${item.id}-name`,
+          typeLabel: exact ? `⚡ Параметр UI: ${item.name}` : `Параметр: ${item.name}`,
+          typeColor: 'bg-cyan-950 text-cyan-300 border-cyan-700',
+          snippet: `${item.name} (${item.symbolLatex}) — ${item.meaning}`,
+          itemTitle: `Параметр UI: ${item.name}`,
+          locationPath: `Гид по Интерфейсу → ${item.categoryName}`,
+          domElementId: `section-decoder-${item.id}`,
+          isExact: exact,
+          score: exact ? 200 : 80,
+          onSelectLine: () => handleJumpToLine('ui_guide', item.id, `section-decoder-${item.id}`),
+        });
+      }
 
       if (isMatch(item.meaning)) {
+        const exact = isExactMatch(item.meaning);
         matchedLines.push({
           lineId: `${item.id}-meaning`,
-          typeLabel: 'Физический смысл',
+          typeLabel: exact ? '⚡ Физический смысл' : 'Физический смысл',
           typeColor: 'bg-cyan-950 text-cyan-300 border-cyan-700',
           snippet: item.meaning,
+          itemTitle: `Параметр UI: ${item.name}`,
+          locationPath: `Гид по Интерфейсу → ${item.categoryName}`,
           domElementId: `section-decoder-${item.id}-meaning`,
+          isExact: exact,
+          score: exact ? 180 : 70,
           onSelectLine: () => handleJumpToLine('ui_guide', item.id, `section-decoder-${item.id}-meaning`),
         });
       }
 
       if (isMatch(item.howToConfigure)) {
+        const exact = isExactMatch(item.howToConfigure);
         matchedLines.push({
           lineId: `${item.id}-configure`,
-          typeLabel: 'Как настраивать',
+          typeLabel: exact ? '⚡ Как настраивать' : 'Как настраивать',
           typeColor: 'bg-amber-950 text-amber-300 border-amber-700',
           snippet: item.howToConfigure,
+          itemTitle: `Параметр UI: ${item.name}`,
+          locationPath: `Гид по Интерфейсу → ${item.categoryName}`,
           domElementId: `section-decoder-${item.id}-configure`,
+          isExact: exact,
+          score: exact ? 175 : 65,
           onSelectLine: () => handleJumpToLine('ui_guide', item.id, `section-decoder-${item.id}-configure`),
         });
       }
 
       if (isMatch(item.howToObtain)) {
+        const exact = isExactMatch(item.howToObtain);
         matchedLines.push({
           lineId: `${item.id}-obtain`,
-          typeLabel: 'Как получить результат',
+          typeLabel: exact ? '⚡ Как получить результат' : 'Как получить результат',
           typeColor: 'bg-emerald-950 text-emerald-300 border-emerald-700',
           snippet: item.howToObtain,
+          itemTitle: `Параметр UI: ${item.name}`,
+          locationPath: `Гид по Интерфейсу → ${item.categoryName}`,
           domElementId: `section-decoder-${item.id}-obtain`,
+          isExact: exact,
+          score: exact ? 175 : 65,
           onSelectLine: () => handleJumpToLine('ui_guide', item.id, `section-decoder-${item.id}-obtain`),
         });
       }
 
       if (score > 0 || matchedLines.length > 0) {
+        matchedLines.sort((a, b) => b.score - a.score);
         const topTargetDom = matchedLines.length > 0 ? matchedLines[0].domElementId : `section-decoder-${item.id}`;
         results.push({
           id: `decoder_${item.id}`,
@@ -3596,7 +3716,7 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
           locationPath: `Гид по Интерфейсу → ${item.categoryName} (${item.location})`,
           snippet: item.meaning,
           matchedLines,
-          score: Math.max(score, matchedLines.length * 20),
+          score: Math.max(score, matchedLines.reduce((acc, m) => acc + m.score, 0)),
           onSelect: () => handleJumpToLine('ui_guide', item.id, topTargetDom),
         });
       }
@@ -3613,52 +3733,93 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
       score += calcScore(recipe.verificationCriteria || '', 25);
       score += calcScore(recipe.proTip, 15);
 
-      const matchedLines: Array<{
-        lineId: string;
-        typeLabel: string;
-        typeColor: string;
-        snippet: string;
-        domElementId: string;
-        onSelectLine: () => void;
-      }> = [];
+      const matchedLines: MatchedLineItem[] = [];
+
+      if (isMatch(recipe.title)) {
+        const exact = isExactMatch(recipe.title);
+        matchedLines.push({
+          lineId: `${recipe.id}-title`,
+          typeLabel: exact ? `⚡ Заголовок рецепта #${recipe.recipeNumber}` : `Рецепт #${recipe.recipeNumber}`,
+          typeColor: 'bg-amber-950 text-amber-300 border-amber-700',
+          snippet: recipe.title,
+          itemTitle: recipe.title,
+          locationPath: `SOP Рецепты → #${recipe.recipeNumber} [${recipe.targetDomain}]`,
+          domElementId: `section-recipe-${recipe.id}-header`,
+          isExact: exact,
+          score: exact ? 200 : 80,
+          onSelectLine: () => handleJumpToLine('recipes', recipe.id, `section-recipe-${recipe.id}-header`),
+        });
+      }
+
+      if (isMatch(recipe.goal)) {
+        const exact = isExactMatch(recipe.goal);
+        matchedLines.push({
+          lineId: `${recipe.id}-goal`,
+          typeLabel: exact ? '⚡ Цель регламента' : 'Цель регламента',
+          typeColor: 'bg-cyan-950 text-cyan-300 border-cyan-700',
+          snippet: recipe.goal,
+          itemTitle: recipe.title,
+          locationPath: `SOP Рецепты → #${recipe.recipeNumber}`,
+          domElementId: `section-recipe-${recipe.id}-header`,
+          isExact: exact,
+          score: exact ? 180 : 70,
+          onSelectLine: () => handleJumpToLine('recipes', recipe.id, `section-recipe-${recipe.id}-header`),
+        });
+      }
 
       recipe.steps.forEach((st) => {
         score += calcScore(st.title + ' ' + st.description + ' ' + st.whereToClick + ' ' + st.expectedOutcome, 20);
         if (isMatch(st.title) || isMatch(st.description) || isMatch(st.whereToClick) || isMatch(st.expectedOutcome)) {
+          const exact = isExactMatch(st.title) || isExactMatch(st.description) || isExactMatch(st.whereToClick) || isExactMatch(st.expectedOutcome);
           matchedLines.push({
             lineId: `${recipe.id}-step-${st.stepNumber}`,
-            typeLabel: `Шаг ${st.stepNumber}: ${st.title}`,
+            typeLabel: exact ? `⚡ Шаг ${st.stepNumber}: ${st.title}` : `Шаг ${st.stepNumber}: ${st.title}`,
             typeColor: 'bg-amber-950 text-amber-300 border-amber-700',
-            snippet: `Кликать: ${st.whereToClick} → ${st.description}`,
+            snippet: `Кликать: ${st.whereToClick} → ${st.description} [Результат: ${st.expectedOutcome}]`,
+            itemTitle: recipe.title,
+            locationPath: `SOP Рецепты → #${recipe.recipeNumber}`,
             domElementId: `section-recipe-${recipe.id}-step-${st.stepNumber}`,
+            isExact: exact,
+            score: exact ? 175 : 65,
             onSelectLine: () => handleJumpToLine('recipes', recipe.id, `section-recipe-${recipe.id}-step-${st.stepNumber}`),
           });
         }
       });
 
       if (isMatch(recipe.verificationCriteria)) {
+        const exact = isExactMatch(recipe.verificationCriteria);
         matchedLines.push({
           lineId: `${recipe.id}-criteria`,
-          typeLabel: 'Критерий приемки',
+          typeLabel: exact ? '⚡ Критерий приемки' : 'Критерий приемки',
           typeColor: 'bg-emerald-950 text-emerald-300 border-emerald-700',
           snippet: recipe.verificationCriteria,
+          itemTitle: recipe.title,
+          locationPath: `SOP Рецепты → #${recipe.recipeNumber}`,
           domElementId: `section-recipe-${recipe.id}-criteria`,
+          isExact: exact,
+          score: exact ? 170 : 60,
           onSelectLine: () => handleJumpToLine('recipes', recipe.id, `section-recipe-${recipe.id}-criteria`),
         });
       }
 
       if (isMatch(recipe.proTip)) {
+        const exact = isExactMatch(recipe.proTip);
         matchedLines.push({
           lineId: `${recipe.id}-protip`,
-          typeLabel: 'Совет инженера (Pro Tip)',
+          typeLabel: exact ? '⚡ Pro Tip инженера' : 'Совет инженера (Pro Tip)',
           typeColor: 'bg-purple-950 text-purple-300 border-purple-700',
           snippet: recipe.proTip,
+          itemTitle: recipe.title,
+          locationPath: `SOP Рецепты → #${recipe.recipeNumber}`,
           domElementId: `section-recipe-${recipe.id}-protip`,
+          isExact: exact,
+          score: exact ? 160 : 55,
           onSelectLine: () => handleJumpToLine('recipes', recipe.id, `section-recipe-${recipe.id}-protip`),
         });
       }
 
       if (score > 0 || matchedLines.length > 0) {
+        matchedLines.sort((a, b) => b.score - a.score);
         const topTargetDom = matchedLines.length > 0 ? matchedLines[0].domElementId : `section-recipe-${recipe.id}-header`;
         results.push({
           id: `recipe_${recipe.id}`,
@@ -3670,7 +3831,7 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
           snippet: recipe.goal,
           proTip: recipe.proTip,
           matchedLines,
-          score: Math.max(score, matchedLines.length * 20),
+          score: Math.max(score, matchedLines.reduce((acc, m) => acc + m.score, 0)),
           onSelect: () => handleJumpToLine('recipes', recipe.id, topTargetDom),
         });
       }
@@ -3686,22 +3847,36 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
       score += calcScore(zone.proTip, 15);
       score += calcScore(zone.inputsAndOutputs?.inputs + ' ' + zone.inputsAndOutputs?.outputs, 15);
 
-      const matchedLines: Array<{
-        lineId: string;
-        typeLabel: string;
-        typeColor: string;
-        snippet: string;
-        domElementId: string;
-        onSelectLine: () => void;
-      }> = [];
+      const matchedLines: MatchedLineItem[] = [];
+
+      if (isMatch(zone.title)) {
+        const exact = isExactMatch(zone.title);
+        matchedLines.push({
+          lineId: `${zone.id}-title`,
+          typeLabel: exact ? `⚡ Зона ${zone.id}: ${zone.title}` : `Зона ${zone.id}`,
+          typeColor: 'bg-emerald-950 text-emerald-300 border-emerald-700',
+          snippet: `Зона ${zone.id}: ${zone.title} (${zone.role})`,
+          itemTitle: `Зона ${zone.id}: ${zone.title}`,
+          locationPath: `Гид по Интерфейсу → Архитектура экрана`,
+          domElementId: `section-zone-${zone.id}`,
+          isExact: exact,
+          score: exact ? 190 : 75,
+          onSelectLine: () => handleJumpToLine('ui_guide', String(zone.id), `section-zone-${zone.id}`),
+        });
+      }
 
       if (isMatch(zone.role)) {
+        const exact = isExactMatch(zone.role);
         matchedLines.push({
           lineId: `${zone.id}-role`,
-          typeLabel: 'Назначение зоны',
+          typeLabel: exact ? '⚡ Назначение зоны' : 'Назначение зоны',
           typeColor: 'bg-cyan-950 text-cyan-300 border-cyan-700',
           snippet: zone.role,
+          itemTitle: `Зона ${zone.id}: ${zone.title}`,
+          locationPath: `Гид по Интерфейсу → Архитектура экрана`,
           domElementId: `section-zone-${zone.id}-passport`,
+          isExact: exact,
+          score: exact ? 175 : 65,
           onSelectLine: () => handleJumpToLine('ui_guide', String(zone.id), `section-zone-${zone.id}-passport`),
         });
       }
@@ -3709,29 +3884,40 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
       zone.keyControls?.forEach((ctrl, idx) => {
         score += calcScore(ctrl, 15);
         if (isMatch(ctrl)) {
+          const exact = isExactMatch(ctrl);
           matchedLines.push({
             lineId: `${zone.id}-ctrl-${idx}`,
-            typeLabel: `Элемент управления #${idx + 1}`,
+            typeLabel: exact ? `⚡ Элемент управления #${idx + 1}` : `Элемент управления #${idx + 1}`,
             typeColor: 'bg-amber-950 text-amber-300 border-amber-700',
             snippet: ctrl,
+            itemTitle: `Зона ${zone.id}: ${zone.title}`,
+            locationPath: `Гид по Интерфейсу → Архитектура экрана`,
             domElementId: `section-zone-${zone.id}-controls`,
+            isExact: exact,
+            score: exact ? 165 : 55,
             onSelectLine: () => handleJumpToLine('ui_guide', String(zone.id), `section-zone-${zone.id}-controls`),
           });
         }
       });
 
       if (isMatch(zone.proTip)) {
+        const exact = isExactMatch(zone.proTip);
         matchedLines.push({
           lineId: `${zone.id}-protip`,
-          typeLabel: 'Совет инженера',
+          typeLabel: exact ? '⚡ Совет инженера' : 'Совет инженера',
           typeColor: 'bg-purple-950 text-purple-300 border-purple-700',
           snippet: zone.proTip,
+          itemTitle: `Зона ${zone.id}: ${zone.title}`,
+          locationPath: `Гид по Интерфейсу → Архитектура экрана`,
           domElementId: `section-zone-${zone.id}-protip`,
+          isExact: exact,
+          score: exact ? 160 : 50,
           onSelectLine: () => handleJumpToLine('ui_guide', String(zone.id), `section-zone-${zone.id}-protip`),
         });
       }
 
       if (score > 0 || matchedLines.length > 0) {
+        matchedLines.sort((a, b) => b.score - a.score);
         const topTargetDom = matchedLines.length > 0 ? matchedLines[0].domElementId : `section-zone-${zone.id}`;
         results.push({
           id: `zone_${zone.id}`,
@@ -3743,7 +3929,7 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
           snippet: zone.role,
           proTip: zone.proTip,
           matchedLines,
-          score: Math.max(score, matchedLines.length * 20),
+          score: Math.max(score, matchedLines.reduce((acc, m) => acc + m.score, 0)),
           onSelect: () => handleJumpToLine('ui_guide', String(zone.id), topTargetDom),
         });
       }
@@ -3755,6 +3941,21 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
     const shortcutScaleTerms = 'шкалы слои cp давление мах mach q-критерий вихри сверхзвуковой звуковой карман цвета градиент';
 
     if (isMatch(shortcutMouseTerms)) {
+      const exact = isExactMatch('мышь') || isExactMatch('вращение') || isExactMatch('панорамирование') || isExactMatch('zoom');
+      const mouseLines: MatchedLineItem[] = [
+        {
+          lineId: 'shortcut-mouse-1',
+          typeLabel: exact ? '⚡ 3D Мышь & Тач' : '3D Мышь & Тач',
+          typeColor: 'bg-cyan-950 text-cyan-300 border-cyan-700',
+          snippet: 'ЛКМ — вращение, ПКМ/Shift — панорамирование, Колесо — масштабирование',
+          itemTitle: '3D Управление (Orbit & Pan)',
+          locationPath: 'Гид по Интерфейсу → 3D Вьюпорт',
+          domElementId: 'section-shortcuts-mouse',
+          isExact: exact,
+          score: exact ? 170 : 60,
+          onSelectLine: () => handleJumpToLine('ui_guide', 'shortcuts', 'section-shortcuts-mouse'),
+        },
+      ];
       results.push({
         id: 'shortcuts_mouse',
         category: 'decoder',
@@ -3763,22 +3964,28 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
         title: 'Манипуляция Мышью & Тачем (3D Orbit & Pan)',
         locationPath: 'Гид по Интерфейсу → 3D Вьюпорт',
         snippet: 'ЛКМ: Вращение | ПКМ/Shift: Панорамирование | Колесо: Zoom | 2x Клик: Фокус на крыле',
-        score: 45,
-        matchedLines: [
-          {
-            lineId: 'shortcut-mouse-1',
-            typeLabel: '3D Мышь & Тач',
-            typeColor: 'bg-cyan-950 text-cyan-300 border-cyan-700',
-            snippet: 'ЛКМ — вращение, ПКМ/Shift — панорамирование, Колесо — масштабирование',
-            domElementId: 'section-shortcuts-mouse',
-            onSelectLine: () => handleJumpToLine('ui_guide', 'shortcuts', 'section-shortcuts-mouse'),
-          },
-        ],
+        score: 65,
+        matchedLines: mouseLines,
         onSelect: () => handleJumpToLine('ui_guide', 'shortcuts', 'section-shortcuts-mouse'),
       });
     }
 
     if (isMatch(shortcutKeyTerms)) {
+      const exact = isExactMatch('горячие') || isExactMatch('клавиши') || isExactMatch('shortcuts');
+      const keyLines: MatchedLineItem[] = [
+        {
+          lineId: 'shortcut-keys-1',
+          typeLabel: exact ? '⚡ Горячие клавиши' : 'Горячие клавиши',
+          typeColor: 'bg-amber-950 text-amber-300 border-amber-700',
+          snippet: 'Клавиши R (Сброс), X/Y/Z (Сечения), Space (Пауза тока), C (Снимок)',
+          itemTitle: 'Быстрые Клавиши (R, X/Y/Z, Space, C)',
+          locationPath: 'Гид по Интерфейсу → Горячие Клавиши 3D',
+          domElementId: 'section-shortcuts-keys',
+          isExact: exact,
+          score: exact ? 175 : 65,
+          onSelectLine: () => handleJumpToLine('ui_guide', 'shortcuts', 'section-shortcuts-keys'),
+        },
+      ];
       results.push({
         id: 'shortcuts_keys',
         category: 'decoder',
@@ -3787,22 +3994,28 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
         title: 'Быстрые Клавиши (Shortcuts R, X/Y/Z, Space, C)',
         locationPath: 'Гид по Интерфейсу → Горячие Клавиши 3D',
         snippet: 'R: Сброс камеры | X/Y/Z: Плоскости Cut Planes | Space: Пауза линий тока | C: 4K Снимок',
-        score: 50,
-        matchedLines: [
-          {
-            lineId: 'shortcut-keys-1',
-            typeLabel: 'Горячие клавиши',
-            typeColor: 'bg-amber-950 text-amber-300 border-amber-700',
-            snippet: 'Клавиши R (Сброс), X/Y/Z (Сечения), Space (Пауза тока), C (Снимок)',
-            domElementId: 'section-shortcuts-keys',
-            onSelectLine: () => handleJumpToLine('ui_guide', 'shortcuts', 'section-shortcuts-keys'),
-          },
-        ],
+        score: 70,
+        matchedLines: keyLines,
         onSelect: () => handleJumpToLine('ui_guide', 'shortcuts', 'section-shortcuts-keys'),
       });
     }
 
     if (isMatch(shortcutScaleTerms)) {
+      const exact = isExactMatch('шкалы') || isExactMatch('слои') || isExactMatch('cp') || isExactMatch('мах') || isExactMatch('вихри');
+      const scaleLines: MatchedLineItem[] = [
+        {
+          lineId: 'shortcut-scales-1',
+          typeLabel: exact ? '⚡ Шкалы Cp, Mach, Q' : 'Шкалы Cp, Mach, Q',
+          typeColor: 'bg-emerald-950 text-emerald-300 border-emerald-700',
+          snippet: 'Цветовые шкалы: Cp (давление), Мах (сжимаемость), Q-критерий (вихри)',
+          itemTitle: 'Цветовые Шкалы & Физические Поля',
+          locationPath: 'Гид по Интерфейсу → Физические Слои',
+          domElementId: 'section-shortcuts-scales',
+          isExact: exact,
+          score: exact ? 170 : 60,
+          onSelectLine: () => handleJumpToLine('ui_guide', 'shortcuts', 'section-shortcuts-scales'),
+        },
+      ];
       results.push({
         id: 'shortcuts_scales',
         category: 'decoder',
@@ -3811,77 +4024,44 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
         title: 'Цветовые Шкалы & Физические Поля (Cp, Mach, Q)',
         locationPath: 'Гид по Интерфейсу → Физические Слои',
         snippet: 'Cp: Поле давлений | Мах: Сверхзвуковой карман | Q-критерий: Жгуты вихрей',
-        score: 45,
-        matchedLines: [
-          {
-            lineId: 'shortcut-scales-1',
-            typeLabel: 'Шкалы Cp, Mach, Q',
-            typeColor: 'bg-emerald-950 text-emerald-300 border-emerald-700',
-            snippet: 'Цветовые шкалы: Cp (давление), Мах (сжимаемость), Q-критерий (вихри)',
-            domElementId: 'section-shortcuts-scales',
-            onSelectLine: () => handleJumpToLine('ui_guide', 'shortcuts', 'section-shortcuts-scales'),
-          },
-        ],
+        score: 65,
+        matchedLines: scaleLines,
         onSelect: () => handleJumpToLine('ui_guide', 'shortcuts', 'section-shortcuts-scales'),
       });
     }
 
-    // Sort by score descending
-    return results.sort((a, b) => b.score - a.score);
+    // Sort sections by score descending
+    const sortedResults = results.sort((a, b) => b.score - a.score);
+
+    // Flatten all unique matched lines across all results and sort: exact matches first, then by score
+    const allLinesMap = new Map<string, MatchedLineItem>();
+    for (const res of sortedResults) {
+      for (const ml of res.matchedLines) {
+        if (!allLinesMap.has(ml.lineId)) {
+          allLinesMap.set(ml.lineId, ml);
+        }
+      }
+    }
+    const allLinesList = Array.from(allLinesMap.values());
+    allLinesList.sort((a, b) => {
+      if (a.isExact && !b.isExact) return -1;
+      if (!a.isExact && b.isExact) return 1;
+      return b.score - a.score;
+    });
+
+    const topLines = allLinesList.slice(0, 10);
+
+    return {
+      globalSearchResults: sortedResults,
+      allMatchedLines: allLinesList,
+      topQuickLines: topLines,
+    };
   }, [globalSearchQuery]);
 
   const filteredGlobalResults = useMemo(() => {
     if (globalSearchTab === 'all') return globalSearchResults;
     return globalSearchResults.filter((r) => r.category === globalSearchTab);
   }, [globalSearchResults, globalSearchTab]);
-
-  // Top Line-Level Quick Suggestions
-  const topQuickLines = useMemo(() => {
-    if (!globalSearchQuery.trim()) return [];
-    const lines: Array<{
-      itemTitle: string;
-      itemBadge: string;
-      categoryColor: string;
-      line: {
-        lineId: string;
-        typeLabel: string;
-        typeColor: string;
-        snippet: string;
-        domElementId: string;
-        onSelectLine: () => void;
-      };
-    }> = [];
-
-    for (const res of globalSearchResults) {
-      if (res.matchedLines.length === 0) {
-        lines.push({
-          itemTitle: res.title,
-          itemBadge: res.categoryBadge,
-          categoryColor: res.categoryBadgeColor,
-          line: {
-            lineId: `${res.id}-main`,
-            typeLabel: res.categoryBadge,
-            typeColor: res.categoryBadgeColor,
-            snippet: res.snippet || res.title,
-            domElementId: res.id,
-            onSelectLine: res.onSelect,
-          },
-        });
-      } else {
-        for (const ml of res.matchedLines) {
-          lines.push({
-            itemTitle: res.title,
-            itemBadge: res.categoryBadge,
-            categoryColor: res.categoryBadgeColor,
-            line: ml,
-          });
-          if (lines.length >= 8) break;
-        }
-      }
-      if (lines.length >= 8) break;
-    }
-    return lines;
-  }, [globalSearchResults, globalSearchQuery]);
 
   // Filter topics by category and search
   const filteredTopics = useMemo(() => {
@@ -4050,9 +4230,21 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
                 setIsQuickDropdownOpen(true);
               }}
               onKeyDown={(e) => {
-                if (e.key === 'Enter') {
+                if (e.key === 'ArrowDown') {
+                  e.preventDefault();
                   if (topQuickLines.length > 0) {
-                    topQuickLines[0].line.onSelectLine();
+                    setQuickLineSelectedIndex((prev) => (prev + 1) % topQuickLines.length);
+                  }
+                } else if (e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  if (topQuickLines.length > 0) {
+                    setQuickLineSelectedIndex((prev) => (prev - 1 + topQuickLines.length) % topQuickLines.length);
+                  }
+                } else if (e.key === 'Enter') {
+                  e.preventDefault();
+                  if (topQuickLines.length > 0) {
+                    const selected = topQuickLines[quickLineSelectedIndex] || topQuickLines[0];
+                    selected.onSelectLine();
                     setIsQuickDropdownOpen(false);
                   } else if (filteredGlobalResults.length > 0) {
                     filteredGlobalResults[0].onSelect();
@@ -4095,44 +4287,68 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
 
             {/* Quick Dropdown with Instant Line-Level Jumps */}
             {isQuickDropdownOpen && topQuickLines.length > 0 && (
-              <div className="absolute left-0 right-0 top-full mt-1.5 bg-slate-900 border border-cyan-500/40 rounded-2xl shadow-2xl overflow-hidden z-50 p-2 space-y-1 backdrop-blur-xl animate-fadeIn">
+              <div className="absolute left-0 right-0 top-full mt-1.5 bg-slate-900/95 border border-cyan-500/40 rounded-2xl shadow-2xl overflow-hidden z-50 p-2 space-y-1 backdrop-blur-xl animate-fadeIn">
                 <div className="flex items-center justify-between px-2.5 py-1 text-[10px] font-mono text-slate-400 border-b border-slate-800">
                   <span className="text-cyan-300 font-bold flex items-center gap-1">
                     <Sparkles className="w-3 h-3 text-cyan-400" />
-                    Мгновенный переход к найденной строке:
+                    Совпадающие строки (стрелки ↑↓ и Enter или кнопка «Переход»):
                   </span>
-                  <span>(Нажмите для скролла)</span>
+                  <span className="text-slate-500 hidden sm:inline">({topQuickLines.length} строк)</span>
                 </div>
                 <div className="max-h-64 overflow-y-auto space-y-1 pr-1">
-                  {topQuickLines.map((item, idx) => (
-                    <button
-                      key={`${item.line.lineId}-${idx}`}
-                      type="button"
-                      onClick={() => {
-                        item.line.onSelectLine();
-                        setIsQuickDropdownOpen(false);
-                      }}
-                      className="w-full text-left p-2 rounded-xl bg-slate-950/70 hover:bg-cyan-950/40 border border-slate-800 hover:border-cyan-500/60 transition-all cursor-pointer flex items-center justify-between gap-2 group"
-                    >
-                      <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-1.5 text-[10px] font-mono mb-0.5">
-                          <span className={`px-1.5 py-0.2 rounded font-bold border ${item.line.typeColor}`}>
-                            {item.line.typeLabel}
-                          </span>
-                          <span className="text-slate-400 truncate max-w-[200px]">
-                            {item.itemTitle}
-                          </span>
+                  {topQuickLines.map((item, idx) => {
+                    const isSelected = idx === quickLineSelectedIndex;
+                    return (
+                      <div
+                        key={`${item.lineId}-${idx}`}
+                        onClick={() => {
+                          item.onSelectLine();
+                          setIsQuickDropdownOpen(false);
+                        }}
+                        onMouseEnter={() => setQuickLineSelectedIndex(idx)}
+                        className={`w-full text-left p-2 rounded-xl border transition-all cursor-pointer flex items-center justify-between gap-2.5 ${
+                          isSelected
+                            ? 'bg-cyan-950/60 border-cyan-400 shadow-md ring-1 ring-cyan-400/40'
+                            : 'bg-slate-950/70 hover:bg-cyan-950/30 border-slate-800 hover:border-cyan-500/50'
+                        }`}
+                      >
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5 text-[10px] font-mono mb-0.5">
+                            <span className={`px-1.5 py-0.2 rounded font-bold border ${item.typeColor}`}>
+                              {item.typeLabel}
+                            </span>
+                            {item.isExact && (
+                              <span className="px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 font-bold border border-cyan-700 text-[9px]">
+                                ⚡ 100%
+                              </span>
+                            )}
+                            <span className="text-slate-400 truncate max-w-[220px]">
+                              {item.locationPath}
+                            </span>
+                          </div>
+                          <p className="text-[11px] text-slate-200 truncate font-mono">
+                            <MathText text={item.snippet} />
+                          </p>
                         </div>
-                        <p className="text-[11px] text-slate-200 truncate group-hover:text-cyan-200">
-                          <MathText text={item.line.snippet} />
-                        </p>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            item.onSelectLine();
+                            setIsQuickDropdownOpen(false);
+                          }}
+                          className={`px-2.5 py-1 rounded-lg font-mono font-bold text-xs flex items-center gap-1 shrink-0 transition-all cursor-pointer ${
+                            isSelected
+                              ? 'bg-cyan-400 text-slate-950 shadow-md'
+                              : 'bg-cyan-950 hover:bg-cyan-500 text-cyan-300 hover:text-slate-950 border border-cyan-800'
+                          }`}
+                        >
+                          <span>Переход</span>
+                          <ArrowRight className="w-3 h-3" />
+                        </button>
                       </div>
-                      <span className="text-[10px] font-mono font-bold text-cyan-400 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 flex items-center gap-1 bg-cyan-950 px-2 py-1 rounded-lg border border-cyan-800">
-                        <span>Перейти</span>
-                        <ArrowRight className="w-3 h-3" />
-                      </span>
-                    </button>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -4218,7 +4434,65 @@ export const EngineeringHandbookModal: React.FC<EngineeringHandbookModalProps> =
             </div>
 
             {/* Results Grid / List with Direct Line-Level Selection */}
-            <div className="flex-1 overflow-y-auto pr-1 space-y-3.5">
+            <div className="flex-1 overflow-y-auto pr-1 space-y-4">
+              {/* Highlighted Exact-Matched Lines Quick Jump Grid */}
+              {allMatchedLines.length > 0 && (
+                <div className="p-4 rounded-2xl bg-gradient-to-r from-cyan-950/40 via-slate-900 to-indigo-950/40 border border-cyan-500/40 space-y-3 shrink-0 shadow-lg animate-fadeIn">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-slate-800/80">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-cyan-400" />
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        <span>Варианты точно совпадающих строк и формул</span>
+                        <span className="px-2 py-0.2 rounded-full bg-cyan-900 text-cyan-300 text-[10px] font-mono border border-cyan-700 font-bold">
+                          {allMatchedLines.filter((l) => l.isExact).length || allMatchedLines.length} строк
+                        </span>
+                      </h4>
+                    </div>
+                    <span className="text-[11px] font-mono text-slate-400">
+                      Нажмите «Переход», чтобы мгновенно прокрутить к строке
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2.5 max-h-64 overflow-y-auto pr-1">
+                    {allMatchedLines.slice(0, 9).map((ml, idx) => (
+                      <div
+                        key={`${ml.lineId}-${idx}`}
+                        className={`p-3 rounded-xl bg-slate-950/90 border transition-all flex flex-col justify-between gap-2.5 group/card ${
+                          ml.isExact ? 'border-cyan-500/60 shadow-sm shadow-cyan-500/10' : 'border-slate-800 hover:border-cyan-500/50'
+                        }`}
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between gap-1 text-[10px] font-mono">
+                            <span className={`px-1.5 py-0.2 rounded font-bold border ${ml.typeColor}`}>
+                              {ml.typeLabel}
+                            </span>
+                            {ml.isExact && (
+                              <span className="px-1.5 py-0.2 rounded bg-cyan-950 text-cyan-300 font-bold border border-cyan-700">
+                                ⚡ 100% совпадение
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[10px] font-mono text-slate-400 truncate">
+                            {ml.locationPath}
+                          </p>
+                          <p className="text-xs text-slate-200 leading-snug line-clamp-2 group-hover/card:text-cyan-200 font-mono">
+                            <MathText text={ml.snippet} />
+                          </p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={ml.onSelectLine}
+                          className="w-full py-1.5 px-3 rounded-lg bg-cyan-500 hover:bg-cyan-400 text-slate-950 text-xs font-mono font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md"
+                        >
+                          <span>Переход</span>
+                          <ArrowRight className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {filteredGlobalResults.length === 0 ? (
                 <div className="h-64 flex flex-col items-center justify-center text-center p-6 rounded-2xl bg-slate-900/50 border border-slate-800">
                   <AlertTriangle className="w-10 h-10 text-amber-400 mb-3" />
