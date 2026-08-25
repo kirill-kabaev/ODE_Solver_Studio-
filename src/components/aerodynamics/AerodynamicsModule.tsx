@@ -69,6 +69,9 @@ import { UAVHypersonicWaveriderModule } from './uav/UAVHypersonicWaveriderModule
 import { UAVMIMOAntiRadiationSeekerModule } from './uav/UAVMIMOAntiRadiationSeekerModule';
 import { UAVUnderwaterSubmersibleAmphibiousModule } from './uav/UAVUnderwaterSubmersibleAmphibiousModule';
 import { UAVLaserDirectedEnergyDefenseModule } from './uav/UAVLaserDirectedEnergyDefenseModule';
+import { UAVFlappingWingOrnithopterModule } from './uav/UAVFlappingWingOrnithopterModule';
+import { UAVFreeSpaceOpticalLasercomModule } from './uav/UAVFreeSpaceOpticalLasercomModule';
+import { UAVAirLaunchRocketRamjetModule } from './uav/UAVAirLaunchRocketRamjetModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -133,6 +136,9 @@ export type AeroSubTab =
   | 'uav_anti_radiation_seeker'
   | 'uav_amphibious_submersible'
   | 'uav_laser_defense'
+  | 'uav_flapping_ornithopter'
+  | 'uav_fso_lasercom'
+  | 'uav_air_launch_ramjet'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -184,11 +190,11 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '32 Системы',
+    tag: '35 Систем',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'Лазерная защита HEL/DEW, дроны-амфибии, ПРР ГСН (SEAD), гиперзвуковые вейврайдеры, дозаправка в воздухе, соосные винты, WIG-экранопланы, HAPS спутники, морфинг, привязной кабель, ORCA рой, био-захват, ОЭС KCF, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
+    description: 'Машущее крыло / орнитоптеры, лазерная FSO-связь 100G, воздушный старт ИРПД, лазерная защита HEL/DEW, дроны-амфибии, ПРР ГСН (SEAD), гиперзвуковые вейврайдеры, дозаправка, соосные винты, WIG-экранопланы, HAPS спутники, морфинг, привязной кабель, ORCA рой, био-захват, ОЭС KCF, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
     defaultSubTab: 'uav_studio',
   },
   {
@@ -310,6 +316,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
         'uav_anti_radiation_seeker',
         'uav_amphibious_submersible',
         'uav_laser_defense',
+        'uav_flapping_ornithopter',
+        'uav_fso_lasercom',
+        'uav_air_launch_ramjet',
       ];
 
       if (uavSubTabs.includes(targetSubTab)) {
@@ -1114,6 +1123,45 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <Zap className="w-3.5 h-3.5 text-rose-400" />
             <span>⚡ Лазерная Защита БПЛА (HEL / DEW), Абляция & Тепловое Пятно</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_flapping_ornithopter')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_flapping_ornithopter'
+                ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-400 text-slate-950 shadow-md font-black ring-1 ring-teal-400/50'
+                : 'text-teal-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-teal-900/50'
+            }`}
+          >
+            <Feather className="w-3.5 h-3.5 text-teal-400" />
+            <span>🪶 Биомиметический Орнитоптер, Машущее Крыло & LEV Вихри</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_fso_lasercom')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_fso_lasercom'
+                ? 'bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400 text-white shadow-md font-black ring-1 ring-cyan-400/50'
+                : 'text-cyan-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-cyan-900/50'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5 text-cyan-400" />
+            <span>📡 Оптико-Лазерная FSO Связь БПЛА (100G) & Anti-РЭБ Stealth</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_air_launch_ramjet')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_air_launch_ramjet'
+                ? 'bg-gradient-to-r from-orange-500 via-red-500 to-amber-400 text-white shadow-md font-black ring-1 ring-orange-400/50'
+                : 'text-orange-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-orange-900/50'
+            }`}
+          >
+            <Rocket className="w-3.5 h-3.5 text-orange-400" />
+            <span>🚀 Воздушный Старт & Интегральный Ракетно-Прямоточный ДУ (ИРПД M=4.5)</span>
+          </button>
         </div>
       )}
 
@@ -1241,6 +1289,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_anti_radiation_seeker' && <UAVMIMOAntiRadiationSeekerModule />}
           {activeUAVSubTab === 'uav_amphibious_submersible' && <UAVUnderwaterSubmersibleAmphibiousModule />}
           {activeUAVSubTab === 'uav_laser_defense' && <UAVLaserDirectedEnergyDefenseModule />}
+          {activeUAVSubTab === 'uav_flapping_ornithopter' && <UAVFlappingWingOrnithopterModule />}
+          {activeUAVSubTab === 'uav_fso_lasercom' && <UAVFreeSpaceOpticalLasercomModule />}
+          {activeUAVSubTab === 'uav_air_launch_ramjet' && <UAVAirLaunchRocketRamjetModule />}
         </>
       )}
 
