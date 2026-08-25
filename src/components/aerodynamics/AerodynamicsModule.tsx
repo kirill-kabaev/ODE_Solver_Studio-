@@ -26,6 +26,8 @@ import {
   Shield,
   Gauge,
   Eye,
+  Cable,
+  Feather,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
@@ -49,6 +51,9 @@ import { UAVBatteryThermalBMSModule } from './uav/UAVBatteryThermalBMSModule';
 import { UAVGimbalVisionTrackingModule } from './uav/UAVGimbalVisionTrackingModule';
 import { UAVCatapultPneumaticLauncherModule } from './uav/UAVCatapultPneumaticLauncherModule';
 import { UAVAeromagneticLidarSurveyModule } from './uav/UAVAeromagneticLidarSurveyModule';
+import { UAVTetheredPowerStationModule } from './uav/UAVTetheredPowerStationModule';
+import { UAVSwarmCollisionAvoidanceORCA } from './uav/UAVSwarmCollisionAvoidanceORCA';
+import { UAVPerchingBioGripperModule } from './uav/UAVPerchingBioGripperModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -101,6 +106,9 @@ export type AeroSubTab =
   | 'uav_gimbal_vision'
   | 'uav_catapult_launcher'
   | 'uav_lidar_survey'
+  | 'uav_tethered_power'
+  | 'uav_swarm_orca'
+  | 'uav_perching_gripper'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -152,11 +160,11 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '20 Систем',
+    tag: '23 Системы',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'ОЭС подвес KCF, пневмокатапульта, LiDAR, VIO/Lucas-Kanade, Stealth ЭПР, спассистемы ПСС, BMS аккумуляторы, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
+    description: 'Привязной HVDC кабель, ORCA рой, био-перчинг захваты, ОЭС KCF, пневмокатапульта, LiDAR, VIO/Lucas-Kanade, Stealth ЭПР, спассистемы ПСС, BMS аккумуляторы, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
     defaultSubTab: 'uav_studio',
   },
   {
@@ -914,6 +922,45 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <Layers className="w-3.5 h-3.5 text-teal-400" />
             <span>🌐 Воздушный LiDAR & Аэромагниторазведка (RIEGL/Cesium)</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_tethered_power')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_tethered_power'
+                ? 'bg-gradient-to-r from-sky-500 via-blue-500 to-indigo-500 text-slate-950 shadow-md font-black ring-1 ring-sky-400/50'
+                : 'text-sky-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-sky-900/50'
+            }`}
+          >
+            <Cable className="w-3.5 h-3.5 text-sky-400" />
+            <span>⚡ Привязной БПЛА: HVDC Кабель & Провисание (Catenary Sag)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_swarm_orca')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_swarm_orca'
+                ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-slate-950 shadow-md font-black ring-1 ring-indigo-400/50'
+                : 'text-indigo-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-indigo-900/50'
+            }`}
+          >
+            <Boxes className="w-3.5 h-3.5 text-indigo-400" />
+            <span>🐝 Рой БПЛА: ORCA-3D Бесконфликтная Навигация (Velocity Obstacle)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_perching_gripper')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_perching_gripper'
+                ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 shadow-md font-black ring-1 ring-emerald-400/50'
+                : 'text-emerald-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-emerald-900/50'
+            }`}
+          >
+            <Feather className="w-3.5 h-3.5 text-emerald-400" />
+            <span>🦅 Био-Перчинг: Посадка на Ветки/Стены & Микроигольчатый Захват</span>
+          </button>
         </div>
       )}
 
@@ -1029,6 +1076,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_gimbal_vision' && <UAVGimbalVisionTrackingModule />}
           {activeUAVSubTab === 'uav_catapult_launcher' && <UAVCatapultPneumaticLauncherModule />}
           {activeUAVSubTab === 'uav_lidar_survey' && <UAVAeromagneticLidarSurveyModule />}
+          {activeUAVSubTab === 'uav_tethered_power' && <UAVTetheredPowerStationModule />}
+          {activeUAVSubTab === 'uav_swarm_orca' && <UAVSwarmCollisionAvoidanceORCA />}
+          {activeUAVSubTab === 'uav_perching_gripper' && <UAVPerchingBioGripperModule />}
         </>
       )}
 
