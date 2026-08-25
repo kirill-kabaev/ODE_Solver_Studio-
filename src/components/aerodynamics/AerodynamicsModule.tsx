@@ -30,6 +30,8 @@ import {
   Feather,
   Waves,
   Sun,
+  RotateCw,
+  Fuel,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
@@ -59,6 +61,9 @@ import { UAVPerchingBioGripperModule } from './uav/UAVPerchingBioGripperModule';
 import { UAVGroundEffectEkranoplanModule } from './uav/UAVGroundEffectEkranoplanModule';
 import { UAVSolarHAPSAtmosphericSatelliteModule } from './uav/UAVSolarHAPSAtmosphericSatelliteModule';
 import { UAVMorphingWingAeroelasticModule } from './uav/UAVMorphingWingAeroelasticModule';
+import { UAVCoaxialTiltrotorDynamicsModule } from './uav/UAVCoaxialTiltrotorDynamicsModule';
+import { UAVAerialRefuelingDockingModule } from './uav/UAVAerialRefuelingDockingModule';
+import { UAVHypersonicWaveriderModule } from './uav/UAVHypersonicWaveriderModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -117,6 +122,9 @@ export type AeroSubTab =
   | 'uav_ekranoplan_wig'
   | 'uav_solar_haps'
   | 'uav_morphing_wing'
+  | 'uav_coaxial_tiltrotor'
+  | 'uav_refueling_docking'
+  | 'uav_hypersonic_waverider'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -168,11 +176,11 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '26 Систем',
+    tag: '29 Систем',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'Экранопланы WIG, Солнечные HAPS псевдоспутники, морфинг крыла и флаттер, привязной кабель, ORCA рой, био-захват, ОЭС KCF, пневмокатапульта, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
+    description: 'Гиперзвуковые вейврайдеры, дозаправка в воздухе, соосные винты/конвертопланы, WIG-экранопланы, HAPS спутники, морфинг, привязной кабель, ORCA рой, био-захват, ОЭС KCF, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
     defaultSubTab: 'uav_studio',
   },
   {
@@ -288,6 +296,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
         'uav_ekranoplan_wig',
         'uav_solar_haps',
         'uav_morphing_wing',
+        'uav_coaxial_tiltrotor',
+        'uav_refueling_docking',
+        'uav_hypersonic_waverider',
       ];
 
       if (uavSubTabs.includes(targetSubTab)) {
@@ -1014,6 +1025,45 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <Layers className="w-3.5 h-3.5 text-indigo-400" />
             <span>📐 Морфинг Крыла, Изменяемая Стреловидность & Флаттер</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_coaxial_tiltrotor')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_coaxial_tiltrotor'
+                ? 'bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-400 text-slate-950 shadow-md font-black ring-1 ring-sky-400/50'
+                : 'text-sky-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-sky-900/50'
+            }`}
+          >
+            <RotateCw className="w-3.5 h-3.5 text-sky-400" />
+            <span>🌀 Соосные Винты, Конвертопланы & Гиропрецессия</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_refueling_docking')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_refueling_docking'
+                ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-400 text-slate-950 shadow-md font-black ring-1 ring-emerald-400/50'
+                : 'text-emerald-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-emerald-900/50'
+            }`}
+          >
+            <Fuel className="w-3.5 h-3.5 text-emerald-400" />
+            <span>⛽ Дозаправка в Воздухе (AAR) & Стыковка Штанга-Конус</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_hypersonic_waverider')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_hypersonic_waverider'
+                ? 'bg-gradient-to-r from-rose-500 via-amber-500 to-orange-400 text-white shadow-md font-black ring-1 ring-rose-400/50'
+                : 'text-rose-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-rose-900/50'
+            }`}
+          >
+            <Flame className="w-3.5 h-3.5 text-rose-400" />
+            <span>🔥 Гиперзвуковой Вейврайдер, Scramjet & Тепловые Потоки</span>
+          </button>
         </div>
       )}
 
@@ -1135,6 +1185,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_ekranoplan_wig' && <UAVGroundEffectEkranoplanModule />}
           {activeUAVSubTab === 'uav_solar_haps' && <UAVSolarHAPSAtmosphericSatelliteModule />}
           {activeUAVSubTab === 'uav_morphing_wing' && <UAVMorphingWingAeroelasticModule />}
+          {activeUAVSubTab === 'uav_coaxial_tiltrotor' && <UAVCoaxialTiltrotorDynamicsModule />}
+          {activeUAVSubTab === 'uav_refueling_docking' && <UAVAerialRefuelingDockingModule />}
+          {activeUAVSubTab === 'uav_hypersonic_waverider' && <UAVHypersonicWaveriderModule />}
         </>
       )}
 
