@@ -36,6 +36,7 @@ import {
   Anchor,
   ShieldCheck,
   Droplets,
+  Fan,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
@@ -77,6 +78,9 @@ import { UAVAirLaunchRocketRamjetModule } from './uav/UAVAirLaunchRocketRamjetMo
 import { UAVHighPowerMicrowaveCounterUASModule } from './uav/UAVHighPowerMicrowaveCounterUASModule';
 import { UAVL1AdaptiveFlightControlDamageModule } from './uav/UAVL1AdaptiveFlightControlDamageModule';
 import { UAVHydrogenCryoFuelCellModule } from './uav/UAVHydrogenCryoFuelCellModule';
+import { UAVCoaxialDuctedFanVectoredThrustModule } from './uav/UAVCoaxialDuctedFanVectoredThrustModule';
+import { UAVQuantumGravimetricAnomalyNavModule } from './uav/UAVQuantumGravimetricAnomalyNavModule';
+import { UAVPlasmaActuatorFlowControlModule } from './uav/UAVPlasmaActuatorFlowControlModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -147,6 +151,9 @@ export type AeroSubTab =
   | 'uav_hpm_counter_uas'
   | 'uav_l1_adaptive_control'
   | 'uav_hydrogen_cryo_fuelcell'
+  | 'uav_ducted_fan_thrust_vector'
+  | 'uav_quantum_gravimetric_nav'
+  | 'uav_plasma_actuator_flow'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -1212,6 +1219,45 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <Droplets className="w-3.5 h-3.5 text-cyan-400" />
             <span>💧 Криогенная Водородная Энергоустановка (LH₂ PEMFC 120ч)</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_ducted_fan_thrust_vector')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_ducted_fan_thrust_vector'
+                ? 'bg-gradient-to-r from-blue-500 via-cyan-500 to-teal-400 text-slate-950 shadow-md font-black ring-1 ring-cyan-400/50'
+                : 'text-blue-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-blue-900/50'
+            }`}
+          >
+            <Fan className="w-3.5 h-3.5 text-cyan-400" />
+            <span>🌀 Соосный Импеллер & Вектор Тяги (Ducted Fan VTOL)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_quantum_gravimetric_nav')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_quantum_gravimetric_nav'
+                ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-400 text-slate-950 shadow-md font-black ring-1 ring-emerald-400/50'
+                : 'text-emerald-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-emerald-900/50'
+            }`}
+          >
+            <Compass className="w-3.5 h-3.5 text-emerald-400" />
+            <span>🧭 Квантовая Гравиметрическая & Магнитная Навигация (GNSS-Denied)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_plasma_actuator_flow')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_plasma_actuator_flow'
+                ? 'bg-gradient-to-r from-purple-500 via-indigo-500 to-pink-400 text-white shadow-md font-black ring-1 ring-purple-400/50'
+                : 'text-purple-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-purple-900/50'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5 text-purple-400" />
+            <span>⚡ Плазменное Управление Пограничным Слоем (DBD Actuator Stall Delay)</span>
+          </button>
         </div>
       )}
 
@@ -1345,6 +1391,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_hpm_counter_uas' && <UAVHighPowerMicrowaveCounterUASModule />}
           {activeUAVSubTab === 'uav_l1_adaptive_control' && <UAVL1AdaptiveFlightControlDamageModule />}
           {activeUAVSubTab === 'uav_hydrogen_cryo_fuelcell' && <UAVHydrogenCryoFuelCellModule />}
+          {activeUAVSubTab === 'uav_ducted_fan_thrust_vector' && <UAVCoaxialDuctedFanVectoredThrustModule />}
+          {activeUAVSubTab === 'uav_quantum_gravimetric_nav' && <UAVQuantumGravimetricAnomalyNavModule />}
+          {activeUAVSubTab === 'uav_plasma_actuator_flow' && <UAVPlasmaActuatorFlowControlModule />}
         </>
       )}
 
