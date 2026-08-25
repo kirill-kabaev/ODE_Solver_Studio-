@@ -34,6 +34,8 @@ import {
   Fuel,
   Zap,
   Anchor,
+  ShieldCheck,
+  Droplets,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
@@ -72,6 +74,9 @@ import { UAVLaserDirectedEnergyDefenseModule } from './uav/UAVLaserDirectedEnerg
 import { UAVFlappingWingOrnithopterModule } from './uav/UAVFlappingWingOrnithopterModule';
 import { UAVFreeSpaceOpticalLasercomModule } from './uav/UAVFreeSpaceOpticalLasercomModule';
 import { UAVAirLaunchRocketRamjetModule } from './uav/UAVAirLaunchRocketRamjetModule';
+import { UAVHighPowerMicrowaveCounterUASModule } from './uav/UAVHighPowerMicrowaveCounterUASModule';
+import { UAVL1AdaptiveFlightControlDamageModule } from './uav/UAVL1AdaptiveFlightControlDamageModule';
+import { UAVHydrogenCryoFuelCellModule } from './uav/UAVHydrogenCryoFuelCellModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -139,6 +144,9 @@ export type AeroSubTab =
   | 'uav_flapping_ornithopter'
   | 'uav_fso_lasercom'
   | 'uav_air_launch_ramjet'
+  | 'uav_hpm_counter_uas'
+  | 'uav_l1_adaptive_control'
+  | 'uav_hydrogen_cryo_fuelcell'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -190,11 +198,11 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '35 Систем',
+    tag: '38 Систем',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'Машущее крыло / орнитоптеры, лазерная FSO-связь 100G, воздушный старт ИРПД, лазерная защита HEL/DEW, дроны-амфибии, ПРР ГСН (SEAD), гиперзвуковые вейврайдеры, дозаправка, соосные винты, WIG-экранопланы, HAPS спутники, морфинг, привязной кабель, ORCA рой, био-захват, ОЭС KCF, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
+    description: 'HPM/ЭМИ СВЧ-перехват, адаптивное L1 парирование повреждений, крио-водородные LH2 PEMFC (120ч), машущее крыло, лазерная FSO-связь 100G, воздушный старт ИРПД, лазерная защита HEL, амфибии, ПРР ГСН, гиперзвук, соосные винты, экранопланы, HAPS, морфинг, привязной кабель, ORCA рой, био-захват, ОЭС KCF, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
     defaultSubTab: 'uav_studio',
   },
   {
@@ -319,6 +327,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
         'uav_flapping_ornithopter',
         'uav_fso_lasercom',
         'uav_air_launch_ramjet',
+        'uav_hpm_counter_uas',
+        'uav_l1_adaptive_control',
+        'uav_hydrogen_cryo_fuelcell',
       ];
 
       if (uavSubTabs.includes(targetSubTab)) {
@@ -1162,6 +1173,45 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <Rocket className="w-3.5 h-3.5 text-orange-400" />
             <span>🚀 Воздушный Старт & Интегральный Ракетно-Прямоточный ДУ (ИРПД M=4.5)</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_hpm_counter_uas')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_hpm_counter_uas'
+                ? 'bg-gradient-to-r from-purple-500 via-indigo-500 to-amber-400 text-white shadow-md font-black ring-1 ring-purple-400/50'
+                : 'text-purple-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-purple-900/50'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5 text-amber-400" />
+            <span>⚡ СВЧ/ЭМИ Перехват Роя (HPM Counter-UAS 50-100 МВт)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_l1_adaptive_control')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_l1_adaptive_control'
+                ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-green-400 text-slate-950 shadow-md font-black ring-1 ring-emerald-400/50'
+                : 'text-emerald-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-emerald-900/50'
+            }`}
+          >
+            <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+            <span>🛡️ Нейросетевое L₁ Адаптивное Управление & Парирование Повреждений Крыла</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_hydrogen_cryo_fuelcell')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_hydrogen_cryo_fuelcell'
+                ? 'bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-400 text-white shadow-md font-black ring-1 ring-cyan-400/50'
+                : 'text-cyan-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-cyan-900/50'
+            }`}
+          >
+            <Droplets className="w-3.5 h-3.5 text-cyan-400" />
+            <span>💧 Криогенная Водородная Энергоустановка (LH₂ PEMFC 120ч)</span>
+          </button>
         </div>
       )}
 
@@ -1292,6 +1342,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_flapping_ornithopter' && <UAVFlappingWingOrnithopterModule />}
           {activeUAVSubTab === 'uav_fso_lasercom' && <UAVFreeSpaceOpticalLasercomModule />}
           {activeUAVSubTab === 'uav_air_launch_ramjet' && <UAVAirLaunchRocketRamjetModule />}
+          {activeUAVSubTab === 'uav_hpm_counter_uas' && <UAVHighPowerMicrowaveCounterUASModule />}
+          {activeUAVSubTab === 'uav_l1_adaptive_control' && <UAVL1AdaptiveFlightControlDamageModule />}
+          {activeUAVSubTab === 'uav_hydrogen_cryo_fuelcell' && <UAVHydrogenCryoFuelCellModule />}
         </>
       )}
 
