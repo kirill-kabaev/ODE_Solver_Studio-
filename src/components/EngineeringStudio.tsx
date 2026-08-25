@@ -25,6 +25,8 @@ import {
   Search,
   CornerDownLeft,
   Filter,
+  FileText,
+  Scale,
 } from 'lucide-react';
 import { MathText } from './MathView';
 import { AerodynamicsModule, AeroDomainCategory, AeroSubTab } from './aerodynamics/AerodynamicsModule';
@@ -33,6 +35,12 @@ import { FutureRoadmapModal } from './FutureRoadmapModal';
 import { NvidiaHardwareEnforcerBar } from './NvidiaHardwareEnforcerBar';
 import { EngineeringGlobalSearchModal } from './EngineeringGlobalSearchModal';
 import { EngineeringSearchItem, ENGINEERING_SEARCH_ITEMS } from './engineeringSearchIndex';
+import { EngineeringFlightComputerModal } from './aerodynamics/EngineeringFlightComputerModal';
+import { AircraftDesignWizardModal } from './aerodynamics/AircraftDesignWizardModal';
+import { AeroInteractiveAtlasModal } from './aerodynamics/AeroInteractiveAtlasModal';
+import { GostReportGeneratorModal } from './aerodynamics/GostReportGeneratorModal';
+import { MaterialsDatabaseModal } from './aerodynamics/MaterialsDatabaseModal';
+import { RealtimeSanityCheckBadge } from './aerodynamics/RealtimeSanityCheckBadge';
 
 export type EngineeringDomain = 'aero' | 'space' | 'eda';
 
@@ -43,6 +51,13 @@ export const EngineeringStudio: React.FC = () => {
   const [isRoadmapOpen, setIsRoadmapOpen] = useState<boolean>(false);
   const [isSearchOpen, setIsSearchOpen] = useState<boolean>(false);
   const [handbookTopicId, setHandbookTopicId] = useState<HandbookTopicId>('presets');
+
+  // New Engineering Suite Modals State
+  const [isFlightComputerOpen, setIsFlightComputerOpen] = useState<boolean>(false);
+  const [isDesignWizardOpen, setIsDesignWizardOpen] = useState<boolean>(false);
+  const [isAeroAtlasOpen, setIsAeroAtlasOpen] = useState<boolean>(false);
+  const [isGostReportOpen, setIsGostReportOpen] = useState<boolean>(false);
+  const [isMaterialsDbOpen, setIsMaterialsDbOpen] = useState<boolean>(false);
 
   // Search Navigation state passed to AerodynamicsModule
   const [searchTargetCategory, setSearchTargetCategory] = useState<AeroDomainCategory | undefined>(undefined);
@@ -281,6 +296,96 @@ export const EngineeringStudio: React.FC = () => {
               </button>
             ))}
           </div>
+
+          {/* Proactive Engineering Tool Suite Bar (5 Interactive Modals + Live Sanity Check) */}
+          <div className="pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2.5">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-[10px] font-bold text-cyan-400 uppercase tracking-wider font-mono">
+                Инженерный Комплекс:
+              </span>
+
+              {/* 1. Flight Computer & ISA */}
+              <button
+                type="button"
+                onClick={() => setIsFlightComputerOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/80 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-bold transition-all cursor-pointer shadow-sm hover:scale-[1.02]"
+                title="Авиационный борткомпьютер: атмосфера ГОСТ 4401, конвертер скоростей (TAS/EAS/Mach), число Re, центровка"
+              >
+                <Wind className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Борткомпьютер & ISA</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-cyan-900/90 text-cyan-200 border border-cyan-700 font-normal">
+                  ГОСТ 4401
+                </span>
+              </button>
+
+              {/* 2. Aircraft Design Wizard */}
+              <button
+                type="button"
+                onClick={() => setIsDesignWizardOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-indigo-950/60 hover:bg-indigo-900/80 text-indigo-300 border border-indigo-500/40 text-xs font-mono font-bold transition-all cursor-pointer shadow-sm hover:scale-[1.02]"
+                title="Пошаговый мастер проектирования ЛА: синтез геометрии, ВМГ, центровка и 3D визуализация"
+              >
+                <Compass className="w-3.5 h-3.5 text-indigo-400" />
+                <span>Мастер САПР (Wizard)</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-indigo-900/90 text-indigo-200 border border-indigo-700 font-normal">
+                  5 Шагов
+                </span>
+              </button>
+
+              {/* 3. Aero Interactive Atlas */}
+              <button
+                type="button"
+                onClick={() => setIsAeroAtlasOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-teal-950/60 hover:bg-teal-900/80 text-teal-300 border border-teal-500/40 text-xs font-mono font-bold transition-all cursor-pointer shadow-sm hover:scale-[1.02]"
+                title="Интерактивный атлас теории: подъемная сила, скос потока, Рейнольдс, устойчивость"
+              >
+                <BookOpen className="w-3.5 h-3.5 text-teal-400" />
+                <span>Атлас «Аэродинамика»</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-teal-900/90 text-teal-200 border border-teal-700 font-normal">
+                  Песочница
+                </span>
+              </button>
+
+              {/* 4. GOST Report Generator */}
+              <button
+                type="button"
+                onClick={() => setIsGostReportOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-sky-950/60 hover:bg-sky-900/80 text-sky-300 border border-sky-500/40 text-xs font-mono font-bold transition-all cursor-pointer shadow-sm hover:scale-[1.02]"
+                title="Автогенератор пояснительной записки по ГОСТ 2.105-95 с титульным листом и печатью"
+              >
+                <FileText className="w-3.5 h-3.5 text-sky-400" />
+                <span>Отчет ГОСТ 2.105</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-sky-900/90 text-sky-200 border border-sky-700 font-normal">
+                  ЕСКД / PDF
+                </span>
+              </button>
+
+              {/* 5. Aerospace Materials Database */}
+              <button
+                type="button"
+                onClick={() => setIsMaterialsDbOpen(true)}
+                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/80 text-emerald-300 border border-emerald-500/40 text-xs font-mono font-bold transition-all cursor-pointer shadow-sm hover:scale-[1.02]"
+                title="База авиационных материалов (Д16Т, В95, ВТ6, Carbon T700) и расчет лонжерона"
+              >
+                <Layers className="w-3.5 h-3.5 text-emerald-400" />
+                <span>База Материалов</span>
+                <span className="text-[9px] px-1.5 py-0.2 rounded bg-emerald-900/90 text-emerald-200 border border-emerald-700 font-normal">
+                  ВИАМ & Сплавы
+                </span>
+              </button>
+            </div>
+
+            {/* Live Physics Sanity Check HUD Badge */}
+            <div className="flex items-center">
+              <RealtimeSanityCheckBadge
+                staticMarginPct={11.5}
+                currentAoADeg={4.2}
+                wingLoadingKgM2={28.4}
+                thrustToWeightRatio={0.62}
+                onOpenFlightComputer={() => setIsFlightComputerOpen(true)}
+              />
+            </div>
+          </div>
         </div>
 
         {/* Domain Navigation Tabs */}
@@ -411,6 +516,44 @@ export const EngineeringStudio: React.FC = () => {
       <FutureRoadmapModal
         isOpen={isRoadmapOpen}
         onClose={() => setIsRoadmapOpen(false)}
+      />
+
+      {/* 1. Engineering Flight Computer Modal */}
+      <EngineeringFlightComputerModal
+        isOpen={isFlightComputerOpen}
+        onClose={() => setIsFlightComputerOpen(false)}
+      />
+
+      {/* 2. Aircraft Design Wizard Modal */}
+      <AircraftDesignWizardModal
+        isOpen={isDesignWizardOpen}
+        onClose={() => setIsDesignWizardOpen(false)}
+        onApplyDesign={(design) => {
+          setActiveDomain('aero');
+          setIsDesignWizardOpen(false);
+          setToastMessage({
+            title: `Синтезирована модель "${design.name}" (Размах: ${design.spanM}м, Масса: ${design.mtowKg}кг)`,
+            badge: 'САПР Синтез',
+          });
+        }}
+      />
+
+      {/* 3. Aero Interactive Atlas Modal */}
+      <AeroInteractiveAtlasModal
+        isOpen={isAeroAtlasOpen}
+        onClose={() => setIsAeroAtlasOpen(false)}
+      />
+
+      {/* 4. GOST 2.105 Report Generator Modal */}
+      <GostReportGeneratorModal
+        isOpen={isGostReportOpen}
+        onClose={() => setIsGostReportOpen(false)}
+      />
+
+      {/* 5. Aerospace Materials Database Modal */}
+      <MaterialsDatabaseModal
+        isOpen={isMaterialsDbOpen}
+        onClose={() => setIsMaterialsDbOpen(false)}
       />
     </div>
   );

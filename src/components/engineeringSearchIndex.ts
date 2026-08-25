@@ -59,6 +59,104 @@ export interface EngineeringSearchItem {
 
 export const ENGINEERING_SEARCH_ITEMS: EngineeringSearchItem[] = [
   // ============================================================================
+  // 0. НОВЫЕ ПРИКЛАДНЫЕ ИНСТРУМЕНТЫ & КАЛЬКУЛЯТОРЫ (TOOLS & WIZARDS)
+  // ============================================================================
+  {
+    id: 'tool_flight_computer',
+    title: 'Авиационный Бортовой Компьютер & Инженерный Калькулятор (ГОСТ 4401 / ISA)',
+    shortTitle: 'Борткомпьютер & Атмосфера ISA',
+    group: 'general_aero',
+    domain: 'aero',
+    category: 'general_aero',
+    subTab: 'visual_studio',
+    handbookTopicId: 'overview',
+    iconName: 'Wind',
+    badge: 'Калькулятор ISA',
+    badgeColor: 'from-cyan-500 to-sky-500 text-slate-950',
+    description: 'Расчет параметров стандартной атмосферы ICAO/ГОСТ 4401 до 30 км (T, P, rho, a, mu), конвертер скоростей (TAS, EAS, Mach, kts), расчет числа Рейнольдса Re, нагрузки на крыло W/S и запаса устойчивости SM.',
+    formulaLatex: 'P(h) = P_0 \\cdot \\left(1 - \\frac{L \\cdot h}{T_0}\\right)^{\\frac{g}{L \\cdot R}}, \\quad Re = \\frac{\\rho V c}{\\mu}',
+    keywords: [
+      'борткомпьютер', 'калькулятор', 'isa', 'атмосфера', 'гост 4401', 'высота', 'плотность', 'давление',
+      'температура', 'вязкость', 'рейнольдс', 'махи', 'узлы', 'tas', 'eas', 'скорость звука', 'центровка', 'sm'
+    ],
+  },
+  {
+    id: 'tool_aircraft_wizard',
+    title: 'Пошаговый Мастер Проектирования ЛА (Aircraft Design Wizard)',
+    shortTitle: 'Мастер Проектирования ЛА',
+    group: 'general_aero',
+    domain: 'aero',
+    category: 'general_aero',
+    subTab: 'presets',
+    handbookTopicId: 'presets',
+    iconName: 'Compass',
+    badge: 'САПР Wizard',
+    badgeColor: 'from-indigo-500 to-purple-500 text-white',
+    description: 'Интерактивный пошаговый конфигуратор от ТЗ до 3D: синтез геометрии трапециевидного крыла, выбор профиля, подбор ВМГ, расчет запаса устойчивости, поляры и дальности.',
+    formulaLatex: 'C_{Di} = \\frac{C_L^2}{\\pi \\cdot AR \\cdot e}, \\quad SM = \\frac{X_F - X_{CG}}{b_{MAC}} \\times 100\\%',
+    keywords: [
+      'мастер', 'wizard', 'проектирование', 'сапр', 'синтез', 'размах', 'сах', 'удлинение', 'стреловидность',
+      'мотор', 'винт', 'аккумулятор', 'центровка', 'устойчивость', 'поляра', 'компоновка'
+    ],
+  },
+  {
+    id: 'tool_aero_atlas',
+    title: 'Интерактивный Атлас «Аэродинамика на пальцах» & Инспектор Формул',
+    shortTitle: 'Атлас «Аэродинамика на пальцах»',
+    group: 'general_aero',
+    domain: 'aero',
+    category: 'general_aero',
+    subTab: 'visual_studio',
+    handbookTopicId: 'architecture',
+    iconName: 'BookOpen',
+    badge: 'Обучение & Теория',
+    badgeColor: 'from-teal-500 to-emerald-500 text-slate-950',
+    description: 'Наглядный разбор физических явлений (Бернулли vs Ньютон, скос потока, концевые вихри, погранслой, сжимаемость) с интерактивными микро-песочницами и анатомией величин в СИ.',
+    formulaLatex: 'L = \\rho \\cdot V_\\infty \\cdot \\Gamma, \\quad K = \\frac{C_L}{C_D}',
+    keywords: [
+      'атлас', 'теория', 'формулы', 'бернулли', 'ньютон', 'жуковский', 'циркуляция', 'вихри', 'погранслой',
+      'качество', 'индуктивное сопротивление', 'освальд', 'сжимаемость', 'стреловидность'
+    ],
+  },
+  {
+    id: 'tool_gost_report',
+    title: 'Автогенератор Пояснительной Записки по ГОСТ 2.105-95 (ЕСКД)',
+    shortTitle: 'Пояснительная Записка ГОСТ',
+    group: 'general_aero',
+    domain: 'aero',
+    category: 'general_aero',
+    subTab: 'visual_studio',
+    handbookTopicId: 'export_report',
+    iconName: 'FileText',
+    badge: 'ЕСКД / ГОСТ Отчет',
+    badgeColor: 'from-sky-500 to-cyan-500 text-slate-950',
+    description: 'Формирование официального научно-технического отчета с титульным листом по ГОСТ 2.105-95, исходными данными, таблицами аэродинамических коэффициентов, проверкой устойчивости и печатью в PDF.',
+    formulaLatex: '\\text{ГОСТ 2.105-95 / ЕСКД}',
+    keywords: [
+      'гост', 'гост 2.105', 'ескд', 'пояснительная записка', 'отчет', 'pdf', 'печать', 'документация',
+      'титульный лист', 'расчетно-графическая работа', 'ргр', 'диплом', 'инженерный отчет'
+    ],
+  },
+  {
+    id: 'tool_materials_db',
+    title: 'База Авиационных Материалов & Калькулятор Прочности Лонжерона',
+    shortTitle: 'База Материалов & Лонжерон',
+    group: 'general_aero',
+    domain: 'aero',
+    category: 'general_aero',
+    subTab: 'visual_studio',
+    handbookTopicId: 'flutter',
+    iconName: 'Layers',
+    badge: 'Материалы ВИАМ',
+    badgeColor: 'from-emerald-500 to-teal-500 text-slate-950',
+    description: 'Инженерная база сплавов и композитов (Д16Т, В95, ВТ6 Титан, Carbon T700, бальза, фанера) с модулями упругости E, плотностью и расчетом массы лонжерона при изгибе.',
+    formulaLatex: 'W_{\\text{треб}} = \\frac{M_{\\text{изг}}}{[\\sigma]}, \\quad m = A \\cdot L \\cdot \\rho',
+    keywords: [
+      'материалы', 'д16т', 'в95', 'титан', 'вт6', 'карбон', 'углепластик', 'стеклопластик', 'бальза',
+      'фанера', 'лонжерон', 'прочность', 'модуль юнга', 'виам', 'сплавы'
+    ],
+  },
+  // ============================================================================
   // 1. БПЛА, ДРОНЫ И РОЙ (UAV SYSTEMS)
   // ============================================================================
   {
