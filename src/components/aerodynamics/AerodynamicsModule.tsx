@@ -43,6 +43,7 @@ import { UAVDsmacTercomModule } from './uav/UAVDsmacTercomModule';
 import { UAVAutopilotPIDStudio } from './uav/UAVAutopilotPIDStudio';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
+import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
 import { BiplaneAn2Module } from './civil/BiplaneAn2Module';
 import { CommercialAirlinerModule } from './civil/CommercialAirlinerModule';
 import { SupersonicAviationModule } from './supersonic/SupersonicAviationModule';
@@ -87,6 +88,7 @@ export type AeroSubTab =
   | 'uav_pid_autopilot'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
+  | 'wing_fea_structural'
   | 'physics_solvers'
   | 'export_report'
   | 'vlm'
@@ -601,6 +603,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
 
           <button
             type="button"
+            onClick={() => handleGeneralSubTabSelect('wing_fea_structural')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeGeneralSubTab === 'wing_fea_structural'
+                ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-md font-black ring-1 ring-indigo-400/50'
+                : 'text-indigo-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-indigo-900/50'
+            }`}
+          >
+            <Box className="w-3.5 h-3.5 text-indigo-400" />
+            <span>1D/2D МКЭ Прочность Лонжерона</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => handleGeneralSubTabSelect('export_report')}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeGeneralSubTab === 'export_report'
@@ -819,6 +834,10 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
 
           {activeGeneralSubTab === 'rocket_staging_optimizer' && (
             <RocketStagingTrajectoryOptimizer />
+          )}
+
+          {activeGeneralSubTab === 'wing_fea_structural' && (
+            <WingFEAStructuralStudio />
           )}
 
           {activeGeneralSubTab === 'export_report' && (

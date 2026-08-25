@@ -36,6 +36,8 @@ import {
   Area,
 } from 'recharts';
 import { FullscreenGraphButton } from '../../telemetry/FullscreenGraphButton';
+import { RocketStagingTrajectoryOptimizer } from './RocketStagingTrajectoryOptimizer';
+import { HypersonicHeatShieldStudio } from './HypersonicHeatShieldStudio';
 
 export type SpaceVehicleType = 'heavy_launch_falcon' | 'superheavy_starship' | 'reentry_capsule_soyuz' | 'shuttle_spaceplane';
 
@@ -104,6 +106,7 @@ export const SPACE_PRESETS: SpaceVehiclePreset[] = [
 ];
 
 export const SpaceLaunchAerodynamicsModule: React.FC = () => {
+  const [activeSubTab, setActiveSubTab] = useState<'launch_maxq' | 'staging_optimizer' | 'reentry_tps'>('launch_maxq');
   const [selectedPresetIdx, setSelectedPresetIdx] = useState<number>(0);
   const [liftoffThrustTons, setLiftoffThrustTons] = useState<number>(760);
   const [throttleAtMaxQPercent, setThrottleAtMaxQPercent] = useState<number>(72);
@@ -240,31 +243,78 @@ export const SpaceLaunchAerodynamicsModule: React.FC = () => {
             </div>
           </div>
         </div>
-
-        {/* Preset Selector */}
-        <div className="mt-5 pt-4 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-          {SPACE_PRESETS.map((p, idx) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => handleSelectPreset(idx)}
-              className={`p-3 rounded-2xl border text-left transition-all cursor-pointer text-xs flex flex-col justify-between gap-1.5 ${
-                selectedPresetIdx === idx
-                  ? 'bg-gradient-to-br from-indigo-950/90 to-slate-900 border-indigo-400 text-white shadow-lg shadow-indigo-950/50 ring-1 ring-indigo-400/40'
-                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
-              }`}
-            >
-              <div className="font-bold text-indigo-300 flex items-center justify-between">
-                <span>{p.name.split('(')[0]}</span>
-                {selectedPresetIdx === idx && <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />}
-              </div>
-              <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
-                {p.description}
-              </p>
-            </button>
-          ))}
-        </div>
       </div>
+
+      {/* Subtab Switcher */}
+      <div className="bg-slate-900/90 backdrop-blur-md p-1.5 rounded-2xl border border-indigo-900/40 flex items-center justify-start gap-1.5 overflow-x-auto shadow-lg">
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('launch_maxq')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'launch_maxq'
+              ? 'bg-gradient-to-r from-indigo-500 via-purple-600 to-pink-600 text-white shadow-md font-black ring-1 ring-indigo-400/50'
+              : 'text-indigo-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-indigo-900/50'
+          }`}
+        >
+          <Rocket className="w-3.5 h-3.5 text-indigo-300" />
+          <span>🚀 Аэродинамика РН, Max-Q & Буфер Обтекателя</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('staging_optimizer')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'staging_optimizer'
+              ? 'bg-gradient-to-r from-purple-500 via-pink-600 to-rose-600 text-white shadow-md font-black ring-1 ring-purple-400/50'
+              : 'text-purple-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-purple-900/50'
+          }`}
+        >
+          <Activity className="w-3.5 h-3.5 text-pink-400" />
+          <span>🎯 Многоступенчатая Ракетодинамика Δv (Циолковский)</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('reentry_tps')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'reentry_tps'
+              ? 'bg-gradient-to-r from-orange-500 via-amber-600 to-red-600 text-white shadow-md font-black ring-1 ring-orange-400/50'
+              : 'text-orange-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-orange-900/50'
+          }`}
+        >
+          <Shield className="w-3.5 h-3.5 text-orange-400" />
+          <span>🛡️ Вход в Атмосферу & Теплозащитные Экраны ТЗК</span>
+        </button>
+      </div>
+
+      {activeSubTab === 'staging_optimizer' && <RocketStagingTrajectoryOptimizer />}
+      {activeSubTab === 'reentry_tps' && <HypersonicHeatShieldStudio />}
+
+      {activeSubTab === 'launch_maxq' && (
+        <>
+          {/* Preset Selector */}
+          <div className="bg-slate-950/80 p-4 rounded-3xl border border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            {SPACE_PRESETS.map((p, idx) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => handleSelectPreset(idx)}
+                className={`p-3 rounded-2xl border text-left transition-all cursor-pointer text-xs flex flex-col justify-between gap-1.5 ${
+                  selectedPresetIdx === idx
+                    ? 'bg-gradient-to-br from-indigo-950/90 to-slate-900 border-indigo-400 text-white shadow-lg shadow-indigo-950/50 ring-1 ring-indigo-400/40'
+                    : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+                }`}
+              >
+                <div className="font-bold text-indigo-300 flex items-center justify-between">
+                  <span>{p.name.split('(')[0]}</span>
+                  {selectedPresetIdx === idx && <CheckCircle2 className="w-3.5 h-3.5 text-indigo-400" />}
+                </div>
+                <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                  {p.description}
+                </p>
+              </button>
+            ))}
+          </div>
 
       {/* KPI Ribbon */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 font-mono text-xs">
@@ -501,6 +551,8 @@ export const SpaceLaunchAerodynamicsModule: React.FC = () => {
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };

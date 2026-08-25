@@ -34,6 +34,7 @@ import {
   Area,
 } from 'recharts';
 import { FullscreenGraphButton } from '../../telemetry/FullscreenGraphButton';
+import { SupersonicIntakeRamjetStudio } from './SupersonicIntakeRamjetStudio';
 
 export type SupersonicVehicleType = 'concorde_civil' | 'mig31_interceptor' | 'sr71_blackbird' | 'hypersonic_glide_waverider';
 
@@ -97,6 +98,7 @@ export const SUPERSONIC_PRESETS: SupersonicPreset[] = [
 ];
 
 export const SupersonicAviationModule: React.FC = () => {
+  const [activeSubTab, setActiveSubTab] = useState<'aircraft' | 'intake'>('aircraft');
   const [selectedPresetIdx, setSelectedPresetIdx] = useState<number>(0);
   const [flightMach, setFlightMach] = useState<number>(2.04);
   const [flightAltitudeM, setFlightAltitudeM] = useState<number>(18000);
@@ -222,31 +224,64 @@ export const SupersonicAviationModule: React.FC = () => {
             />
           </div>
         </div>
-
-        {/* Preset Selector */}
-        <div className="mt-5 pt-4 border-t border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
-          {SUPERSONIC_PRESETS.map((p, idx) => (
-            <button
-              key={p.id}
-              type="button"
-              onClick={() => handleSelectPreset(idx)}
-              className={`p-3 rounded-2xl border text-left transition-all cursor-pointer text-xs flex flex-col justify-between gap-1.5 ${
-                selectedPresetIdx === idx
-                  ? 'bg-gradient-to-br from-rose-950/90 to-slate-900 border-rose-400 text-white shadow-lg shadow-rose-950/50 ring-1 ring-rose-400/40'
-                  : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
-              }`}
-            >
-              <div className="font-bold text-rose-300 flex items-center justify-between">
-                <span>{p.name.split('(')[0]}</span>
-                {selectedPresetIdx === idx && <CheckCircle2 className="w-3.5 h-3.5 text-rose-400" />}
-              </div>
-              <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
-                {p.description}
-              </p>
-            </button>
-          ))}
-        </div>
       </div>
+
+      {/* Subtab Switcher */}
+      <div className="bg-slate-900/90 backdrop-blur-md p-1.5 rounded-2xl border border-rose-900/40 flex items-center justify-start gap-1.5 overflow-x-auto shadow-lg">
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('aircraft')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'aircraft'
+              ? 'bg-gradient-to-r from-rose-500 via-red-600 to-amber-600 text-white shadow-md font-black ring-1 ring-rose-400/50'
+              : 'text-rose-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-rose-900/50'
+          }`}
+        >
+          <Flame className="w-3.5 h-3.5 text-rose-300" />
+          <span>🚀 Сверхзвуковой Планер & Кинетический Нагрев</span>
+        </button>
+
+        <button
+          type="button"
+          onClick={() => setActiveSubTab('intake')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+            activeSubTab === 'intake'
+              ? 'bg-gradient-to-r from-rose-500 via-red-600 to-amber-600 text-white shadow-md font-black ring-1 ring-rose-400/50'
+              : 'text-rose-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-rose-900/50'
+          }`}
+        >
+          <Zap className="w-3.5 h-3.5 text-amber-400" />
+          <span>⚡ Сверхзвуковой Воздухозаборник & ПВРД / ГПВРД Решатель</span>
+        </button>
+      </div>
+
+      {activeSubTab === 'intake' ? (
+        <SupersonicIntakeRamjetStudio />
+      ) : (
+        <>
+          {/* Preset Selector */}
+          <div className="bg-slate-950/80 p-4 rounded-3xl border border-slate-800 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
+            {SUPERSONIC_PRESETS.map((p, idx) => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => handleSelectPreset(idx)}
+                className={`p-3 rounded-2xl border text-left transition-all cursor-pointer text-xs flex flex-col justify-between gap-1.5 ${
+                  selectedPresetIdx === idx
+                    ? 'bg-gradient-to-br from-rose-950/90 to-slate-900 border-rose-400 text-white shadow-lg shadow-rose-950/50 ring-1 ring-rose-400/40'
+                    : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/80'
+                }`}
+              >
+                <div className="font-bold text-rose-300 flex items-center justify-between">
+                  <span>{p.name.split('(')[0]}</span>
+                  {selectedPresetIdx === idx && <CheckCircle2 className="w-3.5 h-3.5 text-rose-400" />}
+                </div>
+                <p className="text-[11px] text-slate-400 line-clamp-2 leading-relaxed">
+                  {p.description}
+                </p>
+              </button>
+            ))}
+          </div>
 
       {/* KPI Ribbon */}
       <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-3 font-mono text-xs">
@@ -495,6 +530,8 @@ export const SupersonicAviationModule: React.FC = () => {
           </div>
         </div>
       </div>
+        </>
+      )}
     </div>
   );
 };
