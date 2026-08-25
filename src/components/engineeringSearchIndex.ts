@@ -156,6 +156,63 @@ export const ENGINEERING_SEARCH_ITEMS: EngineeringSearchItem[] = [
       'фанера', 'лонжерон', 'прочность', 'модуль юнга', 'виам', 'сплавы'
     ],
   },
+  {
+    id: 'uav_pid_autopilot_tool',
+    title: 'САУ & PID Автопилот БПЛА (БФЧХ / ЛАЧХ / Диаграмма Найквиста / Рунге-Кутта 4)',
+    shortTitle: 'САУ & PID Автопилот БПЛА',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_pid_autopilot',
+    handbookTopicId: 'uav_navigation_ew',
+    iconName: 'Activity',
+    badge: 'PID Автопилот / САУ',
+    badgeColor: 'from-indigo-500 via-purple-500 to-pink-500 text-white',
+    description: 'Интерактивный тренажер настройки регуляторов САУ: численная интеграция RK4 для FPV, гексакоптеров, самолетов и VTOL, построение ЛАЧХ/ФЧХ Боде, годографа Найквиста, расчет запасов устойчивости по фазе и амплитуде.',
+    formulaLatex: 'u(t) = K_p e(t) + K_i \\int_0^t e(\\tau) d\\tau + K_d \\frac{d e(t)}{dt}, \\quad W(s) = \\frac{K_p s + K_i + K_d s^2}{s (J s^2 + D s)}',
+    keywords: [
+      'pid', 'пид', 'автопилот', 'сау', 'боде', 'найквист', 'рунге кутта', 'rk4', 'fpv', 'дрон', 'квадрокоптер',
+      'vtol', 'акро', 'угол тангажа', 'крен', 'перерегулирование', 'маржа устойчивости', 'частотный анализ'
+    ],
+  },
+  {
+    id: 'rocket_staging_optimizer_tool',
+    title: 'Оптимизатор Многоступенчатых Ракет (Циолковский / Гравитационный Разворот / Max-Q / Траектория)',
+    shortTitle: 'Многоступенчатая Ракетодинамика',
+    group: 'general_aero',
+    domain: 'aero',
+    category: 'general_aero',
+    subTab: 'rocket_staging_optimizer',
+    handbookTopicId: 'space_gnc',
+    iconName: 'Rocket',
+    badge: 'Ракетодинамика Δv',
+    badgeColor: 'from-purple-500 via-indigo-500 to-rose-500 text-white',
+    description: 'Расчет многоступенчатых ракет-носителей (1-3 ступени) по уравнению Мещерского-Циолковского, гравитационный разворот (Gravity Turn), распределение масс, плотность динамического напора Max-Q и 2D орбитальная траектория.',
+    formulaLatex: '\\Delta v = I_{sp} \\cdot g_0 \\cdot \\ln\\left(\\frac{m_0}{m_f}\\right), \\quad q_{max} = \\frac{1}{2} \\rho v^2',
+    keywords: [
+      'ракета', 'циолковский', 'дельта v', 'delta v', 'ступени', 'удельный импульс', 'isp',
+      'гравитационный разворот', 'max-q', 'орбита', 'кпд', 'сухая масса', 'тяговооруженность', 'twr', 'космос'
+    ],
+  },
+  {
+    id: 'pde_acoustic_wave_tool',
+    title: '2D Волновой PDE Решатель & Аэроакустическая Лаборатория (Finite Difference / Конус Маха)',
+    shortTitle: '2D Волновой PDE Решатель',
+    group: 'general_aero',
+    domain: 'aero',
+    category: 'general_aero',
+    subTab: 'pde_acoustic_wave',
+    handbookTopicId: 'vlm',
+    iconName: 'Volume2',
+    badge: 'PDE Решатель 2D',
+    badgeColor: 'from-cyan-500 via-teal-500 to-indigo-500 text-slate-950',
+    description: 'Интерактивное конечно-разностное моделирование волнового уравнения давления в реальном времени: эффект Доплера при сверхзвуковом движении M > 1, образование конуса Маха, дифракция на профиле крыла и акустический глушитель.',
+    formulaLatex: '\\frac{\\partial^2 u}{\\partial t^2} = c^2 \\nabla^2 u - \\gamma \\frac{\\partial u}{\\partial t}, \\quad \\sin\\mu = \\frac{1}{M}',
+    keywords: [
+      'pde', 'дифракция', 'волна', 'звук', 'аэроакустика', 'доплер', 'конус маха', 'махи',
+      'двойная щель', 'интерференция', 'профиль', 'глушитель', 'уравнение волны', 'курант', 'fdtd'
+    ],
+  },
   // ============================================================================
   // 1. БПЛА, ДРОНЫ И РОЙ (UAV SYSTEMS)
   // ============================================================================

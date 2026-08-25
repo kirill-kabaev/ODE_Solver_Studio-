@@ -40,6 +40,9 @@ import { UAVFaultToleranceModule } from './uav/UAVFaultToleranceModule';
 import { UAVHybridIcingModule } from './uav/UAVHybridIcingModule';
 import { UAVLoiteringDiveModule } from './uav/UAVLoiteringDiveModule';
 import { UAVDsmacTercomModule } from './uav/UAVDsmacTercomModule';
+import { UAVAutopilotPIDStudio } from './uav/UAVAutopilotPIDStudio';
+import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
+import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { BiplaneAn2Module } from './civil/BiplaneAn2Module';
 import { CommercialAirlinerModule } from './civil/CommercialAirlinerModule';
 import { SupersonicAviationModule } from './supersonic/SupersonicAviationModule';
@@ -81,6 +84,9 @@ export type AeroSubTab =
   | 'uav_hybrid_icing'
   | 'uav_loitering_dive'
   | 'uav_dsmac_tercom'
+  | 'uav_pid_autopilot'
+  | 'rocket_staging_optimizer'
+  | 'pde_acoustic_wave'
   | 'physics_solvers'
   | 'export_report'
   | 'vlm'
@@ -569,6 +575,32 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
 
           <button
             type="button"
+            onClick={() => handleGeneralSubTabSelect('pde_acoustic_wave')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeGeneralSubTab === 'pde_acoustic_wave'
+                ? 'bg-gradient-to-r from-cyan-400 via-teal-500 to-indigo-500 text-slate-950 shadow-md font-black ring-1 ring-cyan-400/50'
+                : 'text-cyan-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-cyan-900/50'
+            }`}
+          >
+            <Volume2 className="w-3.5 h-3.5 text-cyan-400" />
+            <span>2D Волновой PDE Решатель</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleGeneralSubTabSelect('rocket_staging_optimizer')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeGeneralSubTab === 'rocket_staging_optimizer'
+                ? 'bg-gradient-to-r from-purple-400 via-indigo-500 to-rose-500 text-slate-950 shadow-md font-black ring-1 ring-purple-400/50'
+                : 'text-purple-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-purple-900/50'
+            }`}
+          >
+            <Rocket className="w-3.5 h-3.5 text-purple-400" />
+            <span>Многоступенчатая Ракетодинамика Δv</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => handleGeneralSubTabSelect('export_report')}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeGeneralSubTab === 'export_report'
@@ -730,6 +762,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
 
           <button
             type="button"
+            onClick={() => handleUAVSubTabSelect('uav_pid_autopilot')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_pid_autopilot'
+                ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 text-white shadow-md font-black ring-1 ring-indigo-400/50'
+                : 'text-indigo-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-indigo-900/50'
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5 text-indigo-400" />
+            <span>🕹️ САУ & PID Автопилот (Боде)</span>
+          </button>
+
+          <button
+            type="button"
             onClick={() => handleUAVSubTabSelect('uav_dsmac_tercom')}
             className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
               activeUAVSubTab === 'uav_dsmac_tercom'
@@ -766,6 +811,14 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
 
           {activeGeneralSubTab === 'physics_solvers' && (
             <AdvancedAeroSolversLab />
+          )}
+
+          {activeGeneralSubTab === 'pde_acoustic_wave' && (
+            <PDEAcousticWaveStudio />
+          )}
+
+          {activeGeneralSubTab === 'rocket_staging_optimizer' && (
+            <RocketStagingTrajectoryOptimizer />
           )}
 
           {activeGeneralSubTab === 'export_report' && (
@@ -835,6 +888,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_hybrid_icing' && <UAVHybridIcingModule />}
           {activeUAVSubTab === 'uav_loitering_dive' && <UAVLoiteringDiveModule />}
           {activeUAVSubTab === 'uav_dsmac_tercom' && <UAVDsmacTercomModule />}
+          {activeUAVSubTab === 'uav_pid_autopilot' && <UAVAutopilotPIDStudio />}
         </>
       )}
 
