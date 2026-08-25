@@ -30,18 +30,42 @@ import {
   ChevronRight,
   CheckSquare,
   FileSpreadsheet,
+  Eye,
+  Palette,
+  GraduationCap,
+  HelpCircle,
+  Wrench,
+  FileText,
+  Boxes,
+  Scale,
+  Monitor,
+  Sliders,
+  BookOpen,
+  Maximize2,
+  FileCode2,
 } from 'lucide-react';
 import { MathView, MathText } from './MathView';
 
 export type PriorityLevel = 'p0_urgent' | 'p1_high' | 'p2_medium' | 'p3_rnd';
-export type VehicleClass = 'all' | 'uav' | 'light_crop' | 'airliner' | 'supersonic' | 'rocket_space';
+export type VehicleClass = 'all' | 'uav' | 'light_crop' | 'airliner' | 'supersonic' | 'rocket_space' | 'app_platform';
+export type FeatureCategory =
+  | 'Аэродинамика'
+  | 'Двигатели & Пропульсия'
+  | 'Динамика & СУ'
+  | 'Прочность & Вес'
+  | 'Космос & Авионика'
+  | 'Интерфейс & Юзер-Френдли (UX/UI)'
+  | 'Визуальное Восприятие & 3D Графика'
+  | 'Инженерная Полезность & САПР'
+  | 'Обучение & Инженерная Ясность';
+
 export type FeatureStatus = 'completed' | 'in_progress' | 'planned';
 
 export interface RoadmapFeatureItem {
   id: string;
   title: string;
-  category: 'Аэродинамика' | 'Двигатели & Пропульсия' | 'Динамика & СУ' | 'Прочность & Вес' | 'Космос & Авионика';
-  vehicleClass: 'uav' | 'light_crop' | 'airliner' | 'supersonic' | 'rocket_space' | 'universal';
+  category: FeatureCategory;
+  vehicleClass: 'uav' | 'light_crop' | 'airliner' | 'supersonic' | 'rocket_space' | 'universal' | 'app_platform';
   vehicleClassLabel: string;
   priority: PriorityLevel;
   priorityLabel: string;
@@ -822,6 +846,382 @@ export const INITIAL_ROADMAP_FEATURES: RoadmapFeatureItem[] = [
     targetMilestone: 'САПР: Фаза 3 (Производство)',
     mathBasis: '\\sigma_{\\max} = \\frac{M(z) \\cdot y_{\\max}}{I_z} \\le [\\sigma_{\\text{allow}}], \\quad \\tau_{\\text{cr}} = k_s \\frac{\\pi^2 E}{12(1-\\nu^2)} \\left(\\frac{t}{b}\\right)^2',
   },
+
+  // ==========================================
+  // РАЗДЕЛ I: ИНТЕРФЕЙС, ЮЗЕР-ФРЕНДЛИ & ЭРГОНОМИКА ИНЖЕНЕРА (UX/UI ECOSYSTEM)
+  // ==========================================
+  {
+    id: 'feat_ux_design_wizard_5steps',
+    title: '51. Интерактивный Пошаговый Мастер Проектирования «Design Wizard» (От Идеи до 3D-Модели за 5 Шагов)',
+    category: 'Интерфейс & Юзер-Френдли (UX/UI)',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Платформа & Юзер-Френдли',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Интуитивный мастер с понятными карточками и визуальными подсказками: Шаг 1 (Назначение и полезная нагрузка) → Шаг 2 (Выбор аэродинамической схемы) → Шаг 3 (Подбор профиля и размаха) → Шаг 4 (Силовая установка и АКБ) → Шаг 5 (Сводный паспорт и 3D-просмотр). Сопровождается визуальными анимациями и рекомендациями.',
+    engineeringImpact: 'Снижает порог входа для молодых инженеров и студентов в 5 раз, позволяя спроектировать физически корректный аппарат без штудирования сотен страниц формул.',
+    autoDetected: false,
+    defaultStatus: 'in_progress',
+    targetMilestone: 'Юзер-Френдли Платформа v3.1',
+    mathBasis: '\\text{Workflow} = \\{ \\text{Payload} \\to \\text{AeroLayout} \\to \\text{WingGeometry} \\to \\text{Propulsion} \\to \\text{Validation} \\}',
+  },
+  {
+    id: 'feat_ux_command_palette_ctrl_k',
+    title: '52. Командная Палитра Быстрого Доступа & Горячие Клавиши (Command Palette Ctrl+K / ⌘K)',
+    category: 'Интерфейс & Юзер-Френдли (UX/UI)',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Платформа & Юзер-Френдли',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Мгновенный вызов всплывающей командной строки (Ctrl+K) с нечетким поиском (Fuzzy Search), быстрым прыжком к любому графику, пресету, переключением тем, запуском решателя и вычислением формул прямо в строке ввода без мыши.',
+    engineeringImpact: 'Ускоряет ежедневную работу опытного инженера-расчетчика на 40% за счет быстрой навигации без блуждания по вкладкам.',
+    autoDetected: true,
+    defaultStatus: 'completed',
+    targetMilestone: 'Инженерная Эргономика',
+    mathBasis: '\\text{SearchScore} = \\text{LevenshteinDistance}(q, \\text{Keyword}) + \\text{TagWeight}',
+  },
+  {
+    id: 'feat_ux_realtime_sanity_check_hints',
+    title: '53. Контекстные Подсказки & Автопроверка на Инженерные Ошибки (Real-Time Physics Sanity Check)',
+    category: 'Интерфейс & Юзер-Френдли (UX/UI)',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Платформа & Юзер-Френдли',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Интеллектуальный страж физической корректности: при вводе параметров в реальном времени анализирует физику и подсвечивает критические несоответствия («Внимание: Удельная нагрузка на крыло W/S > 120 кг/м² — скорость сваливания превысит 110 км/ч», «Лонжерон толще строительной высоты профиля!», «Отрицательный статический запас — ЛА неустойчив»).',
+    engineeringImpact: 'Предотвращает грубые проектные ошибки и дорогостоящие аварии прототипов еще на стадии эскизного ввода чисел.',
+    autoDetected: false,
+    defaultStatus: 'in_progress',
+    targetMilestone: 'Инженерная Безопасность',
+    mathBasis: '\\text{AlertFlag} = (\\text{SM} < 0.05) \\lor (t_{\\text{spar}} > c \\cdot (t/c)) \\lor (P_{\\text{req}} > P_{\\text{max}})',
+  },
+  {
+    id: 'feat_ux_blueprint_engineering_theme',
+    title: '54. Чертежный Инженерный Режим «Blueprint Engineering Mode & ГОСТ-Сетка»',
+    category: 'Интерфейс & Юзер-Френдли (UX/UI)',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Платформа & Юзер-Френдли',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Специальная высококонтрастная чертежная тема (глубокий технический синий / Blueprint-сетка с миллиметровыми делениями, технические моноширинные шрифты, выноски размеров с допусками и посадочными размерами, удобный экспорт скриншотов для проекторов и цеховой документации).',
+    engineeringImpact: 'Обеспечивает идеальную читаемость графиков и моделей при демонстрациях на проекторах, печать на плоттерах и работу в условиях производственного цеха.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Инженерная Эргономика',
+    mathBasis: '\\text{ContrastRatio} \\ge 7:1 \\text{ (WCAG AAA)}, \\quad \\text{GridStep} = 10\\text{ мм} / 50\\text{ мм}',
+  },
+  {
+    id: 'feat_ux_adaptive_density_multimonitor',
+    title: '55. Адаптивная Плотность Интерфейса & Многооконный Режим (Compact Density & Multi-Window Dock)',
+    category: 'Интерфейс & Юзер-Френдли (UX/UI)',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Платформа & Юзер-Френдли',
+    priority: 'p2_medium',
+    priorityLabel: 'P2: Средний приоритет',
+    description: 'Переключение плотности отображения между режимом обучения (просторные карточки с пояснениями) и ультра-компактным режимом профи-инженера (высокая плотность таблиц, открепляемые плавающие панели графиков, поддержка многомониторных конфигураций 4K).',
+    engineeringImpact: 'Позволяет эффективно разместить на одном или двух экранах одновременно 3D-модель, эпюры давлений, полярные кривые и окно параметров без лишнего скроллинга.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Интерфейс & Продуктивность',
+    mathBasis: '\\text{GridDensity} \\in \\{ \\text{Spacious (Mobile/Study)}, \\text{Standard}, \\text{UltraDense (Pro 4K)} \\}',
+  },
+
+  // ==========================================
+  // РАЗДЕЛ II: ВИЗУАЛЬНОЕ ВОСПРИЯТИЕ & 3D ГРАФИКА (VISUAL IMMERSION & 3D CFD)
+  // ==========================================
+  {
+    id: 'feat_vis_volumetric_particle_streamlines',
+    title: '56. Анимированные Линии Тока Частиц (Volumetric 3D Particle Streamlines & Streaklines)',
+    category: 'Визуальное Восприятие & 3D Графика',
+    vehicleClass: 'universal',
+    vehicleClassLabel: '3D Визуализация & CFD',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Трехмерная интерактивная анимация тысяч светящихся частиц воздушного потока, обтекающих крыло, фюзеляж и винты в реальном времени с цветовой дифференциацией по числу Маха, местному коэффициенту давления $C_p$ и турбулентной кинетической энергии $k$.',
+    engineeringImpact: 'Делает невидимые аэродинамические явления (скос потока, зоны разрежения, перетекание через законцовку) наглядными и понятными с первого взгляда.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: '3D Визуальная Лаборатория',
+    mathBasis: '\\frac{d\\mathbf{x}_p}{dt} = \\mathbf{u}(\\mathbf{x}_p, t), \\quad \\text{Color} = \\text{Colormap}(C_p, \\text{min}=-3.0, \\text{max}=1.0)',
+  },
+  {
+    id: 'feat_vis_dynamic_section_clipping_planes',
+    title: '57. Интерактивные Секущие Плоскости (Dynamic 3D Section Clipping X/Y/Z with Live Cp Profiles)',
+    category: 'Визуальное Восприятие & 3D Графика',
+    vehicleClass: 'universal',
+    vehicleClassLabel: '3D Визуализация & CFD',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Интерактивный срез 3D-модели планера и поля давлений плоскостями X, Y, Z с помощью трехмерного ползунка. Мгновенный вывод плоской эпюры распределения давления $C_p(x/c)$ и толщины пограничного слоя в выбранном сечении.',
+    engineeringImpact: 'Позволяет инженеру мгновенно исследовать внутреннюю структуру потока в любом сечении крыла или стыка фюзеляжа без экспорта в тяжелые внешние постпроцессоры.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: '3D Визуальная Лаборатория',
+    mathBasis: '\\mathbf{n} \\cdot (\\mathbf{r} - \\mathbf{r}_0) = 0, \\quad C_p(x/c) = 1 - \\left(\\frac{V(x/c)}{V_\\infty}\\right)^2',
+  },
+  {
+    id: 'feat_vis_q_criterion_vortex_cores',
+    title: '58. Изоповерхности Вихревых Жгутов (Q-Criterion & Lambda-2 Vortex Core Identification)',
+    category: 'Визуальное Восприятие & 3D Графика',
+    vehicleClass: 'universal',
+    vehicleClassLabel: '3D Визуализация & CFD',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Автоматическое выделение и полупрозрачный 3D-рендеринг вихревых ядер (концевые вихри крыла, наплывы LEX, вихревые следы от лопастей винтов и стоек шасси) на основе второго инварианта тензора градиента скорости $Q = \\frac{1}{2}(\\|\\boldsymbol{\\Omega}\\|^2 - \\|\\mathbf{S}\\|^2) > 0$.',
+    engineeringImpact: 'Критично для анализа эффективности винглетов, скоса потока на оперение и обеспечения вихревой безопасности в строю и при посадке.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: '3D Визуальная Лаборатория',
+    mathBasis: 'Q = \\frac{1}{2} (\\Omega_{ij} \\Omega_{ij} - S_{ij} S_{ij}) > Q_{\\text{threshold}}, \\quad S_{ij} = \\frac{1}{2}(\\partial_j u_i + \\partial_i u_j)',
+  },
+  {
+    id: 'feat_vis_pbr_materials_studio_lighting',
+    title: '59. Фотореалистичный PBR-Рендеринг Материалов (Three.js Physically Based Materials & SSAO)',
+    category: 'Визуальное Восприятие & 3D Графика',
+    vehicleClass: 'universal',
+    vehicleClassLabel: '3D Визуализация & Графика',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Высококачественные шейдеры материалов летательного аппарата: фактура плетения углеткани 3K Twill, матовый и полированный авиационный дюралюминий Д16Т, стеклопластик, полупрозрачный фонарь кабины с отражениями неба и мягкие контактные тени SSAO.',
+    engineeringImpact: 'Позволяет презентовать проект инвесторам и заказчикам в кинематографическом качестве прямо из браузера без необходимости рендера в Blender или KeyShot.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: '3D Визуальная Лаборатория',
+    mathBasis: 'f_r(\\mathbf{\\omega}_i, \\mathbf{\\omega}_o) = \\frac{D(h) F(\\mathbf{\\omega}_i, h) G(\\mathbf{\\omega}_i, \\mathbf{\\omega}_o, h)}{4 (\\mathbf{n} \\cdot \\mathbf{\\omega}_i)(\\mathbf{n} \\cdot \\mathbf{\\omega}_o)}',
+  },
+  {
+    id: 'feat_vis_slowmo_flow_separation_stall',
+    title: '60. Режим Замедленной Съемки Срыва Потока & Динамического Сваливания (Slow-Mo Flow Separation)',
+    category: 'Визуальное Восприятие & 3D Графика',
+    vehicleClass: 'universal',
+    vehicleClassLabel: '3D Визуализация & CFD',
+    priority: 'p2_medium',
+    priorityLabel: 'P2: Средний приоритет',
+    description: 'Интерактивная покадровая визуализация развития срыва потока при плавном увеличении угла атаки $\\alpha$: от зарождения ламинарного пузыря отрыва до прогрессирующего отрыва с задней кромки и полного сваливания с вибрацией планера.',
+    engineeringImpact: 'Дает инженеру и летчику-испытателю глубокое визуальное понимание предвестников сваливания и эффективности противосрывных гребней и генераторов вихрей (Vortex Generators).',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: '3D Визуальная Лаборатория',
+    mathBasis: '\\tau_w = \\mu \\left(\\frac{\\partial u}{\\partial y}\\right)_{y=0} \\le 0 \\implies \\text{Flow Separation Onset}',
+  },
+  {
+    id: 'feat_vis_3d_stress_heatmap_projection',
+    title: '61. 3D Проекция Эпюр Напряжений и Деформаций по Мизесу на Планер (Stress Heatmap Mapping)',
+    category: 'Визуальное Восприятие & 3D Графика',
+    vehicleClass: 'universal',
+    vehicleClassLabel: '3D Визуализация & Прочность',
+    priority: 'p2_medium',
+    priorityLabel: 'P2: Средний приоритет',
+    description: 'Наложение цветовой тепловой карты эквивалентных механических напряжений по фон Мизесу $\\sigma_{\\text{vM}}$ и упругого прогиба консоли $w(z)$ непосредственно на 3D-сетку крыла при маневрах с перегрузкой от $+6g$ до $-3g$.',
+    engineeringImpact: 'Позволяет мгновенно локализовать концентраторы напряжений в корне крыла и вокруг вырезов под элероны.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: '3D Визуальная Лаборатория',
+    mathBasis: '\\sigma_{\\text{vM}} = \\sqrt{\\frac{1}{2}\\left[(\\sigma_{xx}-\\sigma_{yy})^2 + (\\sigma_{yy}-\\sigma_{zz})^2 + (\\sigma_{zz}-\\sigma_{xx})^2 + 6(\\tau_{xy}^2+\\tau_{yz}^2+\\tau_{zx}^2)\\right]}',
+  },
+
+  // ==========================================
+  // РАЗДЕЛ III: ИНЖЕНЕРНАЯ ПОЛЕЗНОСТЬ & САПР ЭКОСИСТЕМА (ENGINEERING UTILITY & CAD)
+  // ==========================================
+  {
+    id: 'feat_util_gost_report_pdf_generator',
+    title: '62. Генератор Пояснительных Записок и Отчетов по ГОСТ 2.105-95 / ЕСКД (PDF/Word Экспорт)',
+    category: 'Инженерная Полезность & САПР',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Инструменты Инженера & САПР',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Автоматическое формирование полного инженерного отчета (пояснительной записки) в один клик: титульный лист с основной надписью по ГОСТ, техническое задание, таблица геометрических параметров, сводные поляры $C_L(C_D)$, графики устойчивости, весовая сводка, эпюры лонжерона и выводы с подписью исполнителя.',
+    engineeringImpact: 'Экономит до 80% времени инженера на оформление курсовых, дипломных и производственных научно-технических отчетов (НТО).',
+    autoDetected: false,
+    defaultStatus: 'in_progress',
+    targetMilestone: 'Инженерная Документация & Экспорт',
+    mathBasis: '\\text{ReportDoc} = \\text{GenerateGOST}(\\text{AeroData}, \\text{MassProperties}, \\text{PolarCharts}, \\text{Formulas})',
+  },
+  {
+    id: 'feat_util_unit_converter_flight_computer',
+    title: '63. Инженерный Калькулятор & Конвертер Авиационных Единиц (Engineering Units & Flight Computer)',
+    category: 'Инженерная Полезность & САПР',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Инструменты Инженера & САПР',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Встроенный интерактивный конвертер величин с поддержкой СИ, имперской и международной авиационной систем: скорость (узлы, Мах, км/ч, м/с, mph), высота (футы, метры, эшелоны FL), давление (гПа, мм рт. ст., psi, дюймы рт. ст. inHg), тяга/сила (Н, кгс, lbf), удельная плотность и динамическая вязкость стандартной атмосферы СА-73 / ISA.',
+    engineeringImpact: 'Исключает фатальные ошибки пересчета единиц измерения (как потеря Mars Climate Orbiter) при работе с зарубежными чертежами и моторами.',
+    autoDetected: false,
+    defaultStatus: 'in_progress',
+    targetMilestone: 'Инженерный Инструментарий',
+    mathBasis: '1\\text{ kt} = 1.852\\text{ км/ч} = 0.5144\\text{ м/с}, \\quad 1\\text{ lbf} = 4.44822\\text{ Н}, \\quad 1\\text{ psi} = 6894.76\\text{ Па}',
+  },
+  {
+    id: 'feat_util_materials_structural_database',
+    title: '64. Интерактивная База Данных Авиационных Материалов (Aerospace Materials Library)',
+    category: 'Инженерная Полезность & САПР',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Инструменты Инженера & САПР',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Библиотека физико-механических свойств конструкционных материалов: Дюралюминий Д16Т/2024-T3, Высокопрочный сплав В95/7075-T6, Титан ВТ6/Ti-6Al-4V, Хромансиль 30ХГСА, Углепластик T700/T800 (продольный/поперечный модуль), Бальза, Авиационная фанера БС-1, Пеноплекс XPS с пределами текучести $\\sigma_{0.2}$, плотностью $\\rho$ и коэффициентами Пуассона $\\nu$.',
+    engineeringImpact: 'Позволяет моментально выбирать материал для лонжеронов, обшивки и моторам с автоматическим подтягиванием механических констант в прочностные расчеты.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Инженерный Инструментарий',
+    mathBasis: '\\sigma_{\\text{allow}} = \\frac{\\sigma_{0.2}}{f_{\\text{safety}}}, \\quad E_{\\text{eff}} = \\sum V_i E_i, \\quad \\rho_{\\text{eff}} = \\sum V_i \\rho_i',
+  },
+  {
+    id: 'feat_util_industry_cae_mesh_export',
+    title: '65. Пакетный Экспорт в Промышленные САПР/CAE Пакеты (OpenFOAM, ANSYS Fluent, AVL & MATLAB)',
+    category: 'Инженерная Полезность & САПР',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Инструменты Инженера & САПР',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Сквозной экспорт рассчитанных сеток и геометрии: генератор блоков сетки `blockMeshDict` / `snappyHexMesh` для OpenFOAM, файлы сетки `.msh` для ANSYS Fluent, конфигурационные файлы `.avl` для Drela AVL, базы профилей `.dat` для XFLR5 и S-функции нелинейной динамики для MATLAB/Simulink.',
+    engineeringImpact: 'Интегрирует легкую веб-студию в рабочий процесс крупных авиационных КБ и исследовательских институтов.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'САПР Экосистема',
+    mathBasis: '\\text{CAEBridge} \\to \\{ \\text{OpenFOAM: snappyHexMesh}, \\text{ANSYS: .msh}, \\text{AVL: .avl}, \\text{Simulink: S-Function} \\}',
+  },
+  {
+    id: 'feat_util_splitscreen_comparison_ab_diff',
+    title: '66. Режим Сравнительного Анализа «Split-Screen Design Comparison & A/B Diff»',
+    category: 'Инженерная Полезность & САПР',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Инструменты Инженера & САПР',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Инструмент сравнения двух версий летательного аппарата или двух профилей в режиме разделенного экрана (Split-Screen): наложение поляр $C_L(\\alpha)$ и $C_L(C_D)$, прямое вычисление разницы аэродинамического качества $\\Delta (L/D)$, весовой разницы $\\Delta m$ и подсвечивание геометрических изменений.',
+    engineeringImpact: 'Позволяет наглядно оценить эффект от установки винглетов, изменения стреловидности или перехода на новый профиль.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Инженерный Инструментарий',
+    mathBasis: '\\Delta (L/D) = (L/D)_B - (L/D)_A, \\quad \\text{DiffMap}(x,y,z) = \\|\\mathbf{r}_B(u,v) - \\mathbf{r}_A(u,v)\\|',
+  },
+  {
+    id: 'feat_util_cloud_history_project_versioning',
+    title: '67. Облачное Сохранение, Версионирование Проектов & Экспорт JSON/ZIP (Project Workspace Sync)',
+    category: 'Инженерная Полезность & САПР',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Инструменты Инженера & САПР',
+    priority: 'p2_medium',
+    priorityLabel: 'P2: Средний приоритет',
+    description: 'Полный менеджер проектов с историей изменений (версионирование Git-style), возможностью делиться расчетом по уникальной ссылке (Share Link), автоматическим автосохранением в браузере и экспортом/импортом всего проекта в структурированный архив JSON/ZIP.',
+    engineeringImpact: 'Обеспечивает сохранность инженерных наработок и удобство совместной работы в распределенных студенческих и конструкторских командах.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Облачная Платформа',
+    mathBasis: '\\text{ProjectArchive} = \\{ \\text{Metadata}, \\text{Geometry3D}, \\text{AeroPolars}, \\text{MassBalance}, \\text{VersionHistory} \\}',
+  },
+
+  // ==========================================
+  // РАЗДЕЛ IV: ОБУЧЕНИЕ, ПОНЯТНОСТЬ & ИНЖЕНЕРНАЯ ЯСНОСТЬ (CLARITY & EDUCATION)
+  // ==========================================
+  {
+    id: 'feat_edu_physics_with_fingers_interactive_atlas',
+    title: '68. Интерактивный Атлас «Аэродинамика на Пальцах» с Живыми Ползунками (Live Physics Sliders)',
+    category: 'Обучение & Инженерная Ясность',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Обучение & Понятность',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Интерактивный визуальный задачник с живыми демонстрациями фундаментальных понятий: почему самолет летит (разница давлений Бернулли + импульс Ньютона), откуда берется скос потока и индуктивное сопротивление, почему стреловидное крыло отодвигает волновой кризис и как крутка предотвращает сваливание на крыло.',
+    engineeringImpact: 'Превращает сложную теоретическую аэродинамику в наглядные осязаемые визуальные модели с регулировкой параметров в реальном времени.',
+    autoDetected: false,
+    defaultStatus: 'in_progress',
+    targetMilestone: 'Обучающий Модуль & Понятность',
+    mathBasis: 'L = \\oint_C -p \\, \\mathbf{n} \\cdot \\mathbf{k} \\, ds = \\rho_\\infty V_\\infty \\Gamma \\quad (\\text{Теорема Жуковского})',
+  },
+  {
+    id: 'feat_edu_aerodynamic_diagnostic_wizard',
+    title: '69. Интеллектуальный Диагностический Ассистент «Aerodynamic Diagnostic Wizard»',
+    category: 'Обучение & Инженерная Ясность',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Обучение & Понятность',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Экспертная система поиска и исправления проблем: пользователь выбирает симптом («Самолет клюет носом на взлете», «Расход топлива выше расчетного», «Появилась раскачка по крену (Dutch Roll)»), а ассистент анализирует модель и предлагает конкретные инженерные решения с формулами.',
+    engineeringImpact: 'Помогает инженеру быстро найти оптимальный способ исправления дефекта управляемости без дорогостоящих натурных переделок.',
+    autoDetected: false,
+    defaultStatus: 'in_progress',
+    targetMilestone: 'Обучающий Модуль & Понятность',
+    mathBasis: '\\text{Diagnosis}(\\text{Issue}) \\to \\{ \\text{Cause}: \\frac{dC_m}{d\\alpha} > 0, \\, \\text{Fix}: \\text{Увеличить } S_h \\text{ или сдвинуть крыло назад} \\}',
+  },
+  {
+    id: 'feat_edu_formula_inspector_dimensional_breakdown',
+    title: '70. Математический Инспектор Формул & Расшифровщик Размерностей (Formula Inspector)',
+    category: 'Обучение & Инженерная Ясность',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Обучение & Понятность',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Интерактивный разбор любой формулы в приложении: при наведении курсора на любой математический символ (например, $\\Gamma, \\rho, AR, \\eta_p, \\mu$) открывается всплывающее окно с физическим смыслом, размерностью в СИ, типовым диапазоном значений и живым текущим численным значением в текущем расчете.',
+    engineeringImpact: 'Устраняет эффект «черного ящика»: инженер всегда видит, из каких физических величин складывается итоговое число.',
+    autoDetected: false,
+    defaultStatus: 'in_progress',
+    targetMilestone: 'Обучающий Модуль & Понятность',
+    mathBasis: '[\\Gamma] = \\text{м}^2/\\text{с}, \\quad [\\rho] = \\text{кг}/\\text{м}^3, \\quad [C_L] = 1 \\text{ (безразмерный)}',
+  },
+  {
+    id: 'feat_edu_living_benchmark_aircraft_library',
+    title: '71. Живой Бенчмарк-Каталог Исторических и Современных ЛА (Living Benchmark Aircraft Library)',
+    category: 'Обучение & Инженерная Ясность',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Обучение & Понятность',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Интерактивная коллекция эталонных моделей с полными верифицированными продувками ЦАГИ/NASA: «Флайер 1» Братьев Райт, Ан-2 «Кукурузник», Cessna 172, Су-27, Bayraktar TB2, Boeing 787 Dreamliner, X-15 и Starship. Возможность загрузить любой аппарат как основу для собственного проекта в один клик.',
+    engineeringImpact: 'Позволяет инженеру сопоставлять свои расчетные полярные кривые и весовую сводку с проверенными летающими прототипами мирового уровня.',
+    autoDetected: true,
+    defaultStatus: 'completed',
+    targetMilestone: 'Библиотека Пресетов',
+    mathBasis: '\\text{BenchmarkValidation} = \\frac{\\|C_{L,\\text{calc}} - C_{L,\\text{tunnel}}\\|}{\\|C_{L,\\text{tunnel}}\\|} \\le 3.5\\%',
+  },
+  {
+    id: 'feat_edu_visual_physics_glossary',
+    title: '72. Иллюстрированный Авиационный Глоссарий с Векторными Схемами (Interactive Aero Glossary)',
+    category: 'Обучение & Инженерная Ясность',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Обучение & Понятность',
+    priority: 'p2_medium',
+    priorityLabel: 'P2: Средний приоритет',
+    description: 'Свыше 200 иллюстрированных авиационных терминов (САХ, фокус, центровка, скос потока, интерференция, демпфирование, флаттер, кавитация, угол стреловидности, угол установки крыла, V-образность) с краткими определениями и векторными поясняющими диаграммами.',
+    engineeringImpact: 'Служит настольной энциклопедией авиационного инженера, помогая быстро вспомнить терминологию при подготовке публикаций и патентов.',
+    autoDetected: false,
+    defaultStatus: 'in_progress',
+    targetMilestone: 'Обучающий Модуль & Понятность',
+    mathBasis: '\\bar{c} = \\frac{2}{S} \\int_0^{b/2} c(y)^2 \\, dy \\quad (\\text{Средняя Аэродинамическая Хорда САХ})',
+  },
+  {
+    id: 'feat_edu_ai_aerospace_co_pilot',
+    title: '73. Встроенный Инженерный ИИ-Копилот & Экспертный Консультант (AI Aero Co-Pilot & Formula Explainer)',
+    category: 'Обучение & Инженерная Ясность',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Инструменты Инженера & ИИ',
+    priority: 'p2_medium',
+    priorityLabel: 'P2: Средний приоритет',
+    description: 'Интегрированный в интерфейс локальный/облачный ИИ-ассистент, обученный на отечественных и мировых учебниках по аэродинамике (ЦАГИ, Прандтль, Краснов, Андерсон). Отвечает на вопросы по аэродинамике, рекомендует профили под заданный диапазон чисел Рейнольдса и помогает с балансировкой.',
+    engineeringImpact: 'Предоставляет каждому инженеру персонального консультанта уровня ведущего конструктора КБ прямо в окне браузера.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Искусственный Интеллект & AI CAE',
+    mathBasis: '\\mathbf{y}_{\\text{advice}} = \\text{LLM}(\\text{AeroState}, \\text{Prompt: How to increase L/D at Re=300k})',
+  },
+  {
+    id: 'feat_edu_gamified_aerodynamic_challenges',
+    title: '74. Инженерный Тренажер & Обучающие Задачи «Aero Challenges» (Оптимизируй Планер под Миссию)',
+    category: 'Обучение & Инженерная Ясность',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Обучение & Понятность',
+    priority: 'p3_rnd',
+    priorityLabel: 'P3: Перспективно & R&D',
+    description: 'Интерактивные инженерные квесты: «Построй БПЛА для дальности 100 км при массе до 5 кг», «Устрани флаттер крыла на скорости 250 км/ч с минимальным весом», «Спроектируй самолет STOL с разбегом менее 50 метров». Таблица лидеров и автоматическая оценка инженерной эффективности решения.',
+    engineeringImpact: 'Увлекательный игровой формат для подготовки студентов авиационных вузов, кружков авиамоделирования и проверки квалификации конструкторов.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Обучающий Модуль & Понятность',
+    mathBasis: '\\text{Score} = \\frac{\\text{Payload} \\times \\text{Range}}{\\text{Cost} \\times \\text{EmptyMass}} \\times \\text{StabilityBonus}',
+  },
 ];
 
 interface FutureRoadmapModalProps {
@@ -867,16 +1267,38 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
   const [selectedVehicleClass, setSelectedVehicleClass] = useState<VehicleClass>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'matrix' | 'cad_constructor' | 'features_list' | 'add_feature'>('matrix');
+  const [activeTab, setActiveTab] = useState<'matrix' | 'ux_visual_ecosystem' | 'cad_constructor' | 'features_list' | 'add_feature'>('matrix');
 
   // New feature form state
   const [newTitle, setNewTitle] = useState('');
-  const [newCategory, setNewCategory] = useState<'Аэродинамика' | 'Двигатели & Пропульсия' | 'Динамика & СУ' | 'Прочность & Вес' | 'Космос & Авионика'>('Аэродинамика');
-  const [newVehicle, setNewVehicle] = useState<'uav' | 'light_crop' | 'airliner' | 'supersonic' | 'rocket_space' | 'universal'>('universal');
+  const [newCategory, setNewCategory] = useState<FeatureCategory>('Интерфейс & Юзер-Френдли (UX/UI)');
+  const [newVehicle, setNewVehicle] = useState<'uav' | 'light_crop' | 'airliner' | 'supersonic' | 'rocket_space' | 'universal' | 'app_platform'>('app_platform');
   const [newPriority, setNewPriority] = useState<PriorityLevel>('p0_urgent');
   const [newDesc, setNewDesc] = useState('');
   const [newImpact, setNewImpact] = useState('');
   const [newMath, setNewMath] = useState('');
+
+  // Interactive Live Showcase states for UX & Engineering Tools Tab
+  const [demoAoA, setDemoAoA] = useState<number>(12);
+  const [demoStaticMargin, setDemoStaticMargin] = useState<number>(8);
+  const [demoWingLoading, setDemoWingLoading] = useState<number>(45);
+
+  const [unitSpeedVal, setUnitSpeedVal] = useState<number>(50); // m/s
+  const [unitAltVal, setUnitAltVal] = useState<number>(1000); // meters
+  const [unitPressVal, setUnitPressVal] = useState<number>(101325); // Pa
+
+  const [selectedFormulaKey, setSelectedFormulaKey] = useState<'lift' | 'drag' | 'reynolds' | 'efficiency'>('lift');
+  const [activeCfdLayers, setActiveCfdLayers] = useState<{
+    streamlines: boolean;
+    pressureSlices: boolean;
+    vortexCores: boolean;
+    pbrMaterial: boolean;
+  }>({
+    streamlines: true,
+    pressureSlices: true,
+    vortexCores: false,
+    pbrMaterial: true,
+  });
 
   // Persist status changes
   useEffect(() => {
@@ -1090,11 +1512,20 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
         accent: 'bg-rose-500',
         desc: 'Гравитационный поворот (Gravity Turn), формула Циолковского, тепловой поток Фэя-Ридделла, перелеты Ламберта, радиационная стойкость.',
       },
+      {
+        id: 'app_platform',
+        name: 'Класс 6: Экосистема Платформы, UX/UI & Инструменты',
+        icon: Sparkles,
+        subtitle: 'Юзер-френдли, 3D CFD, Отчеты ГОСТ, Конвертер, Обучение',
+        color: 'from-cyan-500/20 to-indigo-500/10 border-cyan-500/30 text-cyan-400',
+        accent: 'bg-cyan-500',
+        desc: 'Пошаговый мастер Design Wizard, командная палитра Ctrl+K, линии тока частиц, генератор отчетов по ГОСТ 2.105, конвертер единиц и обучающий атлас.',
+      },
     ];
 
     return stages.map((st) => {
       const stageFeatures = allFeatures.filter(
-        (f) => f.vehicleClass === st.id || f.vehicleClass === 'universal'
+        (f) => f.vehicleClass === st.id || (st.id !== 'app_platform' && f.vehicleClass === 'universal')
       );
       const completed = stageFeatures.filter(
         (f) => featureStatuses[f.id] === 'completed'
@@ -1261,7 +1692,19 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              Матрица 5 Классов ЛА
+              Матрица Классов ЛА
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('ux_visual_ecosystem')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                activeTab === 'ux_visual_ecosystem'
+                  ? 'bg-gradient-to-r from-cyan-400 to-indigo-500 text-slate-950 font-bold shadow-md'
+                  : 'text-cyan-400 hover:text-cyan-200 bg-cyan-500/10 border border-cyan-500/20'
+              }`}
+            >
+              <Eye className="w-3.5 h-3.5" />
+              <span>🎨 UX/UI, 3D Графика & Инструменты</span>
             </button>
             <button
               type="button"
@@ -1273,7 +1716,7 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
               }`}
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>🛠️ 3D САПР & ИИ-Конструктор (4 Фазы)</span>
+              <span>🛠️ 3D САПР & ИИ (4 Фазы)</span>
             </button>
             <button
               type="button"
@@ -1284,7 +1727,7 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              Полный Список Фич ({filteredFeatures.length})
+              Полный Список ({filteredFeatures.length})
             </button>
             <button
               type="button"
@@ -1296,7 +1739,7 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
               }`}
             >
               <Plus className="w-3.5 h-3.5" />
-              <span>Добавить Фичу</span>
+              <span>Добавить</span>
             </button>
           </div>
         </div>
@@ -1403,7 +1846,842 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
             </div>
           )}
 
-          {/* TAB 2: 3D CAD & GENERATIVE CONSTRUCTOR 4-PHASE ROADMAP */}
+          {/* TAB 2: UX/UI, 3D VISUALS, CAD ECOSYSTEM & ENGINEERING UTILITY */}
+          {activeTab === 'ux_visual_ecosystem' && (
+            <div className="space-y-6 animate-fadeIn font-mono">
+              {/* Header Hero Banner */}
+              <div className="p-5 rounded-3xl bg-gradient-to-r from-cyan-950/90 via-slate-900 to-indigo-950/80 border border-cyan-500/40 shadow-2xl space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="p-3 rounded-2xl bg-cyan-500/20 border border-cyan-500/30 text-cyan-400">
+                      <Eye className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-base sm:text-lg font-black text-white flex items-center gap-2">
+                        <span>Экосистема Развития: UX/UI, 3D Графика & Инструменты Инженера</span>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-black uppercase bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                          24 Новые Фичи (#51–#74)
+                        </span>
+                      </h3>
+                      <p className="text-xs text-slate-300 font-sans mt-0.5">
+                        Комплексная модернизация платформы: от интуитивного пошагового мастера и фотореалистичной визуализации вихрей до генерации ГОСТ-отчетов и обучающего интерактивного атласа.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedVehicleClass('app_platform');
+                        setSelectedCategory('all');
+                        setActiveTab('features_list');
+                      }}
+                      className="px-3.5 py-1.5 rounded-xl bg-cyan-500 text-slate-950 font-bold text-xs hover:bg-cyan-400 transition-colors flex items-center gap-1.5 cursor-pointer shadow-lg shadow-cyan-950/50"
+                    >
+                      <CheckSquare className="w-3.5 h-3.5" />
+                      <span>Открыть все 24 задачи в списке</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4 Pillars Summary Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-1">
+                  <div 
+                    onClick={() => {
+                      setSelectedCategory('Интерфейс & Юзер-Френдли (UX/UI)');
+                      setActiveTab('features_list');
+                    }}
+                    className="p-3 rounded-2xl bg-slate-900/90 border border-cyan-500/20 hover:border-cyan-400 transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-2 text-cyan-300 font-bold text-xs mb-1">
+                      <Monitor className="w-4 h-4" />
+                      <span>1. UX/UI & Эргономика</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 font-sans line-clamp-2">
+                      Пошаговый мастер Wizard, палитра Ctrl+K, Sanity Check подсказки, чертежный Blueprint режим.
+                    </p>
+                    <div className="mt-2 text-[10px] text-cyan-400 flex items-center gap-1 font-bold group-hover:translate-x-1 transition-transform">
+                      6 фич (#51–#56) <ArrowRight className="w-3 h-3" />
+                    </div>
+                  </div>
+
+                  <div 
+                    onClick={() => {
+                      setSelectedCategory('Визуальное Восприятие & 3D Графика');
+                      setActiveTab('features_list');
+                    }}
+                    className="p-3 rounded-2xl bg-slate-900/90 border border-purple-500/20 hover:border-purple-400 transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-2 text-purple-300 font-bold text-xs mb-1">
+                      <Palette className="w-4 h-4" />
+                      <span>2. 3D CFD Графика</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 font-sans line-clamp-2">
+                      Линии тока частиц, секущие плоскости X/Y/Z, Q-критерий вихрей, PBR-композит, замедленный срыв потока.
+                    </p>
+                    <div className="mt-2 text-[10px] text-purple-400 flex items-center gap-1 font-bold group-hover:translate-x-1 transition-transform">
+                      6 фич (#57–#62) <ArrowRight className="w-3 h-3" />
+                    </div>
+                  </div>
+
+                  <div 
+                    onClick={() => {
+                      setSelectedCategory('Инженерная Полезность & САПР');
+                      setActiveTab('features_list');
+                    }}
+                    className="p-3 rounded-2xl bg-slate-900/90 border border-amber-500/20 hover:border-amber-400 transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-2 text-amber-300 font-bold text-xs mb-1">
+                      <Wrench className="w-4 h-4" />
+                      <span>3. САПР & Инструменты</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 font-sans line-clamp-2">
+                      Генератор отчетов ГОСТ 2.105, конвертер единиц, база авиаматериалов (Д16Т/Карбон), экспорт OpenFOAM.
+                    </p>
+                    <div className="mt-2 text-[10px] text-amber-400 flex items-center gap-1 font-bold group-hover:translate-x-1 transition-transform">
+                      6 фич (#63–#68) <ArrowRight className="w-3 h-3" />
+                    </div>
+                  </div>
+
+                  <div 
+                    onClick={() => {
+                      setSelectedCategory('Обучение & Инженерная Ясность');
+                      setActiveTab('features_list');
+                    }}
+                    className="p-3 rounded-2xl bg-slate-900/90 border border-emerald-500/20 hover:border-emerald-400 transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-2 text-emerald-300 font-bold text-xs mb-1">
+                      <GraduationCap className="w-4 h-4" />
+                      <span>4. Обучение & Ясность</span>
+                    </div>
+                    <p className="text-[11px] text-slate-400 font-sans line-clamp-2">
+                      Атлас «Аэродинамика на пальцах», диагностика сваливания, инспектор формул в СИ, каталог эталонов (Ан-2/Су-27).
+                    </p>
+                    <div className="mt-2 text-[10px] text-emerald-400 flex items-center gap-1 font-bold group-hover:translate-x-1 transition-transform">
+                      6 фич (#69–#74) <ArrowRight className="w-3 h-3" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* PILLAR 1: INTERFACE & USER-FRIENDLY (UX/UI) */}
+              <div className="space-y-4 bg-slate-950/70 border border-cyan-500/30 rounded-3xl p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/30">
+                      <Monitor className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        <span>Направление 1: Интерфейс & Юзер-Френдли (UX/UI & Эргономика)</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                          Фичи #51–#56
+                        </span>
+                      </h4>
+                      <p className="text-xs text-slate-400 font-sans">
+                        Устранение барьеров входа: интерактивные подсказки, командная палитра и пошаговый мастер проектирования.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory('Интерфейс & Юзер-Френдли (UX/UI)');
+                      setActiveTab('features_list');
+                    }}
+                    className="text-xs text-cyan-400 hover:text-cyan-300 font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Задачи направления</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Interactive Live Demo: Physics Sanity Check Inspector */}
+                <div className="p-4 rounded-2xl bg-slate-900 border border-cyan-500/30 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+                      <span>Интерактивный Демонстратор: Physics Sanity Check & Real-time Diagnostic Engine</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400">Попробуйте изменить параметры для теста подсказок</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                      <div className="flex justify-between text-slate-300 mb-1">
+                        <span>Угол атаки $\alpha$:</span>
+                        <span className="font-bold text-cyan-400">{demoAoA}°</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="-5"
+                        max="25"
+                        step="1"
+                        value={demoAoA}
+                        onChange={(e) => setDemoAoA(Number(e.target.value))}
+                        className="w-full accent-cyan-400 cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                      <div className="flex justify-between text-slate-300 mb-1">
+                        <span>Запас стат. устойчивости:</span>
+                        <span className={`font-bold ${demoStaticMargin < 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                          {demoStaticMargin}%
+                        </span>
+                      </div>
+                      <input
+                        type="range"
+                        min="-10"
+                        max="25"
+                        step="1"
+                        value={demoStaticMargin}
+                        onChange={(e) => setDemoStaticMargin(Number(e.target.value))}
+                        className="w-full accent-cyan-400 cursor-pointer"
+                      />
+                    </div>
+
+                    <div className="bg-slate-950 p-2.5 rounded-xl border border-slate-800">
+                      <div className="flex justify-between text-slate-300 mb-1">
+                        <span>Удельная нагрузка $W/S$:</span>
+                        <span className="font-bold text-amber-400">{demoWingLoading} кг/м²</span>
+                      </div>
+                      <input
+                        type="range"
+                        min="10"
+                        max="140"
+                        step="5"
+                        value={demoWingLoading}
+                        onChange={(e) => setDemoWingLoading(Number(e.target.value))}
+                        className="w-full accent-cyan-400 cursor-pointer"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Diagnostic Alert Box */}
+                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 flex items-start gap-2.5 text-xs font-sans">
+                    {demoStaticMargin < 0 ? (
+                      <div className="flex items-start gap-2 text-rose-300">
+                        <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0 mt-0.5" />
+                        <div>
+                          <strong>🚨 Критическая ошибка центровки (SM = {demoStaticMargin}%):</strong> Аппарат статически неустойчив по тангажу (Cmα &gt; 0). Центр тяжести X_CG лежит позади фокуса X_F. Требуется сместить аккумулятор вперед или увеличить площадь стабилизатора!
+                        </div>
+                      </div>
+                    ) : demoAoA >= 16 ? (
+                      <div className="flex items-start gap-2 text-amber-300">
+                        <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" />
+                        <div>
+                          <strong>⚠️ Опасность срыва потока (α = {demoAoA}° ≥ α_crit):</strong> Превышен критический угол атаки. Происходит отрыв пограничного слоя, резкое падение CL и рост CD. Рекомендуется включить отклонение щелевых предкрылков.
+                        </div>
+                      </div>
+                    ) : demoWingLoading > 100 ? (
+                      <div className="flex items-start gap-2 text-yellow-300">
+                        <Clock className="w-4 h-4 text-yellow-400 shrink-0 mt-0.5" />
+                        <div>
+                          <strong>⚡ Высокая нагрузка на крыло (W/S = {demoWingLoading} кг/м²):</strong> Посадочная скорость превысит 130 км/ч. Потребуется удлиненная ВПП или мощная механизация Фаулера.
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-start gap-2 text-emerald-300">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                        <div>
+                          <strong>✅ Параметры в безопасном диапазоне:</strong> Статическая устойчивость положительна (SM = +{demoStaticMargin}%), безотрывное обтекание (α = {demoAoA}°), комфортная посадочная скорость (W/S = {demoWingLoading} кг/м²).
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Feature Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {allFeatures.filter((f) => f.category === 'Интерфейс & Юзер-Френдли (UX/UI)').map((f) => {
+                    const status = featureStatuses[f.id] || 'planned';
+                    return (
+                      <div
+                        key={f.id}
+                        className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-cyan-500/40 transition-all flex flex-col justify-between space-y-2"
+                      >
+                        <div>
+                          <div className="flex items-start justify-between gap-2 mb-1.5">
+                            <span className="text-xs font-bold text-white font-sans">{f.title}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleStatus(f.id)}
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold cursor-pointer transition-colors ${
+                                status === 'completed'
+                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                  : status === 'in_progress'
+                                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                                  : 'bg-slate-800 text-slate-400 border border-slate-700'
+                              }`}
+                            >
+                              {status === 'completed' ? 'ГОТОВО' : status === 'in_progress' ? 'В РАБОТЕ' : 'ПЛАН'}
+                            </button>
+                          </div>
+                          <p className="text-[11px] text-slate-400 font-sans line-clamp-3">{f.description}</p>
+                        </div>
+                        <div className="pt-2 border-t border-slate-800/80 text-[10px] text-cyan-400 font-sans">
+                          <strong>Польза:</strong> {f.engineeringImpact}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* PILLAR 2: 3D CFD GRAPHICS & VISUAL PERCEPTION */}
+              <div className="space-y-4 bg-slate-950/70 border border-purple-500/30 rounded-3xl p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-xl bg-purple-500/20 text-purple-400 border border-purple-500/30">
+                      <Palette className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        <span>Направление 2: Визуальное Восприятие & 3D CFD Графика</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                          Фичи #57–#62
+                        </span>
+                      </h4>
+                      <p className="text-xs text-slate-400 font-sans">
+                        Наглядное представление сложных физических полей: линии тока, секущие плоскости и динамика пограничного слоя.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory('Визуальное Восприятие & 3D Графика');
+                      setActiveTab('features_list');
+                    }}
+                    className="text-xs text-purple-400 hover:text-purple-300 font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Задачи направления</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Interactive Live Demo: 3D CFD Layer Controller */}
+                <div className="p-4 rounded-2xl bg-slate-900 border border-purple-500/30 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                      <Eye className="w-3.5 h-3.5 text-purple-400" />
+                      <span>Интерактивный Демонстратор: Контроллер Слоев CFD 3D Визуализации</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400">Переключайте слои рендеринга аэродинамического обтекания</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => setActiveCfdLayers(prev => ({ ...prev, streamlines: !prev.streamlines }))}
+                      className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                        activeCfdLayers.streamlines
+                          ? 'bg-purple-500/20 border-purple-500/60 text-purple-200 shadow-md shadow-purple-950/40'
+                          : 'bg-slate-950 border-slate-800 text-slate-500'
+                      }`}
+                    >
+                      <span className="font-sans">Линии тока (Streamlines)</span>
+                      <CheckCircle2 className={`w-3.5 h-3.5 ${activeCfdLayers.streamlines ? 'text-purple-400' : 'text-slate-600'}`} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveCfdLayers(prev => ({ ...prev, pressureSlices: !prev.pressureSlices }))}
+                      className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                        activeCfdLayers.pressureSlices
+                          ? 'bg-purple-500/20 border-purple-500/60 text-purple-200 shadow-md shadow-purple-950/40'
+                          : 'bg-slate-950 border-slate-800 text-slate-500'
+                      }`}
+                    >
+                      <span className="font-sans">Сечения Давления (Slice)</span>
+                      <CheckCircle2 className={`w-3.5 h-3.5 ${activeCfdLayers.pressureSlices ? 'text-purple-400' : 'text-slate-600'}`} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveCfdLayers(prev => ({ ...prev, vortexCores: !prev.vortexCores }))}
+                      className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                        activeCfdLayers.vortexCores
+                          ? 'bg-purple-500/20 border-purple-500/60 text-purple-200 shadow-md shadow-purple-950/40'
+                          : 'bg-slate-950 border-slate-800 text-slate-500'
+                      }`}
+                    >
+                      <span className="font-sans">Вихревой Q-критерий</span>
+                      <CheckCircle2 className={`w-3.5 h-3.5 ${activeCfdLayers.vortexCores ? 'text-purple-400' : 'text-slate-600'}`} />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setActiveCfdLayers(prev => ({ ...prev, pbrMaterial: !prev.pbrMaterial }))}
+                      className={`p-2.5 rounded-xl border flex items-center justify-between cursor-pointer transition-all ${
+                        activeCfdLayers.pbrMaterial
+                          ? 'bg-purple-500/20 border-purple-500/60 text-purple-200 shadow-md shadow-purple-950/40'
+                          : 'bg-slate-950 border-slate-800 text-slate-500'
+                      }`}
+                    >
+                      <span className="font-sans">PBR Композит / Карбон</span>
+                      <CheckCircle2 className={`w-3.5 h-3.5 ${activeCfdLayers.pbrMaterial ? 'text-purple-400' : 'text-slate-600'}`} />
+                    </button>
+                  </div>
+
+                  {/* Interactive Palette Bar Indicator */}
+                  <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-1.5">
+                    <div className="flex justify-between text-[11px] text-slate-400 font-sans">
+                      <span>Шкала градиента $C_p$ (Коэффициент давления):</span>
+                      <span className="text-cyan-400 font-mono">-3.5 (Разрежение) $\to$ +1.0 (Торможение)</span>
+                    </div>
+                    <div className="h-3.5 rounded-lg w-full bg-gradient-to-r from-blue-600 via-cyan-400 via-emerald-400 via-amber-400 to-rose-600 shadow-inner" />
+                    <div className="flex justify-between text-[10px] text-slate-500 font-mono">
+                      <span>Верхняя поверхность (Lift)</span>
+                      <span>Критическая точка торможения</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Feature Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {allFeatures.filter((f) => f.category === 'Визуальное Восприятие & 3D Графика').map((f) => {
+                    const status = featureStatuses[f.id] || 'planned';
+                    return (
+                      <div
+                        key={f.id}
+                        className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-purple-500/40 transition-all flex flex-col justify-between space-y-2"
+                      >
+                        <div>
+                          <div className="flex items-start justify-between gap-2 mb-1.5">
+                            <span className="text-xs font-bold text-white font-sans">{f.title}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleStatus(f.id)}
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold cursor-pointer transition-colors ${
+                                status === 'completed'
+                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                  : status === 'in_progress'
+                                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                                  : 'bg-slate-800 text-slate-400 border border-slate-700'
+                              }`}
+                            >
+                              {status === 'completed' ? 'ГОТОВО' : status === 'in_progress' ? 'В РАБОТЕ' : 'ПЛАН'}
+                            </button>
+                          </div>
+                          <p className="text-[11px] text-slate-400 font-sans line-clamp-3">{f.description}</p>
+                        </div>
+                        <div className="pt-2 border-t border-slate-800/80 text-[10px] text-purple-400 font-sans">
+                          <strong>Польза:</strong> {f.engineeringImpact}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* PILLAR 3: CAD ECOSYSTEM & ENGINEERING UTILITY */}
+              <div className="space-y-4 bg-slate-950/70 border border-amber-500/30 rounded-3xl p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                      <Wrench className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        <span>Направление 3: Инженерная Полезность & САПР Экосистема</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          Фичи #63–#68
+                        </span>
+                      </h4>
+                      <p className="text-xs text-slate-400 font-sans">
+                        Интеграция с профессиональными CAD/CAE системами, конвертация единиц, база материалов и ГОСТ-отчеты.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory('Инженерная Полезность & САПР');
+                      setActiveTab('features_list');
+                    }}
+                    className="text-xs text-amber-400 hover:text-amber-300 font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Задачи направления</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Interactive Live Demo: Aerospace Unit Converter */}
+                <div className="p-4 rounded-2xl bg-slate-900 border border-amber-500/30 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                      <Scale className="w-3.5 h-3.5 text-amber-400" />
+                      <span>Интерактивный Демонстратор: Авиационный Калькулятор & Конвертер Единиц</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400">Мгновенный перевод величин в стандартные системы мер</span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                    {/* Speed conversion */}
+                    <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                      <div className="flex justify-between text-slate-300">
+                        <span className="font-bold text-amber-300">Скорость полета ($V$):</span>
+                        <span className="font-mono text-cyan-400">{unitSpeedVal} м/с</span>
+                      </div>
+                      <input
+                        type="number"
+                        min="1"
+                        max="800"
+                        value={unitSpeedVal}
+                        onChange={(e) => setUnitSpeedVal(Math.max(1, Number(e.target.value)))}
+                        className="w-full px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 font-mono text-xs"
+                      />
+                      <div className="space-y-1 text-[11px] font-mono text-slate-300 pt-1 border-t border-slate-800">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Км/ч:</span>
+                          <strong className="text-amber-300">{(unitSpeedVal * 3.6).toFixed(1)} км/ч</strong>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Узлы (Knots):</span>
+                          <strong className="text-cyan-300">{(unitSpeedVal * 1.94384).toFixed(1)} kts</strong>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Число Маха ($M$):</span>
+                          <strong className="text-purple-300">M = {(unitSpeedVal / 340.29).toFixed(3)}</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Altitude conversion */}
+                    <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                      <div className="flex justify-between text-slate-300">
+                        <span className="font-bold text-amber-300">Высота ($H$):</span>
+                        <span className="font-mono text-cyan-400">{unitAltVal} м</span>
+                      </div>
+                      <input
+                        type="number"
+                        min="0"
+                        max="30000"
+                        step="100"
+                        value={unitAltVal}
+                        onChange={(e) => setUnitAltVal(Math.max(0, Number(e.target.value)))}
+                        className="w-full px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 font-mono text-xs"
+                      />
+                      <div className="space-y-1 text-[11px] font-mono text-slate-300 pt-1 border-t border-slate-800">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Футы (Feet):</span>
+                          <strong className="text-amber-300">{(unitAltVal * 3.28084).toFixed(0)} ft</strong>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Эшелон (Flight Level):</span>
+                          <strong className="text-cyan-300">FL{Math.round((unitAltVal * 3.28084) / 100)}</strong>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Атм. давление $P(H)$:</span>
+                          <strong className="text-purple-300">
+                            {(101.325 * Math.pow(1 - 0.0000225577 * unitAltVal, 5.25588)).toFixed(1)} кПа
+                          </strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Pressure conversion */}
+                    <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2">
+                      <div className="flex justify-between text-slate-300">
+                        <span className="font-bold text-amber-300">Давление ($P$):</span>
+                        <span className="font-mono text-cyan-400">{unitPressVal} Па</span>
+                      </div>
+                      <input
+                        type="number"
+                        min="100"
+                        max="200000"
+                        step="500"
+                        value={unitPressVal}
+                        onChange={(e) => setUnitPressVal(Math.max(100, Number(e.target.value)))}
+                        className="w-full px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 font-mono text-xs"
+                      />
+                      <div className="space-y-1 text-[11px] font-mono text-slate-300 pt-1 border-t border-slate-800">
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Мм рт. ст. (Torr):</span>
+                          <strong className="text-amber-300">{(unitPressVal * 0.00750062).toFixed(1)} мм</strong>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">PSI (фунт/кв. дюйм):</span>
+                          <strong className="text-cyan-300">{(unitPressVal * 0.000145038).toFixed(3)} psi</strong>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-slate-400">Бар (Atm/Bar):</span>
+                          <strong className="text-purple-300">{(unitPressVal / 100000).toFixed(4)} bar</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Feature Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {allFeatures.filter((f) => f.category === 'Инженерная Полезность & САПР').map((f) => {
+                    const status = featureStatuses[f.id] || 'planned';
+                    return (
+                      <div
+                        key={f.id}
+                        className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-amber-500/40 transition-all flex flex-col justify-between space-y-2"
+                      >
+                        <div>
+                          <div className="flex items-start justify-between gap-2 mb-1.5">
+                            <span className="text-xs font-bold text-white font-sans">{f.title}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleStatus(f.id)}
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold cursor-pointer transition-colors ${
+                                status === 'completed'
+                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                  : status === 'in_progress'
+                                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                                  : 'bg-slate-800 text-slate-400 border border-slate-700'
+                              }`}
+                            >
+                              {status === 'completed' ? 'ГОТОВО' : status === 'in_progress' ? 'В РАБОТЕ' : 'ПЛАН'}
+                            </button>
+                          </div>
+                          <p className="text-[11px] text-slate-400 font-sans line-clamp-3">{f.description}</p>
+                        </div>
+                        <div className="pt-2 border-t border-slate-800/80 text-[10px] text-amber-400 font-sans">
+                          <strong>Польза:</strong> {f.engineeringImpact}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* PILLAR 4: EDUCATION & ENGINEERING CLARITY */}
+              <div className="space-y-4 bg-slate-950/70 border border-emerald-500/30 rounded-3xl p-5">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-800 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                      <GraduationCap className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                        <span>Направление 4: Обучение, Понятность & Инженерная Ясность</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          Фичи #69–#74
+                        </span>
+                      </h4>
+                      <p className="text-xs text-slate-400 font-sans">
+                        Пояснение физики «на пальцах», расшифровка формул с единицами СИ, каталог эталонов авиации и тренажер.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedCategory('Обучение & Инженерная Ясность');
+                      setActiveTab('features_list');
+                    }}
+                    className="text-xs text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Задачи направления</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Interactive Live Demo: Formula Inspector */}
+                <div className="p-4 rounded-2xl bg-slate-900 border border-emerald-500/30 space-y-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                      <BookOpen className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Интерактивный Демонстратор: Инспектор Физических Формул & Анатомия Величин</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400">Кликните на формулу для физической расшифровки</span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFormulaKey('lift')}
+                      className={`px-3 py-1.5 rounded-xl border text-xs font-mono transition-all cursor-pointer ${
+                        selectedFormulaKey === 'lift'
+                          ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-400 shadow-md'
+                          : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      Подъемная сила ($L$)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFormulaKey('drag')}
+                      className={`px-3 py-1.5 rounded-xl border text-xs font-mono transition-all cursor-pointer ${
+                        selectedFormulaKey === 'drag'
+                          ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-400 shadow-md'
+                          : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      Поляра сопротивления ($C_D$)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFormulaKey('reynolds')}
+                      className={`px-3 py-1.5 rounded-xl border text-xs font-mono transition-all cursor-pointer ${
+                        selectedFormulaKey === 'reynolds'
+                          ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-400 shadow-md'
+                          : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      Число Рейнольдса ($Re$)
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setSelectedFormulaKey('efficiency')}
+                      className={`px-3 py-1.5 rounded-xl border text-xs font-mono transition-all cursor-pointer ${
+                        selectedFormulaKey === 'efficiency'
+                          ? 'bg-emerald-500 text-slate-950 font-bold border-emerald-400 shadow-md'
+                          : 'bg-slate-950 text-slate-300 border-slate-800 hover:border-slate-700'
+                      }`}
+                    >
+                      Аэродинамическое качество ($K$)
+                    </button>
+                  </div>
+
+                  {/* Formula Breakdown Card */}
+                  <div className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+                    {selectedFormulaKey === 'lift' && (
+                      <div>
+                        <div className="text-center py-2 bg-slate-900/80 rounded-xl border border-slate-800 mb-2">
+                          <MathView math="L = C_L \cdot \frac{1}{2} \rho V^2 \cdot S" className="text-emerald-300 text-base" />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-sans text-slate-300">
+                          <div><strong>L [Ньютоны, Н]:</strong> Результирующая подъемная сила крыла.</div>
+                          <div><strong>CL [безразмерный]:</strong> Коэффициент подъемной силы профиля при угле атаки α.</div>
+                          <div><strong>ρ [кг/м³]:</strong> Плотность воздуха (на уровне моря ρ₀ = 1.225 кг/м³).</div>
+                          <div><strong>V [м/с]:</strong> Истинная воздушная скорость набегающего потока (TAS).</div>
+                          <div><strong>S [м²]:</strong> Несущая площадь крыла в плане.</div>
+                          <div className="col-span-full text-[11px] text-emerald-400 font-mono pt-1 border-t border-slate-800">
+                            💡 <em>Инженерный инсайт:</em> При удвоении скорости V подъемная сила возрастает в 4 раза (квадратичная зависимость).
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedFormulaKey === 'drag' && (
+                      <div>
+                        <div className="text-center py-2 bg-slate-900/80 rounded-xl border border-slate-800 mb-2">
+                          <MathView math="C_D = C_{D0} + \frac{C_L^2}{\pi \cdot AR \cdot e}" className="text-emerald-300 text-base" />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-sans text-slate-300">
+                          <div><strong>CD0 [безразмерный]:</strong> Профильное и паразитное сопротивление трения и формы.</div>
+                          <div><strong>AR = b²/S [удлинение]:</strong> Удлинение крыла (отношение размаха к хорде).</div>
+                          <div><strong>e [фактор Освальда, ≈ 0.8...0.95]:</strong> Коэффициент эффективности формы крыла в плане.</div>
+                          <div><strong>Индуктивное слагаемое [CL²/(π·AR·e)]:</strong> Сопротивление скоса потока, вызванное концевыми вихрями.</div>
+                          <div className="col-span-full text-[11px] text-emerald-400 font-mono pt-1 border-t border-slate-800">
+                            💡 <em>Инженерный инсайт:</em> Чтобы снизить сопротивление на крейсерском режиме, увеличивайте удлинение крыла AR или устанавливайте винглеты.
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedFormulaKey === 'reynolds' && (
+                      <div>
+                        <div className="text-center py-2 bg-slate-900/80 rounded-xl border border-slate-800 mb-2">
+                          <MathView math="Re = \frac{\rho \cdot V \cdot c}{\mu}" className="text-emerald-300 text-base" />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-sans text-slate-300">
+                          <div><strong>c [метры]:</strong> Средняя аэродинамическая хорда крыла (САХ).</div>
+                          <div><strong>μ [Па·с]:</strong> Динамическая вязкость воздуха (≈ 1.81 × 10⁻⁵ Па·с).</div>
+                          <div><strong>Re &lt; 500 000:</strong> Режим БПЛА, склонный к образованию ламинарных пузырей отрыва.</div>
+                          <div><strong>Re &gt; 3 000 000:</strong> Развитое турбулентное обтекание магистральных самолетов.</div>
+                          <div className="col-span-full text-[11px] text-emerald-400 font-mono pt-1 border-t border-slate-800">
+                            💡 <em>Инженерный инсайт:</em> Профиль, отлично работающий на лайнере (Re=10M), будет сваливаться на микродроне (Re=100k) из-за вязкостного отрыва.
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {selectedFormulaKey === 'efficiency' && (
+                      <div>
+                        <div className="text-center py-2 bg-slate-900/80 rounded-xl border border-slate-800 mb-2">
+                          <MathView math="K = \frac{C_L}{C_D} = \frac{L}{D} = \frac{X_{\text{планирования}}}{H_{\text{высота}}}" className="text-emerald-300 text-base" />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-sans text-slate-300">
+                          <div><strong>K [качество]:</strong> Аэродинамическое качество аппарата.</div>
+                          <div><strong>Ан-2:</strong> K_max ≈ 10 (надежный биплан с мощным сопротивлением).</div>
+                          <div><strong>Планер-паритель:</strong> K_max ≈ 40...60 (тончайшее длинное крыло).</div>
+                          <div><strong>FPV-дрон / квадрокоптер:</strong> K_max ≈ 2...4.</div>
+                          <div className="col-span-full text-[11px] text-emerald-400 font-mono pt-1 border-t border-slate-800">
+                            💡 <em>Инженерный инсайт:</em> Качество K=15 означает, что с высоты 1 км при отказе двигателя аппарат сможет спланировать на 15 км вперед.
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Feature Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {allFeatures.filter((f) => f.category === 'Обучение & Инженерная Ясность').map((f) => {
+                    const status = featureStatuses[f.id] || 'planned';
+                    return (
+                      <div
+                        key={f.id}
+                        className="p-3.5 rounded-2xl bg-slate-900/90 border border-slate-800 hover:border-emerald-500/40 transition-all flex flex-col justify-between space-y-2"
+                      >
+                        <div>
+                          <div className="flex items-start justify-between gap-2 mb-1.5">
+                            <span className="text-xs font-bold text-white font-sans">{f.title}</span>
+                            <button
+                              type="button"
+                              onClick={() => handleToggleStatus(f.id)}
+                              className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold cursor-pointer transition-colors ${
+                                status === 'completed'
+                                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                  : status === 'in_progress'
+                                  ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                                  : 'bg-slate-800 text-slate-400 border border-slate-700'
+                              }`}
+                            >
+                              {status === 'completed' ? 'ГОТОВО' : status === 'in_progress' ? 'В РАБОТЕ' : 'ПЛАН'}
+                            </button>
+                          </div>
+                          <p className="text-[11px] text-slate-400 font-sans line-clamp-3">{f.description}</p>
+                        </div>
+                        <div className="pt-2 border-t border-slate-800/80 text-[10px] text-emerald-400 font-sans">
+                          <strong>Польза:</strong> {f.engineeringImpact}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Bottom Quick Switcher */}
+              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-xs font-bold text-white">Управление приоритетами и статусами разработки</h4>
+                  <p className="text-[11px] text-slate-400 font-sans">
+                    Перейдите к полному списку, чтобы фильтровать, искать и отмечать выполненные задачи.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedVehicleClass('app_platform');
+                    setSelectedCategory('all');
+                    setActiveTab('features_list');
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-500 text-slate-950 font-bold text-xs hover:from-cyan-400 hover:to-indigo-400 cursor-pointer shadow-lg shadow-cyan-950/40"
+                >
+                  <span>Открыть полный перечень задач (#51–#74)</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 3: 3D CAD & GENERATIVE CONSTRUCTOR 4-PHASE ROADMAP */}
           {activeTab === 'cad_constructor' && (
             <div className="space-y-6 animate-fadeIn font-mono">
               {/* Header Hero Banner */}
@@ -1666,12 +2944,13 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
                   onChange={(e) => setSelectedVehicleClass(e.target.value as VehicleClass)}
                   className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-mono"
                 >
-                  <option value="all">Все Классы ЛА</option>
+                  <option value="all">Все Классы ЛА (6)</option>
                   <option value="uav">Класс 1: БПЛА & Дроны</option>
                   <option value="light_crop">Класс 2: Кукурузник / Ан-2 / STOL</option>
                   <option value="airliner">Класс 3: Магистральные Лайнеры</option>
                   <option value="supersonic">Класс 4: Сверхзвук</option>
                   <option value="rocket_space">Класс 5: Ракеты & Космос</option>
+                  <option value="app_platform">Класс 6: Платформа & UX/UI Инструменты</option>
                 </select>
 
                 {/* Category filter */}
@@ -1680,12 +2959,16 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
                   onChange={(e) => setSelectedCategory(e.target.value)}
                   className="px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-700/80 text-xs text-slate-200 focus:outline-none focus:border-cyan-500 font-mono"
                 >
-                  <option value="all">Все Дисциплины</option>
+                  <option value="all">Все Дисциплины (9)</option>
                   <option value="Аэродинамика">Аэродинамика</option>
                   <option value="Двигатели & Пропульсия">Двигатели & Пропульсия</option>
                   <option value="Динамика & СУ">Динамика & СУ</option>
                   <option value="Прочность & Вес">Прочность & Вес</option>
                   <option value="Космос & Авионика">Космос & Авионика</option>
+                  <option value="Интерфейс & Юзер-Френдли (UX/UI)">🎨 Интерфейс & Юзер-Френдли (UX/UI)</option>
+                  <option value="Визуальное Восприятие & 3D Графика">👁️ Визуальное Восприятие & 3D Графика</option>
+                  <option value="Инженерная Полезность & САПР">🛠️ Инженерная Полезность & САПР</option>
+                  <option value="Обучение & Инженерная Ясность">🎓 Обучение & Инженерная Ясность</option>
                 </select>
               </div>
 
@@ -1907,6 +3190,10 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
                       onChange={(e) => setNewCategory(e.target.value as any)}
                       className="w-full px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono"
                     >
+                      <option value="Интерфейс & Юзер-Френдли (UX/UI)">🎨 Интерфейс & Юзер-Френдли (UX/UI)</option>
+                      <option value="Визуальное Восприятие & 3D Графика">👁️ Визуальное Восприятие & 3D Графика</option>
+                      <option value="Инженерная Полезность & САПР">🛠️ Инженерная Полезность & САПР</option>
+                      <option value="Обучение & Инженерная Ясность">🎓 Обучение & Инженерная Ясность</option>
                       <option value="Аэродинамика">Аэродинамика</option>
                       <option value="Двигатели & Пропульсия">Двигатели & Пропульсия</option>
                       <option value="Динамика & СУ">Динамика & СУ</option>
@@ -1924,7 +3211,8 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
                       onChange={(e) => setNewVehicle(e.target.value as any)}
                       className="w-full px-2.5 py-1.5 rounded-xl bg-slate-900 border border-slate-700 text-xs text-white focus:outline-none focus:border-cyan-500 font-mono"
                     >
-                      <option value="universal">Универсально</option>
+                      <option value="app_platform">Платформа & Инструменты</option>
+                      <option value="universal">Универсально для ЛА</option>
                       <option value="uav">БПЛА / Дроны</option>
                       <option value="light_crop">Кукурузник / Ан-2</option>
                       <option value="airliner">Магистральный Лайнер</option>
