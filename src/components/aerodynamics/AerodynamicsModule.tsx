@@ -25,6 +25,7 @@ import {
   ChevronRight,
   Shield,
   Gauge,
+  Eye,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
@@ -45,6 +46,9 @@ import { UAVOpticalFlowVIOModule } from './uav/UAVOpticalFlowVIOModule';
 import { UAVParachuteBallisticRecoveryModule } from './uav/UAVParachuteBallisticRecoveryModule';
 import { UAVElectromagneticSignatureRCSModule } from './uav/UAVElectromagneticSignatureRCSModule';
 import { UAVBatteryThermalBMSModule } from './uav/UAVBatteryThermalBMSModule';
+import { UAVGimbalVisionTrackingModule } from './uav/UAVGimbalVisionTrackingModule';
+import { UAVCatapultPneumaticLauncherModule } from './uav/UAVCatapultPneumaticLauncherModule';
+import { UAVAeromagneticLidarSurveyModule } from './uav/UAVAeromagneticLidarSurveyModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -94,6 +98,9 @@ export type AeroSubTab =
   | 'uav_parachute_recovery'
   | 'uav_stealth_rcs'
   | 'uav_battery_thermal'
+  | 'uav_gimbal_vision'
+  | 'uav_catapult_launcher'
+  | 'uav_lidar_survey'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -145,11 +152,11 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '17 Систем',
+    tag: '20 Систем',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'Силовые установки, VIO/Lucas-Kanade, Stealth ЭПР, спассистемы ПСС, BMS аккумуляторы, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
+    description: 'ОЭС подвес KCF, пневмокатапульта, LiDAR, VIO/Lucas-Kanade, Stealth ЭПР, спассистемы ПСС, BMS аккумуляторы, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
     defaultSubTab: 'uav_studio',
   },
   {
@@ -251,6 +258,14 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
         'uav_hybrid_icing',
         'uav_loitering_dive',
         'uav_dsmac_tercom',
+        'uav_pid_autopilot',
+        'uav_optical_flow_vio',
+        'uav_parachute_recovery',
+        'uav_stealth_rcs',
+        'uav_battery_thermal',
+        'uav_gimbal_vision',
+        'uav_catapult_launcher',
+        'uav_lidar_survey',
       ];
 
       if (uavSubTabs.includes(targetSubTab)) {
@@ -860,6 +875,45 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <Gauge className="w-3.5 h-3.5 text-emerald-400" />
             <span>🔋 Тепловая BMS & Зимний Разряд АКБ</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_gimbal_vision')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_gimbal_vision'
+                ? 'bg-gradient-to-r from-cyan-500 via-sky-500 to-blue-500 text-slate-950 shadow-md font-black ring-1 ring-cyan-400/50'
+                : 'text-cyan-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-cyan-900/50'
+            }`}
+          >
+            <Eye className="w-3.5 h-3.5 text-cyan-400" />
+            <span>🎯 ОЭС Гиростаб Подвес & Автосопровождение (KCF/WGS-84)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_catapult_launcher')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_catapult_launcher'
+                ? 'bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-slate-950 shadow-md font-black ring-1 ring-amber-400/50'
+                : 'text-amber-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-amber-900/50'
+            }`}
+          >
+            <Rocket className="w-3.5 h-3.5 text-amber-400" />
+            <span>🚀 Пневмокатапульта & Сеточный Улавливатель (G-Rail)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_lidar_survey')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_lidar_survey'
+                ? 'bg-gradient-to-r from-teal-500 via-emerald-500 to-cyan-500 text-slate-950 shadow-md font-black ring-1 ring-teal-400/50'
+                : 'text-teal-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-teal-900/50'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5 text-teal-400" />
+            <span>🌐 Воздушный LiDAR & Аэромагниторазведка (RIEGL/Cesium)</span>
+          </button>
         </div>
       )}
 
@@ -972,6 +1026,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_parachute_recovery' && <UAVParachuteBallisticRecoveryModule />}
           {activeUAVSubTab === 'uav_stealth_rcs' && <UAVElectromagneticSignatureRCSModule />}
           {activeUAVSubTab === 'uav_battery_thermal' && <UAVBatteryThermalBMSModule />}
+          {activeUAVSubTab === 'uav_gimbal_vision' && <UAVGimbalVisionTrackingModule />}
+          {activeUAVSubTab === 'uav_catapult_launcher' && <UAVCatapultPneumaticLauncherModule />}
+          {activeUAVSubTab === 'uav_lidar_survey' && <UAVAeromagneticLidarSurveyModule />}
         </>
       )}
 
