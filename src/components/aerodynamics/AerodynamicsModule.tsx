@@ -28,6 +28,8 @@ import {
   Eye,
   Cable,
   Feather,
+  Waves,
+  Sun,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
@@ -54,6 +56,9 @@ import { UAVAeromagneticLidarSurveyModule } from './uav/UAVAeromagneticLidarSurv
 import { UAVTetheredPowerStationModule } from './uav/UAVTetheredPowerStationModule';
 import { UAVSwarmCollisionAvoidanceORCA } from './uav/UAVSwarmCollisionAvoidanceORCA';
 import { UAVPerchingBioGripperModule } from './uav/UAVPerchingBioGripperModule';
+import { UAVGroundEffectEkranoplanModule } from './uav/UAVGroundEffectEkranoplanModule';
+import { UAVSolarHAPSAtmosphericSatelliteModule } from './uav/UAVSolarHAPSAtmosphericSatelliteModule';
+import { UAVMorphingWingAeroelasticModule } from './uav/UAVMorphingWingAeroelasticModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -109,6 +114,9 @@ export type AeroSubTab =
   | 'uav_tethered_power'
   | 'uav_swarm_orca'
   | 'uav_perching_gripper'
+  | 'uav_ekranoplan_wig'
+  | 'uav_solar_haps'
+  | 'uav_morphing_wing'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -160,11 +168,11 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '23 Системы',
+    tag: '26 Систем',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'Привязной HVDC кабель, ORCA рой, био-перчинг захваты, ОЭС KCF, пневмокатапульта, LiDAR, VIO/Lucas-Kanade, Stealth ЭПР, спассистемы ПСС, BMS аккумуляторы, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
+    description: 'Экранопланы WIG, Солнечные HAPS псевдоспутники, морфинг крыла и флаттер, привязной кабель, ORCA рой, био-захват, ОЭС KCF, пневмокатапульта, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
     defaultSubTab: 'uav_studio',
   },
   {
@@ -274,6 +282,12 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
         'uav_gimbal_vision',
         'uav_catapult_launcher',
         'uav_lidar_survey',
+        'uav_tethered_power',
+        'uav_swarm_orca',
+        'uav_perching_gripper',
+        'uav_ekranoplan_wig',
+        'uav_solar_haps',
+        'uav_morphing_wing',
       ];
 
       if (uavSubTabs.includes(targetSubTab)) {
@@ -961,6 +975,45 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <Feather className="w-3.5 h-3.5 text-emerald-400" />
             <span>🦅 Био-Перчинг: Посадка на Ветки/Стены & Микроигольчатый Захват</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_ekranoplan_wig')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_ekranoplan_wig'
+                ? 'bg-gradient-to-r from-cyan-500 via-sky-500 to-teal-400 text-slate-950 shadow-md font-black ring-1 ring-cyan-400/50'
+                : 'text-cyan-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-cyan-900/50'
+            }`}
+          >
+            <Waves className="w-3.5 h-3.5 text-cyan-400" />
+            <span>🌊 Экраноплан & WIG-Эффект (Динамическая Подушка & L/D &gt; 25)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_solar_haps')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_solar_haps'
+                ? 'bg-gradient-to-r from-amber-500 via-yellow-500 to-orange-400 text-slate-950 shadow-md font-black ring-1 ring-amber-400/50'
+                : 'text-amber-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-amber-900/50'
+            }`}
+          >
+            <Sun className="w-3.5 h-3.5 text-amber-400" />
+            <span>☀️ Солнечный HAPS: Стратосферный Псевдоспутник (20 км & Суточный Цикл)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_morphing_wing')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_morphing_wing'
+                ? 'bg-gradient-to-r from-indigo-500 via-purple-500 to-violet-400 text-white shadow-md font-black ring-1 ring-indigo-400/50'
+                : 'text-indigo-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-indigo-900/50'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5 text-indigo-400" />
+            <span>📐 Морфинг Крыла, Изменяемая Стреловидность & Флаттер</span>
+          </button>
         </div>
       )}
 
@@ -1079,6 +1132,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_tethered_power' && <UAVTetheredPowerStationModule />}
           {activeUAVSubTab === 'uav_swarm_orca' && <UAVSwarmCollisionAvoidanceORCA />}
           {activeUAVSubTab === 'uav_perching_gripper' && <UAVPerchingBioGripperModule />}
+          {activeUAVSubTab === 'uav_ekranoplan_wig' && <UAVGroundEffectEkranoplanModule />}
+          {activeUAVSubTab === 'uav_solar_haps' && <UAVSolarHAPSAtmosphericSatelliteModule />}
+          {activeUAVSubTab === 'uav_morphing_wing' && <UAVMorphingWingAeroelasticModule />}
         </>
       )}
 
