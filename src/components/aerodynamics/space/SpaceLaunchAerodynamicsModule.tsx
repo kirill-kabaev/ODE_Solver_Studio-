@@ -35,6 +35,7 @@ import {
   AreaChart,
   Area,
 } from 'recharts';
+import { FullscreenGraphButton } from '../../telemetry/FullscreenGraphButton';
 
 export type SpaceVehicleType = 'heavy_launch_falcon' | 'superheavy_starship' | 'reentry_capsule_soyuz' | 'shuttle_spaceplane';
 
@@ -430,7 +431,7 @@ export const SpaceLaunchAerodynamicsModule: React.FC = () => {
               </div>
             </div>
 
-            <div className="h-64 w-full text-xs">
+            <div className="relative h-64 w-full text-xs">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={calculations.ascentTrajectoryData} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -450,6 +451,11 @@ export const SpaceLaunchAerodynamicsModule: React.FC = () => {
                   />
                 </LineChart>
               </ResponsiveContainer>
+              <FullscreenGraphButton
+                domain="supersonic_mach"
+                label="Во весь экран"
+                subLabel="Напор Max-Q"
+              />
             </div>
           </div>
 
@@ -467,7 +473,7 @@ export const SpaceLaunchAerodynamicsModule: React.FC = () => {
               </div>
             </div>
 
-            <div className="h-64 w-full text-xs">
+            <div className="relative h-64 w-full text-xs">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={calculations.noseRadiusCurve} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -486,6 +492,11 @@ export const SpaceLaunchAerodynamicsModule: React.FC = () => {
                   />
                 </AreaChart>
               </ResponsiveContainer>
+              <FullscreenGraphButton
+                domain="supersonic_mach"
+                label="Во весь экран"
+                subLabel="Тепловой поток"
+              />
             </div>
           </div>
         </div>

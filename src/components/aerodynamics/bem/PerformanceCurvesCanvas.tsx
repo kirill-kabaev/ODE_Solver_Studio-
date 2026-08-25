@@ -5,6 +5,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { RotorBEMResults } from './bemTypes';
+import { FullscreenGraphButton } from '../../telemetry/FullscreenGraphButton';
 
 interface PerformanceCurvesCanvasProps {
   results: RotorBEMResults;
@@ -244,12 +245,19 @@ export const PerformanceCurvesCanvas: React.FC<PerformanceCurvesCanvasProps> = (
         </div>
       </div>
 
-      <canvas
-        ref={canvasRef}
-        width={900}
-        height={260}
-        className="w-full h-56 sm:h-64 object-cover rounded-xl block"
-      />
+      <div className="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+        <canvas
+          ref={canvasRef}
+          width={900}
+          height={260}
+          className="w-full h-56 sm:h-64 object-cover block"
+        />
+        <FullscreenGraphButton
+          domain="bem_rotor"
+          label="Во весь экран"
+          subLabel="Поляры J"
+        />
+      </div>
     </div>
   );
 };

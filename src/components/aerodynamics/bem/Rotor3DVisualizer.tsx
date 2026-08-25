@@ -8,6 +8,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Play, Pause, RotateCcw, Eye, Layers, Wind, Disc, Compass } from 'lucide-react';
 import { RotorBEMResults, RotorGeometryConfig, FlowOperatingCondition } from './bemTypes';
 import { createHardware2DContext } from '../../../utils/gpuHardwareEnforcer';
+import { FullscreenGraphButton } from '../../telemetry/FullscreenGraphButton';
 
 interface Rotor3DVisualizerProps {
   config: RotorGeometryConfig;
@@ -535,6 +536,12 @@ export const Rotor3DVisualizer: React.FC<Rotor3DVisualizerProps> = ({
           >
             <RotateCcw className="w-3.5 h-3.5" />
           </button>
+
+          <FullscreenGraphButton
+            domain="bem_rotor"
+            title="Открыть полноэкранный 3D HUD ротора и вихревого следа"
+            className="p-2"
+          />
         </div>
 
         {/* Bottom Floating Legend & Overlay Toggles */}

@@ -5,6 +5,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import { RotorBEMResults } from './bemTypes';
+import { FullscreenGraphButton } from '../../telemetry/FullscreenGraphButton';
 
 interface RadialPlotsCanvasProps {
   results: RotorBEMResults;
@@ -280,12 +281,19 @@ export const RadialPlotsCanvas: React.FC<RadialPlotsCanvasProps> = ({ results })
       </div>
 
       {/* Main Radial Chart Canvas */}
-      <canvas
-        ref={canvasRef}
-        width={900}
-        height={260}
-        className="w-full h-56 sm:h-64 object-cover rounded-xl block"
-      />
+      <div className="relative rounded-xl overflow-hidden border border-slate-800 bg-slate-950">
+        <canvas
+          ref={canvasRef}
+          width={900}
+          height={260}
+          className="w-full h-56 sm:h-64 object-cover block"
+        />
+        <FullscreenGraphButton
+          domain="bem_rotor"
+          label="Во весь экран"
+          subLabel="Эпюры BEM"
+        />
+      </div>
 
       {/* Summary Station Table / Quick Telemetry */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs font-mono">

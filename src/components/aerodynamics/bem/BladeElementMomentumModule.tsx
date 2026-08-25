@@ -21,13 +21,9 @@ import {
   solveBladeElementMomentum,
   AIRFOIL_POLARS,
 } from './bemSolver';
-import {
-  BemPreset,
-  DroneFlightProfile,
-  FlowOperatingCondition,
-  RotorGeometryConfig,
-} from './bemTypes';
+import { RotorGeometryConfig, FlowOperatingCondition, DroneFlightProfile, BemPreset } from './bemTypes';
 import { Rotor3DVisualizer } from './Rotor3DVisualizer';
+import { FullscreenGraphButton } from '../../telemetry/FullscreenGraphButton';
 import { RadialPlotsCanvas } from './RadialPlotsCanvas';
 import { PerformanceCurvesCanvas } from './PerformanceCurvesCanvas';
 import { DroneFlightEnvelope } from './DroneFlightEnvelope';
@@ -199,9 +195,15 @@ export const BladeElementMomentumModule: React.FC = () => {
                 3D Динамическая Сцена: Вращение & Спутная Струя
               </h3>
             </div>
-            <span className="text-[11px] text-slate-400 font-mono">
-              $V_{`{tip}`} = {bemResults.tipSpeedMs.toFixed(0)}$ м/с (M = {bemResults.tipMachNumber.toFixed(2)})
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="text-[11px] text-slate-400 font-mono hidden sm:inline">
+                $V_{`{tip}`} = {bemResults.tipSpeedMs.toFixed(0)}$ м/с (M = {bemResults.tipMachNumber.toFixed(2)})
+              </span>
+              <FullscreenGraphButton
+                domain="bem_rotor"
+                title="Развернуть 3D сцену винта/ротора во весь экран"
+              />
+            </div>
           </div>
 
           {/* Interactive 3D Visualizer Component */}

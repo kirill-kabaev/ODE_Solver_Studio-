@@ -36,6 +36,7 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
+import { FullscreenGraphButton } from '../../telemetry/FullscreenGraphButton';
 
 export type RunwaySurfaceType = 'asphalt' | 'dry_grass' | 'wet_grass' | 'soft_dirt_mud' | 'snow_packed';
 
@@ -398,7 +399,7 @@ export const BiplaneAn2Module: React.FC = () => {
               </div>
             </div>
 
-            <div className="h-64 w-full text-xs">
+            <div className="relative h-64 w-full text-xs">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={calculations.liftCurveData} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -427,6 +428,11 @@ export const BiplaneAn2Module: React.FC = () => {
                   />
                 </LineChart>
               </ResponsiveContainer>
+              <FullscreenGraphButton
+                domain="3d_aero_studio"
+                label="Во весь экран"
+                subLabel="Поляра Ан-2"
+              />
             </div>
           </div>
 
@@ -444,7 +450,7 @@ export const BiplaneAn2Module: React.FC = () => {
               </div>
             </div>
 
-            <div className="h-64 w-full text-xs">
+            <div className="relative h-64 w-full text-xs">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={calculations.weightRollCurve} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -464,6 +470,11 @@ export const BiplaneAn2Module: React.FC = () => {
                   />
                 </AreaChart>
               </ResponsiveContainer>
+              <FullscreenGraphButton
+                domain="3d_aero_studio"
+                label="Во весь экран"
+                subLabel="Разбег STOL"
+              />
             </div>
           </div>
         </div>

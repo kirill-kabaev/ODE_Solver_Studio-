@@ -33,6 +33,7 @@ import {
   AreaChart,
   Area,
 } from 'recharts';
+import { FullscreenGraphButton } from '../../telemetry/FullscreenGraphButton';
 
 export type AirlinerType = 'narrow_body_a320' | 'wide_body_b787' | 'long_range_a350' | 'regional_ssj';
 
@@ -460,7 +461,7 @@ export const CommercialAirlinerModule: React.FC = () => {
               </div>
             </div>
 
-            <div className="h-64 w-full text-xs">
+            <div className="relative h-64 w-full text-xs">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={calculations.dragRiseCurveData} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -480,6 +481,11 @@ export const CommercialAirlinerModule: React.FC = () => {
                   />
                 </LineChart>
               </ResponsiveContainer>
+              <FullscreenGraphButton
+                domain="3d_aero_studio"
+                label="Во весь экран"
+                subLabel="Кризис M"
+              />
             </div>
           </div>
 
@@ -497,7 +503,7 @@ export const CommercialAirlinerModule: React.FC = () => {
               </div>
             </div>
 
-            <div className="h-64 w-full text-xs">
+            <div className="relative h-64 w-full text-xs">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={calculations.dragRiseCurveData} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -516,6 +522,11 @@ export const CommercialAirlinerModule: React.FC = () => {
                   />
                 </AreaChart>
               </ResponsiveContainer>
+              <FullscreenGraphButton
+                domain="3d_aero_studio"
+                label="Во весь экран"
+                subLabel="Качество L/D"
+              />
             </div>
           </div>
         </div>

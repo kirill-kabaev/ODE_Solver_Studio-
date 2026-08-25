@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { MathView, MathText } from '../MathView';
 import { createHardware2DContext } from '../../utils/gpuHardwareEnforcer';
+import { FullscreenGraphButton } from '../telemetry/FullscreenGraphButton';
 
 export type SolverPhysicsModel = 
   | 'euler_transonic' 
@@ -586,22 +587,28 @@ export const AdvancedAeroSolversLab: React.FC = () => {
             />
 
             {/* Aerodynamic Coefficients Bar */}
-            <div className="absolute bottom-3 right-3 bg-slate-900/90 backdrop-blur-md p-3 rounded-xl border border-slate-800 text-xs font-mono shadow-2xl flex items-center gap-4">
+            <div className="absolute bottom-3 left-3 bg-slate-900/90 backdrop-blur-md p-2.5 rounded-xl border border-slate-800 text-xs font-mono shadow-2xl flex items-center gap-3 max-w-[calc(100%-140px)]">
               <div>
-                <span className="text-[10px] text-slate-400 block">Подъемная сила $C_L$:</span>
-                <strong className="text-cyan-400 text-sm">{simState.cl.toFixed(4)}</strong>
+                <span className="text-[10px] text-slate-400 block">$C_L$:</span>
+                <strong className="text-cyan-400 text-sm">{simState.cl.toFixed(3)}</strong>
               </div>
               <div className="h-6 w-px bg-slate-800" />
               <div>
-                <span className="text-[10px] text-slate-400 block">Полное сопр. $C_D$:</span>
-                <strong className="text-rose-400 text-sm">{simState.cd.toFixed(4)}</strong>
+                <span className="text-[10px] text-slate-400 block">$C_D$:</span>
+                <strong className="text-rose-400 text-sm">{simState.cd.toFixed(3)}</strong>
               </div>
-              <div className="h-6 w-px bg-slate-800" />
-              <div>
-                <span className="text-[10px] text-slate-400 block">Аэро качество $L/D$:</span>
+              <div className="h-6 w-px bg-slate-800 hidden sm:block" />
+              <div className="hidden sm:block">
+                <span className="text-[10px] text-slate-400 block">$L/D$:</span>
                 <strong className="text-emerald-400 text-sm">{(simState.cl / Math.max(0.0001, simState.cd)).toFixed(2)}</strong>
               </div>
             </div>
+
+            <FullscreenGraphButton
+              domain="cfd_wind_tunnel"
+              label="Во весь экран"
+              subLabel="CFD Решатель"
+            />
           </div>
 
           {/* Convergence History Mini Chart */}

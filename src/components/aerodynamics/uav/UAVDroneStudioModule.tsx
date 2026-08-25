@@ -43,6 +43,7 @@ import {
   PolarRadiusAxis,
   Radar,
 } from 'recharts';
+import { FullscreenGraphButton } from '../../telemetry/FullscreenGraphButton';
 
 export type DroneArchitecture = 'quad_x' | 'hexa_x' | 'octo_coaxial' | 'vtol_tiltrotor' | 'fixed_wing_uav';
 
@@ -724,7 +725,7 @@ export const UAVDroneStudioModule: React.FC = () => {
               </div>
 
               {/* Chart */}
-              <div className="h-72 w-full font-mono text-xs">
+              <div className="relative h-72 w-full font-mono text-xs">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={calculations.speedCurveData} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -783,6 +784,11 @@ export const UAVDroneStudioModule: React.FC = () => {
                     />
                   </LineChart>
                 </ResponsiveContainer>
+                <FullscreenGraphButton
+                  domain="bem_rotor"
+                  label="Во весь экран"
+                  subLabel="Кривые БПЛА"
+                />
               </div>
 
               {/* Insights Box */}

@@ -21,6 +21,7 @@ import {
 import { MathView, MathText } from '../MathView';
 import { HandbookTopicId } from '../EngineeringHandbookModal';
 import { createHardware2DContext } from '../../utils/gpuHardwareEnforcer';
+import { FullscreenGraphButton } from '../telemetry/FullscreenGraphButton';
 
 export interface Aerodynamic3DData {
   mach: number;
@@ -634,20 +635,24 @@ export const Full3DPlotViewer: React.FC<Full3DPlotViewerProps> = ({
           )}
         </div>
 
-        {/* Bottom Legend Colormap Bar */}
-        <div className="absolute bottom-3 left-3 right-3 bg-slate-950/85 backdrop-blur-md p-2.5 rounded-xl border border-slate-800 text-xs flex items-center justify-between flex-wrap gap-2 shadow-xl">
+        {/* Bottom Legend Colormap Bar & Fullscreen Button */}
+        <div className="absolute bottom-3 left-3 bg-slate-950/85 backdrop-blur-md p-2 rounded-xl border border-slate-800 text-xs flex items-center justify-between flex-wrap gap-2 shadow-xl max-w-[calc(100%-140px)]">
           <div className="flex items-center gap-2">
             <span className="text-[11px] font-bold text-slate-300">Изобары $C_p$:</span>
-            <div className="h-3 w-40 sm:w-56 rounded-md bg-gradient-to-r from-purple-500 via-cyan-400 via-green-500 via-amber-400 to-rose-500 border border-slate-700 shadow-inner" />
+            <div className="h-3 w-32 sm:w-48 rounded-md bg-gradient-to-r from-purple-500 via-cyan-400 via-green-500 via-amber-400 to-rose-500 border border-slate-700 shadow-inner" />
           </div>
-          <div className="flex items-center gap-3 font-mono text-[10px] text-slate-400">
-            <span className="text-purple-400">-2.0 (Разрежение)</span>
-            <span className="text-cyan-400">-0.5</span>
+          <div className="hidden sm:flex items-center gap-2 font-mono text-[10px] text-slate-400">
+            <span className="text-purple-400">-2.0</span>
             <span className="text-emerald-400">0.0</span>
-            <span className="text-amber-400">+0.5</span>
-            <span className="text-rose-400">+1.0 (Подпор)</span>
+            <span className="text-rose-400">+1.0</span>
           </div>
         </div>
+
+        <FullscreenGraphButton
+          domain="3d_aero_studio"
+          label="Во весь экран"
+          subLabel="3D CFD"
+        />
       </div>
 
       {/* 3D Controls Bar & Information */}

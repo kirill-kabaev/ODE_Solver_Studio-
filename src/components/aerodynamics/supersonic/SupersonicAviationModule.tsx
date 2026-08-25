@@ -33,6 +33,7 @@ import {
   AreaChart,
   Area,
 } from 'recharts';
+import { FullscreenGraphButton } from '../../telemetry/FullscreenGraphButton';
 
 export type SupersonicVehicleType = 'concorde_civil' | 'mig31_interceptor' | 'sr71_blackbird' | 'hypersonic_glide_waverider';
 
@@ -196,7 +197,7 @@ export const SupersonicAviationModule: React.FC = () => {
             </div>
           </div>
 
-          {/* Stagnation Heating Alert Badge */}
+          {/* Stagnation Heating Alert Badge & Fullscreen Cockpit HUD */}
           <div className="flex items-center gap-2">
             <div
               className={`px-4 py-2 rounded-2xl border text-xs font-bold flex items-center gap-2 ${
@@ -213,6 +214,12 @@ export const SupersonicAviationModule: React.FC = () => {
                 </div>
               </div>
             </div>
+
+            <FullscreenGraphButton
+              domain="supersonic_mach"
+              title="Открыть полноэкранную сверхзвуковую газодинамику & HUD"
+              className="p-3"
+            />
           </div>
         </div>
 
@@ -409,7 +416,7 @@ export const SupersonicAviationModule: React.FC = () => {
               </div>
             </div>
 
-            <div className="h-64 w-full text-xs">
+            <div className="relative h-64 w-full text-xs">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={calculations.shockMachCurve} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -438,6 +445,11 @@ export const SupersonicAviationModule: React.FC = () => {
                   />
                 </LineChart>
               </ResponsiveContainer>
+              <FullscreenGraphButton
+                domain="supersonic_mach"
+                label="Во весь экран"
+                subLabel="Скачки"
+              />
             </div>
           </div>
 
@@ -455,7 +467,7 @@ export const SupersonicAviationModule: React.FC = () => {
               </div>
             </div>
 
-            <div className="h-64 w-full text-xs">
+            <div className="relative h-64 w-full text-xs">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={calculations.shockMachCurve} margin={{ top: 10, right: 30, left: 10, bottom: 5 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
@@ -474,6 +486,11 @@ export const SupersonicAviationModule: React.FC = () => {
                   />
                 </AreaChart>
               </ResponsiveContainer>
+              <FullscreenGraphButton
+                domain="supersonic_mach"
+                label="Во весь экран"
+                subLabel="Нагрев"
+              />
             </div>
           </div>
         </div>

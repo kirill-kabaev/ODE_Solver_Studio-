@@ -283,6 +283,31 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
   });
 
   const [isCockpitOpen, setIsCockpitOpen] = useState<boolean>(false);
+  const [cockpitDomain, setCockpitDomain] = useState<CockpitSystemDomain>('3d_aero_studio');
+
+  // Listen for global fullscreen HUD requests from any graph/animation button
+  useEffect(() => {
+    const handleOpenCockpit = (e: Event) => {
+      const customEvent = e as CustomEvent<{
+        domain?: CockpitSystemDomain;
+        mach?: number;
+        alpha?: number;
+      }>;
+      if (customEvent.detail?.domain) {
+        setCockpitDomain(customEvent.detail.domain);
+      }
+      if (customEvent.detail?.mach !== undefined) {
+        setActiveMach(customEvent.detail.mach);
+      }
+      if (customEvent.detail?.alpha !== undefined) {
+        setActiveAlpha(customEvent.detail.alpha);
+      }
+      setIsCockpitOpen(true);
+    };
+
+    window.addEventListener('open-cockpit-hud', handleOpenCockpit);
+    return () => window.removeEventListener('open-cockpit-hud', handleOpenCockpit);
+  }, []);
 
   const handleCategorySelect = (category: AeroDomainCategory) => {
     setActiveCategory(category);
@@ -829,7 +854,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
       <UniversalCockpitHUDModal
         isOpen={isCockpitOpen}
         onClose={() => setIsCockpitOpen(false)}
-        initialDomain={activeCategory === 'uav_systems' ? 'uav_guidance' : activeCategory === 'supersonic_aviation' ? 'supersonic_mach' : '3d_aero_studio'}
+        initialDomain={cockpitDomain}
         initialMach={activeMach}
         initialAlpha={activeAlpha}
       />
