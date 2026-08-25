@@ -41,6 +41,10 @@ import { UAVHybridIcingModule } from './uav/UAVHybridIcingModule';
 import { UAVLoiteringDiveModule } from './uav/UAVLoiteringDiveModule';
 import { UAVDsmacTercomModule } from './uav/UAVDsmacTercomModule';
 import { UAVAutopilotPIDStudio } from './uav/UAVAutopilotPIDStudio';
+import { UAVOpticalFlowVIOModule } from './uav/UAVOpticalFlowVIOModule';
+import { UAVParachuteBallisticRecoveryModule } from './uav/UAVParachuteBallisticRecoveryModule';
+import { UAVElectromagneticSignatureRCSModule } from './uav/UAVElectromagneticSignatureRCSModule';
+import { UAVBatteryThermalBMSModule } from './uav/UAVBatteryThermalBMSModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -86,6 +90,10 @@ export type AeroSubTab =
   | 'uav_loitering_dive'
   | 'uav_dsmac_tercom'
   | 'uav_pid_autopilot'
+  | 'uav_optical_flow_vio'
+  | 'uav_parachute_recovery'
+  | 'uav_stealth_rcs'
+  | 'uav_battery_thermal'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -137,11 +145,11 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '12 Систем',
+    tag: '17 Систем',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'Силовые установки, РЭБ-навигация, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, FW-H шум, отказ моторов, гибриды и пикирование Ланцетов',
+    description: 'Силовые установки, VIO/Lucas-Kanade, Stealth ЭПР, спассистемы ПСС, BMS аккумуляторы, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
     defaultSubTab: 'uav_studio',
   },
   {
@@ -800,6 +808,58 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <Compass className="w-3.5 h-3.5 text-emerald-400" />
             <span>🛰️ DSMAC / TERCOM & Дубинс</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_optical_flow_vio')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_optical_flow_vio'
+                ? 'bg-gradient-to-r from-teal-400 via-cyan-500 to-indigo-500 text-slate-950 shadow-md font-black ring-1 ring-teal-400/50'
+                : 'text-teal-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-teal-900/50'
+            }`}
+          >
+            <Crosshair className="w-3.5 h-3.5 text-teal-400" />
+            <span>👁️ Оптический Поток & VIO / V-SLAM</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_parachute_recovery')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_parachute_recovery'
+                ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-rose-500 text-slate-950 shadow-md font-black ring-1 ring-amber-400/50'
+                : 'text-amber-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-amber-900/50'
+            }`}
+          >
+            <Shield className="w-3.5 h-3.5 text-amber-400" />
+            <span>🪂 ПСС & Спасательный Парашют / Airbag</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_stealth_rcs')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_stealth_rcs'
+                ? 'bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white shadow-md font-black ring-1 ring-purple-400/50'
+                : 'text-purple-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-purple-900/50'
+            }`}
+          >
+            <Radio className="w-3.5 h-3.5 text-purple-400" />
+            <span>📡 ЭПР & Stealth Малозаметность</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_battery_thermal')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_battery_thermal'
+                ? 'bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 text-slate-950 shadow-md font-black ring-1 ring-emerald-400/50'
+                : 'text-emerald-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-emerald-900/50'
+            }`}
+          >
+            <Gauge className="w-3.5 h-3.5 text-emerald-400" />
+            <span>🔋 Тепловая BMS & Зимний Разряд АКБ</span>
+          </button>
         </div>
       )}
 
@@ -908,6 +968,10 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_loitering_dive' && <UAVLoiteringDiveModule />}
           {activeUAVSubTab === 'uav_dsmac_tercom' && <UAVDsmacTercomModule />}
           {activeUAVSubTab === 'uav_pid_autopilot' && <UAVAutopilotPIDStudio />}
+          {activeUAVSubTab === 'uav_optical_flow_vio' && <UAVOpticalFlowVIOModule />}
+          {activeUAVSubTab === 'uav_parachute_recovery' && <UAVParachuteBallisticRecoveryModule />}
+          {activeUAVSubTab === 'uav_stealth_rcs' && <UAVElectromagneticSignatureRCSModule />}
+          {activeUAVSubTab === 'uav_battery_thermal' && <UAVBatteryThermalBMSModule />}
         </>
       )}
 
