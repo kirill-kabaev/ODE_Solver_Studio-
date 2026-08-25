@@ -32,6 +32,8 @@ import {
   Sun,
   RotateCw,
   Fuel,
+  Zap,
+  Anchor,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
@@ -64,6 +66,9 @@ import { UAVMorphingWingAeroelasticModule } from './uav/UAVMorphingWingAeroelast
 import { UAVCoaxialTiltrotorDynamicsModule } from './uav/UAVCoaxialTiltrotorDynamicsModule';
 import { UAVAerialRefuelingDockingModule } from './uav/UAVAerialRefuelingDockingModule';
 import { UAVHypersonicWaveriderModule } from './uav/UAVHypersonicWaveriderModule';
+import { UAVMIMOAntiRadiationSeekerModule } from './uav/UAVMIMOAntiRadiationSeekerModule';
+import { UAVUnderwaterSubmersibleAmphibiousModule } from './uav/UAVUnderwaterSubmersibleAmphibiousModule';
+import { UAVLaserDirectedEnergyDefenseModule } from './uav/UAVLaserDirectedEnergyDefenseModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -125,6 +130,9 @@ export type AeroSubTab =
   | 'uav_coaxial_tiltrotor'
   | 'uav_refueling_docking'
   | 'uav_hypersonic_waverider'
+  | 'uav_anti_radiation_seeker'
+  | 'uav_amphibious_submersible'
+  | 'uav_laser_defense'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -176,11 +184,11 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '29 Систем',
+    tag: '32 Системы',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'Гиперзвуковые вейврайдеры, дозаправка в воздухе, соосные винты/конвертопланы, WIG-экранопланы, HAPS спутники, морфинг, привязной кабель, ORCA рой, био-захват, ОЭС KCF, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
+    description: 'Лазерная защита HEL/DEW, дроны-амфибии, ПРР ГСН (SEAD), гиперзвуковые вейврайдеры, дозаправка в воздухе, соосные винты, WIG-экранопланы, HAPS спутники, морфинг, привязной кабель, ORCA рой, био-захват, ОЭС KCF, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
     defaultSubTab: 'uav_studio',
   },
   {
@@ -299,6 +307,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
         'uav_coaxial_tiltrotor',
         'uav_refueling_docking',
         'uav_hypersonic_waverider',
+        'uav_anti_radiation_seeker',
+        'uav_amphibious_submersible',
+        'uav_laser_defense',
       ];
 
       if (uavSubTabs.includes(targetSubTab)) {
@@ -1064,6 +1075,45 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <Flame className="w-3.5 h-3.5 text-rose-400" />
             <span>🔥 Гиперзвуковой Вейврайдер, Scramjet & Тепловые Потоки</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_anti_radiation_seeker')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_anti_radiation_seeker'
+                ? 'bg-gradient-to-r from-cyan-500 via-blue-500 to-indigo-400 text-slate-950 shadow-md font-black ring-1 ring-cyan-400/50'
+                : 'text-cyan-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-cyan-900/50'
+            }`}
+          >
+            <Crosshair className="w-3.5 h-3.5 text-cyan-400" />
+            <span>🎯 ПРР-ГСН БПЛА (SEAD), Фазовая Интерферометрия & Память РЛС</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_amphibious_submersible')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_amphibious_submersible'
+                ? 'bg-gradient-to-r from-sky-500 via-teal-500 to-emerald-400 text-slate-950 shadow-md font-black ring-1 ring-sky-400/50'
+                : 'text-sky-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-sky-900/50'
+            }`}
+          >
+            <Waves className="w-3.5 h-3.5 text-sky-400" />
+            <span>🌊 Беспилотник-Амфибия, Гидроудар Slamming & Погружение</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_laser_defense')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_laser_defense'
+                ? 'bg-gradient-to-r from-rose-500 via-orange-500 to-amber-400 text-white shadow-md font-black ring-1 ring-rose-400/50'
+                : 'text-rose-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-rose-900/50'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5 text-rose-400" />
+            <span>⚡ Лазерная Защита БПЛА (HEL / DEW), Абляция & Тепловое Пятно</span>
+          </button>
         </div>
       )}
 
@@ -1188,6 +1238,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_coaxial_tiltrotor' && <UAVCoaxialTiltrotorDynamicsModule />}
           {activeUAVSubTab === 'uav_refueling_docking' && <UAVAerialRefuelingDockingModule />}
           {activeUAVSubTab === 'uav_hypersonic_waverider' && <UAVHypersonicWaveriderModule />}
+          {activeUAVSubTab === 'uav_anti_radiation_seeker' && <UAVMIMOAntiRadiationSeekerModule />}
+          {activeUAVSubTab === 'uav_amphibious_submersible' && <UAVUnderwaterSubmersibleAmphibiousModule />}
+          {activeUAVSubTab === 'uav_laser_defense' && <UAVLaserDirectedEnergyDefenseModule />}
         </>
       )}
 
