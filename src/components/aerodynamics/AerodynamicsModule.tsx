@@ -38,6 +38,8 @@ import {
   Droplets,
   Fan,
   Scan,
+  VolumeX,
+  Atom,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
@@ -85,6 +87,9 @@ import { UAVPlasmaActuatorFlowControlModule } from './uav/UAVPlasmaActuatorFlowC
 import { UAVDynamicSoaringWindGradientModule } from './uav/UAVDynamicSoaringWindGradientModule';
 import { UAVWirelessLaserPowerBeamingModule } from './uav/UAVWirelessLaserPowerBeamingModule';
 import { UAVMiniatureSARInterferometryModule } from './uav/UAVMiniatureSARInterferometryModule';
+import { UAVHybridLaminarFlowSuctionModule } from './uav/UAVHybridLaminarFlowSuctionModule';
+import { UAVMagnetohydrodynamicPlasmaModule } from './uav/UAVMagnetohydrodynamicPlasmaModule';
+import { UAVAcousticCloakingAntiDetectionModule } from './uav/UAVAcousticCloakingAntiDetectionModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -161,6 +166,9 @@ export type AeroSubTab =
   | 'uav_dynamic_soaring'
   | 'uav_laser_power_beaming'
   | 'uav_miniature_sar'
+  | 'uav_hlfc_suction'
+  | 'uav_mhd_plasma'
+  | 'uav_acoustic_cloaking'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -1304,6 +1312,45 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <Scan className="w-3.5 h-3.5 text-emerald-400" />
             <span>📡 Миниатюрная РЛС с Синтезированной Апертурой (SAR & InSAR)</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_hlfc_suction')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_hlfc_suction'
+                ? 'bg-gradient-to-r from-teal-400 via-cyan-500 to-sky-400 text-slate-950 shadow-md font-black ring-1 ring-teal-400/50'
+                : 'text-teal-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-teal-900/50'
+            }`}
+          >
+            <Wind className="w-3.5 h-3.5 text-teal-400" />
+            <span>💨 Гибридное Ламинарное Обтекание Крыла (HLFC Микроотсос Cq)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_mhd_plasma')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_mhd_plasma'
+                ? 'bg-gradient-to-r from-purple-400 via-fuchsia-500 to-indigo-400 text-slate-950 shadow-md font-black ring-1 ring-purple-400/50'
+                : 'text-purple-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-purple-900/50'
+            }`}
+          >
+            <Atom className="w-3.5 h-3.5 text-purple-400" />
+            <span>⚛️ МГД Плазменный Двигатель БПЛА (Lorentz Force F=J×B)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_acoustic_cloaking')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_acoustic_cloaking'
+                ? 'bg-gradient-to-r from-emerald-400 via-green-500 to-teal-400 text-slate-950 shadow-md font-black ring-1 ring-emerald-400/50'
+                : 'text-emerald-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-emerald-900/50'
+            }`}
+          >
+            <VolumeX className="w-3.5 h-3.5 text-emerald-400" />
+            <span>🔇 Акустическая Маскировка & Активное Шумоподавление (ANC Δφ=π)</span>
+          </button>
         </div>
       )}
 
@@ -1443,6 +1490,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_dynamic_soaring' && <UAVDynamicSoaringWindGradientModule />}
           {activeUAVSubTab === 'uav_laser_power_beaming' && <UAVWirelessLaserPowerBeamingModule />}
           {activeUAVSubTab === 'uav_miniature_sar' && <UAVMiniatureSARInterferometryModule />}
+          {activeUAVSubTab === 'uav_hlfc_suction' && <UAVHybridLaminarFlowSuctionModule />}
+          {activeUAVSubTab === 'uav_mhd_plasma' && <UAVMagnetohydrodynamicPlasmaModule />}
+          {activeUAVSubTab === 'uav_acoustic_cloaking' && <UAVAcousticCloakingAntiDetectionModule />}
         </>
       )}
 

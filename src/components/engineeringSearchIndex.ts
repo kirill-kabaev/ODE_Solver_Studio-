@@ -499,6 +499,60 @@ export const ENGINEERING_SEARCH_ITEMS: EngineeringSearchItem[] = [
       'sar', 'рсa', 'радар', 'синтезированная апертура', 'интерферометрия', 'insar', 'fmcw', 'лчм', 'радиолокация', 'рельеф'
     ],
   },
+  {
+    id: 'uav_hlfc_suction',
+    title: 'Гибридное Управление Ламинарным Обтеканием Крыла (HLFC Suction Micro-Perforation)',
+    shortTitle: 'HLFC Отсос Погранслоя',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_hlfc_suction',
+    handbookTopicId: 'uav_hlfc_suction',
+    iconName: 'Wind',
+    badge: 'HLFC Ламинаризация -42%',
+    badgeColor: 'from-teal-400 to-cyan-400 text-slate-950',
+    description: 'Активная стабилизация ламинарного пограничного слоя микроперфорированным отсосом (Cq = v_w / U_inf), подавление волн Толлмина-Шлихтинга и сдвиг турбулентного перехода до 72% хорды.',
+    formulaLatex: 'C_q = \\frac{v_w}{U_\\infty}, \\quad C_f^{\\text{lam}} = \\frac{1.328}{\\sqrt{Re_x}}, \\quad N < 9',
+    keywords: [
+      'hlfc', 'ламинарный слой', 'отсос', 'пограничный слой', 'трение', 'сопротивление', 'толлмин-шлихтинг', 'микроперфорация'
+    ],
+  },
+  {
+    id: 'uav_mhd_plasma',
+    title: 'Магнитогидродинамический (МГД) Плазменный Двигатель БПЛА (MHD Solid-State)',
+    shortTitle: 'МГД Плазменный Двигатель',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_mhd_plasma',
+    handbookTopicId: 'uav_mhd_plasma',
+    iconName: 'Atom',
+    badge: 'МГД Тяга Без Винтов',
+    badgeColor: 'from-purple-400 to-indigo-400 text-slate-950',
+    description: 'Бесшумное прямое электромагнитное ускорение ионизированного воздуха силой Лоренца (F = J × B) в скрещенных полях без подвижных механических лопаток и турбин.',
+    formulaLatex: '\\mathbf{F}_{\\text{Lorentz}} = \\int (\\mathbf{J} \\times \\mathbf{B}) dV = \\sigma (\\mathbf{E} - \\mathbf{v} \\times \\mathbf{B}) \\times \\mathbf{B} \\cdot V',
+    keywords: [
+      'мгд', 'плазма', 'лоренц', 'mhd', 'ионный двигатель', 'магнитное поле', 'бесшумный полет', 'твердотельный двигатель'
+    ],
+  },
+  {
+    id: 'uav_acoustic_cloaking',
+    title: 'Акустическая Маскировка & Активное Шумоподавление БПЛА (Active Noise Cancellation)',
+    shortTitle: 'Акустический Стелс ANC',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_acoustic_cloaking',
+    handbookTopicId: 'uav_acoustic_cloaking',
+    iconName: 'VolumeX',
+    badge: 'ANC Стелс -88% Засечки',
+    badgeColor: 'from-emerald-400 to-green-400 text-slate-950',
+    description: 'Подавление шума лопастных гармоник (BPF) дронов деструктивной интерференцией противофазных звуковых волн (Δφ = π) и совиными шевронами задней кромки.',
+    formulaLatex: '\\Delta SPL_{\\text{ANC}} = -10 \\log_{10}(2 - 2\\cos(\\Delta\\phi)), \\quad r_{\\text{detect}} = 10^{\\frac{SPL - L_{\\text{bkg}}}{20}}',
+    keywords: [
+      'anc', 'шум', 'шумоподавление', 'акустика', 'маскировка', 'стелс', 'противофаза', 'шевроны', 'bpf', 'дба'
+    ],
+  },
 
   // ============================================================================
   // 2. ОБЩАЯ АЭРОДИНАМИКА И ФУНДАМЕНТАЛЬНЫЕ СОЛВЕРЫ (GENERAL AERO)
