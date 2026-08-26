@@ -735,6 +735,60 @@ export const ENGINEERING_SEARCH_ITEMS: EngineeringSearchItem[] = [
       'геопривязка', 'ортофотоплан', 'superglue', 'superpoint', 'gps-denied', 'рэб', 'бинс', 'инс', 'дрейф', 'калман', 'кво', 'cep', 'зрение', 'камера'
     ],
   },
+  {
+    id: 'uav_fiber_optic',
+    title: 'FPV БПЛА на Оптоволокне & Динамика Размотки Катушки (Fiber-Optic Spool 10-20 км)',
+    shortTitle: 'FPV Дрон на Оптоволокне',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_fiber_optic',
+    handbookTopicId: 'uav_navigation_ew',
+    iconName: 'Cable',
+    badge: '100% РЭБ Иммунитет',
+    badgeColor: 'from-cyan-500 to-blue-600 text-white',
+    description: 'Расчет натяжения микроволокна T (Н) при сходе с бобины, аэродинамическое трение подвешенной нити, оптический бюджет затухания SFP+ (дБ) и нулевая задержка 4K видеопотока без радиоизлучения.',
+    formulaLatex: 'T(t) = \\frac{M_{\\text{brake}}}{R_{\\text{spool}}} + \\frac{1}{2}\\rho V^2 d_{\\text{fiber}} C_d L_{\\text{susp}}, \\quad A_{\\text{loss}} = L \\cdot \\alpha_{\\text{fiber}} + A_0',
+    keywords: [
+      'оптоволокно', 'катушка', 'нить', 'fpv', 'дрон', 'бпла', 'рэб', 'радиомолчание', 'натяжение', 'обрыв', 'сброс', 'видео', '10g', 'sfp'
+    ],
+  },
+  {
+    id: 'uav_gust_alleviation',
+    title: 'Активное Гашение Порывов Ветра & Турбулентности (GLAS & LIDAR Feedforward)',
+    shortTitle: 'Активное Гашение Порывов GLAS',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_gust_alleviation',
+    handbookTopicId: '6dof',
+    iconName: 'Wind',
+    badge: '-45% Нагрузки Крыла',
+    badgeColor: 'from-sky-500 to-teal-500 text-white',
+    description: 'Система активной разгрузки планера GLAS: опережающее лидарное детектирование профиля порыва 1-cosine, скоростное отклонение закрылков и снижение изгибающего момента лонжерона крыла Mb(t) на 30-50%.',
+    formulaLatex: '\\delta_f(t) = -K_p \\frac{w_g(t+\\tau)}{V_{\\infty}} \\frac{C_{L\\alpha}}{C_{L\\delta_f}}, \\quad M_b(t) = M_{b0} \\cdot n_y(t)',
+    keywords: [
+      'порыв', 'ветер', 'glas', 'турбулентность', 'разгрузка', 'крыло', 'лонжерон', 'перегрузка', 'лидар', 'lookahead', 'закрылок', 'vtol', 'бпла'
+    ],
+  },
+  {
+    id: 'uav_munition_bay',
+    title: 'Аэродинамика Бомбоотсека & Безопасное Отделение Грузов (Rossiter Open Cavity)',
+    shortTitle: 'Бомбоотсек & Сброс Грузов',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_munition_bay',
+    handbookTopicId: 'supersonic_hypersonic',
+    iconName: 'Crosshair',
+    badge: 'Акустика Росситера 150 дБ',
+    badgeColor: 'from-rose-500 to-amber-500 text-white',
+    description: 'Расчет акустических резонансных мод открытой полости Росситера fn, подавление пульсаций давления передним спойлером и моделирование безопасного выхода сбрасываемого боеприпаса через слой смешения.',
+    formulaLatex: 'f_n = \\frac{U_{\\infty}}{L} \\frac{n - \\alpha}{M + 1/k}, \\quad z(t) = \\iint \\left(g + \\frac{F_{\\text{eject}} - F_{\\text{suction}}}{m}\\right) dt^2',
+    keywords: [
+      'бомбоотсек', 'росситер', 'rossiter', 'полость', 'сброс', 'отделение', 'выталкиватель', 'суббоеприпас', 'акустика', 'спойлер', 'резонанс', 'бпла'
+    ],
+  },
 
   // ============================================================================
   // 2. ОБЩАЯ АЭРОДИНАМИКА И ФУНДАМЕНТАЛЬНЫЕ СОЛВЕРЫ (GENERAL AERO)

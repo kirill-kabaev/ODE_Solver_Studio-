@@ -103,6 +103,9 @@ import { UAVAvionicsEMCAntennaCoSiteModule } from './uav/UAVAvionicsEMCAntennaCo
 import { UAVSwarmDistributedTaskAllocationModule } from './uav/UAVSwarmDistributedTaskAllocationModule';
 import { UAVToroidalPropellerAeroacousticsModule } from './uav/UAVToroidalPropellerAeroacousticsModule';
 import { UAVVisionGeoRegistrationGPSDeniedModule } from './uav/UAVVisionGeoRegistrationGPSDeniedModule';
+import { UAVFiberOpticSpoolTetherDynamicsModule } from './uav/UAVFiberOpticSpoolTetherDynamicsModule';
+import { UAVVTOLGustAlleviationControlModule } from './uav/UAVVTOLGustAlleviationControlModule';
+import { UAVMunitionBaySeparationAeroModule } from './uav/UAVMunitionBaySeparationAeroModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -192,6 +195,9 @@ export type AeroSubTab =
   | 'uav_swarm_cbba'
   | 'uav_toroidal_aeroacoustics'
   | 'uav_vision_georeg'
+  | 'uav_fiber_optic'
+  | 'uav_gust_alleviation'
+  | 'uav_munition_bay'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -381,6 +387,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
         'uav_swarm_cbba',
         'uav_toroidal_aeroacoustics',
         'uav_vision_georeg',
+        'uav_fiber_optic',
+        'uav_gust_alleviation',
+        'uav_munition_bay',
       ];
 
       if (uavSubTabs.includes(targetSubTab)) {
@@ -1510,6 +1519,45 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <Camera className="w-3.5 h-3.5 text-amber-400" />
             <span>👁️ Оптическая Геопривязка Без GPS (SuperGlue Ortho)</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_fiber_optic')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_fiber_optic'
+                ? 'bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 text-slate-950 shadow-md font-black ring-1 ring-cyan-400/50'
+                : 'text-cyan-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-cyan-900/50'
+            }`}
+          >
+            <Cable className="w-3.5 h-3.5 text-cyan-400" />
+            <span>🧵 FPV БПЛА на Оптоволокне (Катушка 10-20 км, РЭБ 0%)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_gust_alleviation')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_gust_alleviation'
+                ? 'bg-gradient-to-r from-sky-400 via-teal-500 to-emerald-500 text-slate-950 shadow-md font-black ring-1 ring-sky-400/50'
+                : 'text-sky-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-sky-900/50'
+            }`}
+          >
+            <Wind className="w-3.5 h-3.5 text-sky-400" />
+            <span>💨 Активное Гашение Порывов Ветра (GLAS & LIDAR Lookahead)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_munition_bay')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_munition_bay'
+                ? 'bg-gradient-to-r from-rose-400 via-amber-500 to-yellow-500 text-slate-950 shadow-md font-black ring-1 ring-rose-400/50'
+                : 'text-rose-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-rose-900/50'
+            }`}
+          >
+            <Crosshair className="w-3.5 h-3.5 text-rose-400" />
+            <span>🎯 Бомбоотсек & Аэродинамика Сброса (Rossiter Cavity)</span>
+          </button>
         </div>
       )}
 
@@ -1662,6 +1710,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_swarm_cbba' && <UAVSwarmDistributedTaskAllocationModule />}
           {activeUAVSubTab === 'uav_toroidal_aeroacoustics' && <UAVToroidalPropellerAeroacousticsModule />}
           {activeUAVSubTab === 'uav_vision_georeg' && <UAVVisionGeoRegistrationGPSDeniedModule />}
+          {activeUAVSubTab === 'uav_fiber_optic' && <UAVFiberOpticSpoolTetherDynamicsModule />}
+          {activeUAVSubTab === 'uav_gust_alleviation' && <UAVVTOLGustAlleviationControlModule />}
+          {activeUAVSubTab === 'uav_munition_bay' && <UAVMunitionBaySeparationAeroModule />}
         </>
       )}
 
