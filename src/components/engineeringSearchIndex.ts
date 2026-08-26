@@ -573,6 +573,60 @@ export const ENGINEERING_SEARCH_ITEMS: EngineeringSearchItem[] = [
       'anc', 'шум', 'шумоподавление', 'акустика', 'маскировка', 'стелс', 'противофаза', 'шевроны', 'bpf', 'дба'
     ],
   },
+  {
+    id: 'uav_mavlink_bus',
+    title: 'MAVLink 2.0 & Micro-XRCE-DDS Телеметрия, Буферизация и QoS Оптимизатор',
+    shortTitle: 'MAVLink & DDS Телеметрия',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_mavlink_bus',
+    handbookTopicId: 'uav_navigation_ew',
+    iconName: 'Wifi',
+    badge: 'MAVLink 2.0 & QoS',
+    badgeColor: 'from-teal-400 to-cyan-400 text-slate-950',
+    description: 'Анализ пропускной способности, очередей буферов FIFO, джиттера, загрузки UART/CAN-FD шин и сериализации пакетов телеметрии между ArduPilot/PX4 и бортовым компьютером ROS2.',
+    formulaLatex: 'B_{\\text{total}} = \\sum_{i} f_i \\cdot (L_{\\text{payload},i} + L_{\\text{header}}) \\cdot 8, \\quad T_{\\text{lat}} = \\frac{L_{\\text{avg}} \\cdot 8}{R_{\\text{baud}}} \\cdot Q_{\\text{mult}}',
+    keywords: [
+      'mavlink', 'mavlink 2', 'telemetry', 'qos', 'джиттер', 'задержка', 'uart', 'can-fd', 'dronecan', 'ros2', 'micro-xrce-dds', 'ardupilot', 'px4'
+    ],
+  },
+  {
+    id: 'uav_blade_flapping',
+    title: 'Маховое Движение Лопастей Винта & Аэродинамика Обдува Лучей Рамы БПЛА',
+    shortTitle: 'Маховое Движение Лопастей',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_blade_flapping',
+    handbookTopicId: 'aero_cad_mdo',
+    iconName: 'Wind',
+    badge: 'Blade Flapping & Arm Drag',
+    badgeColor: 'from-emerald-400 to-teal-400 text-slate-950',
+    description: 'Гармонические уравнения махового движения гибких лопастей beta(psi) = a0 - a1 cos(psi) - b1 sin(psi), коэффициент опережения mu, паразитная H-сила и аэродинамические потери тяги от затенения лучами рамы.',
+    formulaLatex: '\\beta(\\psi) = a_0 - a_1 \\cos\\psi - b_1 \\sin\\psi, \\quad \\mu = \\frac{V_\\infty}{\\Omega R}, \\quad F_{\\text{arm}} = \\frac{1}{2}\\rho v_i^2 C_{D,\\text{arm}} A_{\\text{arm}}',
+    keywords: [
+      'flapping', 'маховое движение', 'лопасть', 'винт', 'advance ratio', 'коэффициент опережения', 'h-сила', 'луч рамы', 'обдув', 'скос потока'
+    ],
+  },
+  {
+    id: 'uav_spar_fea',
+    title: 'Параметрический FEA Лонжерона, Эпюры Q(z)/M(z) & Устойчивость Обшивки',
+    shortTitle: 'FEA Прочность Лонжерона',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_spar_fea',
+    handbookTopicId: 'aero_cad_mdo',
+    iconName: 'Layers',
+    badge: 'FEA Прочность Лонжерона',
+    badgeColor: 'from-indigo-400 to-purple-400 text-white',
+    description: 'Расчет эпюр перерезывающих сил Q(z), изгибающих моментов M(z), нормальных напряжений в карбоновом трубчатом лонжероне и критических касательных напряжений потери устойчивости обшивки tau_cr при перегрузках до +6g.',
+    formulaLatex: 'M(z) = \\int_z^{b/2} Q(\\zeta) d\\zeta, \\quad \\sigma_{\\max} = \\frac{M \\cdot y_{\\max}}{I_{\\text{spar}}} \\le [\\sigma], \\quad \\tau_{\\text{cr}} = k_s \\frac{\\pi^2 E}{12(1-\\nu^2)}\\left(\\frac{t}{b}\\right)^2',
+    keywords: [
+      'fea', 'лонжерон', 'прочность', 'изгибающий момент', 'эпюра', 'нормальные напряжения', 'buckling', 'потеря устойчивости', 'обшивка', 'перегрузка'
+    ],
+  },
 
   // ============================================================================
   // 2. ОБЩАЯ АЭРОДИНАМИКА И ФУНДАМЕНТАЛЬНЫЕ СОЛВЕРЫ (GENERAL AERO)

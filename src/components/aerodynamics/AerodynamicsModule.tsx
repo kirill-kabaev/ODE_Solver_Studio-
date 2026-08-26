@@ -40,6 +40,7 @@ import {
   Scan,
   VolumeX,
   Atom,
+  Wifi,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
@@ -91,6 +92,9 @@ import { UAVHybridLaminarFlowSuctionModule } from './uav/UAVHybridLaminarFlowSuc
 import { UAVMagnetohydrodynamicPlasmaModule } from './uav/UAVMagnetohydrodynamicPlasmaModule';
 import { UAVAcousticCloakingAntiDetectionModule } from './uav/UAVAcousticCloakingAntiDetectionModule';
 import { UAVAIGenerativeConstructorStudio } from './uav/UAVAIGenerativeConstructorStudio';
+import { UAVMavlinkTelemetryBusModule } from './uav/UAVMavlinkTelemetryBusModule';
+import { UAVBladeFlappingRotorDynamicsModule } from './uav/UAVBladeFlappingRotorDynamicsModule';
+import { UAVParametricSparFEABucklingModule } from './uav/UAVParametricSparFEABucklingModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -171,6 +175,9 @@ export type AeroSubTab =
   | 'uav_mhd_plasma'
   | 'uav_acoustic_cloaking'
   | 'uav_ai_constructor'
+  | 'uav_mavlink_bus'
+  | 'uav_blade_flapping'
+  | 'uav_spar_fea'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -222,11 +229,11 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '39 Систем',
+    tag: '42 Системы',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'AI Генеративный Конструктор ЛА, HPM/ЭМИ СВЧ-перехват, адаптивное L1 парирование повреждений, крио-водородные LH2 PEMFC (120ч), машущее крыло, лазерная FSO-связь 100G, воздушный старт ИРПД, лазерная защита HEL, амфибии, ПРР ГСН, гиперзвук, соосные винты, экранопланы, HAPS, морфинг, привязной кабель, ORCA рой, био-захват, ОЭС KCF, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
+    description: 'AI Генеративный Конструктор ЛА, MAVLink 2.0 / Micro-XRCE-DDS телеметрия, маховое движение лопастей & обдув лучей, параметрический FEA лонжерона и обшивки, HPM/ЭМИ СВЧ-перехват, адаптивное L1 парирование повреждений, крио-водородные LH2 PEMFC (120ч), машущее крыло, лазерная FSO-связь 100G, воздушный старт ИРПД, лазерная защита HEL, амфибии, ПРР ГСН, гиперзвук, соосные винты, экранопланы, HAPS, морфинг, привязной кабель, ORCA рой, био-захват, ОЭС KCF, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
     defaultSubTab: 'uav_ai_constructor',
   },
   {
@@ -1366,6 +1373,45 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <VolumeX className="w-3.5 h-3.5 text-emerald-400" />
             <span>🔇 Акустическая Маскировка & Активное Шумоподавление (ANC Δφ=π)</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_mavlink_bus')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_mavlink_bus'
+                ? 'bg-gradient-to-r from-teal-400 via-cyan-500 to-indigo-500 text-slate-950 shadow-md font-black ring-1 ring-cyan-400/50'
+                : 'text-cyan-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-cyan-900/50'
+            }`}
+          >
+            <Wifi className="w-3.5 h-3.5 text-cyan-400" />
+            <span>📶 MAVLink 2.0 / Micro-XRCE-DDS Телеметрия & QoS</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_blade_flapping')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_blade_flapping'
+                ? 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-slate-950 shadow-md font-black ring-1 ring-emerald-400/50'
+                : 'text-emerald-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-emerald-900/50'
+            }`}
+          >
+            <Wind className="w-3.5 h-3.5 text-emerald-400" />
+            <span>🔄 Маховое Движение Лопастей & Обдув Лучей Рамы</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_spar_fea')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_spar_fea'
+                ? 'bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 text-slate-950 shadow-md font-black ring-1 ring-purple-400/50'
+                : 'text-purple-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-purple-900/50'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5 text-purple-400" />
+            <span>📐 Параметрический FEA Лонжерона & Устойчивость Обшивки</span>
+          </button>
         </div>
       )}
 
@@ -1509,6 +1555,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_hlfc_suction' && <UAVHybridLaminarFlowSuctionModule />}
           {activeUAVSubTab === 'uav_mhd_plasma' && <UAVMagnetohydrodynamicPlasmaModule />}
           {activeUAVSubTab === 'uav_acoustic_cloaking' && <UAVAcousticCloakingAntiDetectionModule />}
+          {activeUAVSubTab === 'uav_mavlink_bus' && <UAVMavlinkTelemetryBusModule />}
+          {activeUAVSubTab === 'uav_blade_flapping' && <UAVBladeFlappingRotorDynamicsModule />}
+          {activeUAVSubTab === 'uav_spar_fea' && <UAVParametricSparFEABucklingModule />}
         </>
       )}
 
