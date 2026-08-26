@@ -237,6 +237,26 @@ export const ENGINEERING_SEARCH_ITEMS: EngineeringSearchItem[] = [
     ],
   },
   {
+    id: 'uav_ai_constructor',
+    title: 'AI Генеративный Конструктор БПЛА: Синтез MDO, 3D CAD Сборка, Центровка & Экспорт',
+    shortTitle: 'AI Конструктор БПЛА',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_ai_constructor',
+    handbookTopicId: 'aero_cad_mdo',
+    iconName: 'Sparkles',
+    badge: 'AI Генератор САПР',
+    badgeColor: 'from-teal-400 via-emerald-400 to-cyan-400 text-slate-950 font-black',
+    description: 'Полный сквозной цикл проектирования: генетический MDO синтез по ТЗ, фронт Парето, интерактивная 3D CAD компоновка, расчет CG и тензора инерции Гюйгенса-Штейнера, статический запас устойчивости, расчет ВМГ, экспорт DXF/STL/ArduPilot .param и 6-DoF HIL симулятор.',
+    formulaLatex: '\\min_{\\mathbf{x}} \\{-R(\\mathbf{x}), m_{\\text{tot}}(\\mathbf{x})\\}, \\quad \\mathbf{I}_{\\text{tensor}} = \\sum [\\mathbf{I}_i + m_i(\\mathbf{r}_i^T\\mathbf{r}_i\\mathbf{E} - \\mathbf{r}_i\\mathbf{r}_i^T)]',
+    keywords: [
+      'ai конструктор', 'конструктор бпла', 'mdo', 'парето', 'генеративный дизайн', 'сапр', 'cad',
+      '3d сборка', 'центровка', 'тензор инерции', 'гюйгенс штейнер', 'статический запас', 'static margin',
+      'вмг', 'ardupilot', 'dxf', 'stl', 'чпу', 'hil', 'симулятор', 'виртуальное создание бпла'
+    ],
+  },
+  {
     id: 'uav_ew_nav',
     title: 'РЭБ, Спуфинг GNSS & ИНС Счисление с фильтром EKF3',
     shortTitle: 'РЭБ-Навигация & EKF3',

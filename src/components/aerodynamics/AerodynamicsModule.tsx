@@ -90,6 +90,7 @@ import { UAVMiniatureSARInterferometryModule } from './uav/UAVMiniatureSARInterf
 import { UAVHybridLaminarFlowSuctionModule } from './uav/UAVHybridLaminarFlowSuctionModule';
 import { UAVMagnetohydrodynamicPlasmaModule } from './uav/UAVMagnetohydrodynamicPlasmaModule';
 import { UAVAcousticCloakingAntiDetectionModule } from './uav/UAVAcousticCloakingAntiDetectionModule';
+import { UAVAIGenerativeConstructorStudio } from './uav/UAVAIGenerativeConstructorStudio';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -169,6 +170,7 @@ export type AeroSubTab =
   | 'uav_hlfc_suction'
   | 'uav_mhd_plasma'
   | 'uav_acoustic_cloaking'
+  | 'uav_ai_constructor'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -220,12 +222,12 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '38 Систем',
+    tag: '39 Систем',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'HPM/ЭМИ СВЧ-перехват, адаптивное L1 парирование повреждений, крио-водородные LH2 PEMFC (120ч), машущее крыло, лазерная FSO-связь 100G, воздушный старт ИРПД, лазерная защита HEL, амфибии, ПРР ГСН, гиперзвук, соосные винты, экранопланы, HAPS, морфинг, привязной кабель, ORCA рой, био-захват, ОЭС KCF, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
-    defaultSubTab: 'uav_studio',
+    description: 'AI Генеративный Конструктор ЛА, HPM/ЭМИ СВЧ-перехват, адаптивное L1 парирование повреждений, крио-водородные LH2 PEMFC (120ч), машущее крыло, лазерная FSO-связь 100G, воздушный старт ИРПД, лазерная защита HEL, амфибии, ПРР ГСН, гиперзвук, соосные винты, экранопланы, HAPS, морфинг, привязной кабель, ORCA рой, био-захват, ОЭС KCF, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
+    defaultSubTab: 'uav_ai_constructor',
   },
   {
     id: 'biplane_an2',
@@ -741,6 +743,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
       {/* 2. UAV & DRONES SUB-TABS (8 Systems) */}
       {activeCategory === 'uav_systems' && (
         <div className="bg-slate-900/90 backdrop-blur-md p-1.5 rounded-2xl border border-teal-900/40 flex items-center justify-start gap-1.5 overflow-x-auto shadow-lg">
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_ai_constructor')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_ai_constructor'
+                ? 'bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400 text-slate-950 shadow-lg shadow-teal-500/20 ring-2 ring-teal-300'
+                : 'text-teal-300 hover:text-white hover:bg-teal-950/60 bg-slate-950/80 border border-teal-500/50'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-teal-400 animate-pulse" />
+            <span>✨ AI Конструктор БПЛА (MDO, 3D CAD, ЧПУ & HIL)</span>
+          </button>
+
           <button
             type="button"
             onClick={() => handleUAVSubTabSelect('uav_studio')}
@@ -1446,6 +1461,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
       {/* 2. UAV & DRONES VIEWS */}
       {activeCategory === 'uav_systems' && (
         <>
+          {activeUAVSubTab === 'uav_ai_constructor' && <UAVAIGenerativeConstructorStudio />}
           {activeUAVSubTab === 'uav_studio' && <UAVDroneStudioModule />}
           {activeUAVSubTab === 'uav_ew_nav' && <UAVNavigationEWModule />}
           {activeUAVSubTab === 'uav_rf_link' && <UAVRadioLinkRelayModule />}
