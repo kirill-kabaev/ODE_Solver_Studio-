@@ -41,6 +41,8 @@ import {
   VolumeX,
   Atom,
   Wifi,
+  Users,
+  Camera,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
@@ -98,6 +100,9 @@ import { UAVParametricSparFEABucklingModule } from './uav/UAVParametricSparFEABu
 import { UAVDeckLandingMotionCompModule } from './uav/UAVDeckLandingMotionCompModule';
 import { UAVGuidedGlideBombTrajectoryModule } from './uav/UAVGuidedGlideBombTrajectoryModule';
 import { UAVAvionicsEMCAntennaCoSiteModule } from './uav/UAVAvionicsEMCAntennaCoSiteModule';
+import { UAVSwarmDistributedTaskAllocationModule } from './uav/UAVSwarmDistributedTaskAllocationModule';
+import { UAVToroidalPropellerAeroacousticsModule } from './uav/UAVToroidalPropellerAeroacousticsModule';
+import { UAVVisionGeoRegistrationGPSDeniedModule } from './uav/UAVVisionGeoRegistrationGPSDeniedModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -184,6 +189,9 @@ export type AeroSubTab =
   | 'uav_deck_landing'
   | 'uav_glide_bomb'
   | 'uav_emc_antenna'
+  | 'uav_swarm_cbba'
+  | 'uav_toroidal_aeroacoustics'
+  | 'uav_vision_georeg'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -235,11 +243,11 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '45 Систем',
+    tag: '48 Систем',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'AI Конструктор, посадка на качающуюся палубу LQP, баллистика УМПК, ЭМС & развязка антенн S21, MAVLink 2.0 / Micro-XRCE-DDS, маховое движение лопастей, FEA лонжерона, HPM перехват, L1 адаптивное управление, крио-водородные FC, машущее крыло, лазерная FSO связь, ИРПД, HEL защита, амфибии, ПРР, экранопланы, HAPS, морфинг, привязной кабель, ORCA, био-захват, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование',
+    description: 'AI Конструктор, целераспределение роя CBBA, тороидальные малошумные винты, оптическая геопривязка без GPS, посадка на качающуюся палубу LQP, баллистика УМПК, ЭМС & развязка антенн S21, MAVLink 2.0 / Micro-XRCE-DDS, маховое движение лопастей, FEA лонжерона, HPM перехват, L1 адаптивное управление, крио-водородные FC, машущее крыло, лазерная FSO связь, ИРПД, HEL защита, амфибии, ПРР, экранопланы, HAPS, морфинг, привязной кабель, ORCA, био-захват, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование',
     defaultSubTab: 'uav_ai_constructor',
   },
   {
@@ -370,6 +378,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
         'uav_deck_landing',
         'uav_glide_bomb',
         'uav_emc_antenna',
+        'uav_swarm_cbba',
+        'uav_toroidal_aeroacoustics',
+        'uav_vision_georeg',
       ];
 
       if (uavSubTabs.includes(targetSubTab)) {
@@ -1460,6 +1471,45 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <Radio className="w-3.5 h-3.5 text-indigo-400" />
             <span>📡 ЭМС Авионики & Взаимная Развязка Антенн (S21, GNSS L1/L2)</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_swarm_cbba')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_swarm_cbba'
+                ? 'bg-gradient-to-r from-cyan-400 via-blue-500 to-indigo-500 text-slate-950 shadow-md font-black ring-1 ring-cyan-400/50'
+                : 'text-cyan-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-cyan-900/50'
+            }`}
+          >
+            <Users className="w-3.5 h-3.5 text-cyan-400" />
+            <span>👥 Целераспределение Роя CBBA & Mesh Консенсус</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_toroidal_aeroacoustics')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_toroidal_aeroacoustics'
+                ? 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-slate-950 shadow-md font-black ring-1 ring-teal-400/50'
+                : 'text-teal-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-teal-900/50'
+            }`}
+          >
+            <VolumeX className="w-3.5 h-3.5 text-teal-400" />
+            <span>🔇 Тороидальные Кольцевые Пропеллеры & Аэроакустика BPM</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_vision_georeg')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_vision_georeg'
+                ? 'bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-500 text-slate-950 shadow-md font-black ring-1 ring-amber-400/50'
+                : 'text-amber-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-amber-900/50'
+            }`}
+          >
+            <Camera className="w-3.5 h-3.5 text-amber-400" />
+            <span>👁️ Оптическая Геопривязка Без GPS (SuperGlue Ortho)</span>
+          </button>
         </div>
       )}
 
@@ -1609,6 +1659,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_deck_landing' && <UAVDeckLandingMotionCompModule />}
           {activeUAVSubTab === 'uav_glide_bomb' && <UAVGuidedGlideBombTrajectoryModule />}
           {activeUAVSubTab === 'uav_emc_antenna' && <UAVAvionicsEMCAntennaCoSiteModule />}
+          {activeUAVSubTab === 'uav_swarm_cbba' && <UAVSwarmDistributedTaskAllocationModule />}
+          {activeUAVSubTab === 'uav_toroidal_aeroacoustics' && <UAVToroidalPropellerAeroacousticsModule />}
+          {activeUAVSubTab === 'uav_vision_georeg' && <UAVVisionGeoRegistrationGPSDeniedModule />}
         </>
       )}
 

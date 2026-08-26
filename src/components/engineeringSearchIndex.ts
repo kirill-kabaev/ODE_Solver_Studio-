@@ -681,6 +681,60 @@ export const ENGINEERING_SEARCH_ITEMS: EngineeringSearchItem[] = [
       'эмс', 'emc', 'антенна', 'развязка', 's21', 'vtx', 'видеопередатчик', 'десенситизация', 'gnss', 'gps', 'шумовой фон', 'фильтр', 'пав', 'saw', 'rtk'
     ],
   },
+  {
+    id: 'uav_swarm_cbba',
+    title: 'Распределенное Целераспределение Роя БПЛА (CBBA Consensus & Auction Engine)',
+    shortTitle: 'Рой БПЛА CBBA & Аукционы',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_swarm_cbba',
+    handbookTopicId: 'uav_swarm_control',
+    iconName: 'Users',
+    badge: 'CBBA Консенсус Роя',
+    badgeColor: 'from-cyan-500 to-blue-500 text-white',
+    description: 'Децентрализованный алгоритм CBBA (Consensus-Based Bundle Algorithm) распределения пакетов боевых и разведывательных задач, аукционный протокол и разрешение конфликтов в условиях задержек Mesh-сети.',
+    formulaLatex: 'y_{ij} = \\max_{k} c_{ij}(b_i), \\quad z_{ij} = \\arg\\max_k c_{ij}(b_i), \\quad s_i \\leftarrow s_i \\cup \\{j^*\\}',
+    keywords: [
+      'cbba', 'рой', 'целераспределение', 'аукцион', 'консенсус', 'пакет задач', 'децентрализованный', 'mesh', 'пво', 'sead', 'конфликты', 'многоагентный'
+    ],
+  },
+  {
+    id: 'uav_toroidal_aeroacoustics',
+    title: 'Тороидальные Бесшумные Пропеллеры & Аэроакустическая Модель BPM (Toroidal Loop)',
+    shortTitle: 'Тороидальные Пропеллеры',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_toroidal_aeroacoustics',
+    handbookTopicId: 'aeroacoustics',
+    iconName: 'VolumeX',
+    badge: 'Шум -10 дБА & BPM',
+    badgeColor: 'from-emerald-500 to-teal-500 text-white',
+    description: 'Замкнутая петлевая геометрия винта, устранение концевых вихрей BVI, расчет спектра звукового давления SPL (дБА) по модели Брукса–Поупа–Марколини (BPM) и тяговое качество (Figure of Merit).',
+    formulaLatex: '\\text{SPL}(f) = 10\\log_{10}\\left(\\frac{p_{\\text{rms}}^2}{p_{\\text{ref}}^2}\\right), \\quad \\text{FM} = \\frac{T^{3/2}}{\\sqrt{2\\rho A} \\cdot P_{\\text{aero}}}',
+    keywords: [
+      'тороидальный', 'пропеллер', 'винт', 'шум', 'акустика', 'bpm', 'лопасть', 'кольцевой', 'бпла', 'дрон', 'дба', 'spl', 'вихрь', 'bvi', 'тихий'
+    ],
+  },
+  {
+    id: 'uav_vision_georeg',
+    title: 'Оптическая Геопривязка БПЛА Без GPS (SuperGlue Orthophoto Map Matching & EKF)',
+    shortTitle: 'Оптическая Геопривязка Без GPS',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_vision_georeg',
+    handbookTopicId: 'uav_navigation_ew',
+    iconName: 'Camera',
+    badge: 'КВО < 1.5м Без GPS',
+    badgeColor: 'from-amber-500 to-yellow-500 text-slate-950',
+    description: 'Нейросетевое сопоставление кадров бортовой камеры со спутниковыми ортофотопланами (SuperPoint/SuperGlue), подавление квадратичного дрейфа БИНС расширенным фильтром Калмана EKF и удержание КВО < 1.5 м.',
+    formulaLatex: '\\mathbf{x}_{k|k} = \\mathbf{x}_{k|k-1} + \\mathbf{K}_k (\\mathbf{z}_{\\text{ortho}} - h(\\mathbf{x}_{k|k-1})), \\quad \\text{CEP}_{50} \\approx 0.589(\\sigma_x + \\sigma_y)',
+    keywords: [
+      'геопривязка', 'ортофотоплан', 'superglue', 'superpoint', 'gps-denied', 'рэб', 'бинс', 'инс', 'дрейф', 'калман', 'кво', 'cep', 'зрение', 'камера'
+    ],
+  },
 
   // ============================================================================
   // 2. ОБЩАЯ АЭРОДИНАМИКА И ФУНДАМЕНТАЛЬНЫЕ СОЛВЕРЫ (GENERAL AERO)
