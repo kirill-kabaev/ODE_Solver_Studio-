@@ -114,6 +114,10 @@ import { UAVHeavyLifterTetheredHVDCModule } from './uav/UAVHeavyLifterTetheredHV
 import { UAVTailsitterSlipstreamAeroModule } from './uav/UAVTailsitterSlipstreamAeroModule';
 import { UAVStealthRCSCoatingStudioModule } from './uav/UAVStealthRCSCoatingStudioModule';
 import { UAVTransMediumAmphibiousSubmersibleModule } from './uav/UAVTransMediumAmphibiousSubmersibleModule';
+import { UAVHypersonicScramjetWaveriderStudioModule } from './uav/UAVHypersonicScramjetWaveriderStudioModule';
+import { UAVAcousticArrayPassiveDirectionFindingModule } from './uav/UAVAcousticArrayPassiveDirectionFindingModule';
+import { UAVDecentralizedSwarmCoSLAMModule } from './uav/UAVDecentralizedSwarmCoSLAMModule';
+import { UAVBioInsectFlappingLEVStudioModule } from './uav/UAVBioInsectFlappingLEVStudioModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -214,6 +218,10 @@ export type AeroSubTab =
   | 'uav_tailsitter_slipstream'
   | 'uav_stealth_rcs_studio'
   | 'uav_trans_medium_amphibious'
+  | 'uav_hypersonic_scramjet'
+  | 'uav_acoustic_df_array'
+  | 'uav_swarm_co_slam'
+  | 'uav_bio_insect_lev'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -910,6 +918,58 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           >
             <Waves className="w-3.5 h-3.5 text-cyan-400" />
             <span>🌊 [#100] Транссредовые БПЛА-Амфибии</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_hypersonic_scramjet')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_hypersonic_scramjet'
+                ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 text-slate-950 shadow-md font-black ring-1 ring-amber-400/50'
+                : 'text-amber-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-amber-900/50'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5 text-amber-400" />
+            <span>🔥 [#101] Гиперзвук ГПВРД & Волнолет</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_acoustic_df_array')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_acoustic_df_array'
+                ? 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-500 text-slate-950 shadow-md font-black ring-1 ring-emerald-400/50'
+                : 'text-emerald-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-emerald-900/50'
+            }`}
+          >
+            <Activity className="w-3.5 h-3.5 text-emerald-400" />
+            <span>🎯 [#102] Акустическая Пеленгация TDOA</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_swarm_co_slam')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_swarm_co_slam'
+                ? 'bg-gradient-to-r from-sky-400 via-cyan-500 to-blue-600 text-slate-950 shadow-md font-black ring-1 ring-sky-400/50'
+                : 'text-sky-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-sky-900/50'
+            }`}
+          >
+            <Layers className="w-3.5 h-3.5 text-sky-400" />
+            <span>🛰️ [#103] Co-SLAM Роя в Зоне РЭБ</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_bio_insect_lev')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_bio_insect_lev'
+                ? 'bg-gradient-to-r from-purple-400 via-pink-500 to-rose-500 text-white shadow-md font-black ring-1 ring-purple-400/50'
+                : 'text-purple-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-purple-900/50'
+            }`}
+          >
+            <Feather className="w-3.5 h-3.5 text-purple-400" />
+            <span>🪲 [#104] Микро-БПЛА & Вихрь LEV</span>
           </button>
 
           <button
@@ -1782,6 +1842,10 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_tailsitter_slipstream' && <UAVTailsitterSlipstreamAeroModule />}
           {activeUAVSubTab === 'uav_stealth_rcs_studio' && <UAVStealthRCSCoatingStudioModule />}
           {activeUAVSubTab === 'uav_trans_medium_amphibious' && <UAVTransMediumAmphibiousSubmersibleModule />}
+          {activeUAVSubTab === 'uav_hypersonic_scramjet' && <UAVHypersonicScramjetWaveriderStudioModule />}
+          {activeUAVSubTab === 'uav_acoustic_df_array' && <UAVAcousticArrayPassiveDirectionFindingModule />}
+          {activeUAVSubTab === 'uav_swarm_co_slam' && <UAVDecentralizedSwarmCoSLAMModule />}
+          {activeUAVSubTab === 'uav_bio_insect_lev' && <UAVBioInsectFlappingLEVStudioModule />}
           {activeUAVSubTab === 'uav_studio' && <UAVDroneStudioModule />}
           {activeUAVSubTab === 'uav_ew_nav' && <UAVNavigationEWModule />}
           {activeUAVSubTab === 'uav_rf_link' && <UAVRadioLinkRelayModule />}

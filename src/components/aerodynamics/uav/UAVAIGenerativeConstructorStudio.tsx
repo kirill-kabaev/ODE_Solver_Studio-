@@ -1303,6 +1303,18 @@ endsolid uav_motor_mount_bracket`;
             <span className="px-1.5 py-0.5 rounded bg-teal-950/70 border border-teal-500/40 text-teal-300">
               #100: Trans-Medium
             </span>
+            <span className="px-1.5 py-0.5 rounded bg-red-950/70 border border-red-500/40 text-red-300">
+              #101: Scramjet M7+
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40 text-emerald-300">
+              #102: Acoustic DF
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-blue-950/70 border border-blue-500/40 text-blue-300">
+              #103: Co-SLAM Mesh
+            </span>
+            <span className="px-1.5 py-0.5 rounded bg-pink-950/70 border border-pink-500/40 text-pink-300">
+              #104: Bio-LEV MAV
+            </span>
           </div>
         </div>
       </div>
