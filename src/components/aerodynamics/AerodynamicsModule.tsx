@@ -118,6 +118,7 @@ import { UAVHypersonicScramjetWaveriderStudioModule } from './uav/UAVHypersonicS
 import { UAVAcousticArrayPassiveDirectionFindingModule } from './uav/UAVAcousticArrayPassiveDirectionFindingModule';
 import { UAVDecentralizedSwarmCoSLAMModule } from './uav/UAVDecentralizedSwarmCoSLAMModule';
 import { UAVBioInsectFlappingLEVStudioModule } from './uav/UAVBioInsectFlappingLEVStudioModule';
+import { UAVUnifiedMasterEngineeringPipelineModule } from './uav/UAVUnifiedMasterEngineeringPipelineModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -197,6 +198,7 @@ export type AeroSubTab =
   | 'uav_hlfc_suction'
   | 'uav_mhd_plasma'
   | 'uav_acoustic_cloaking'
+  | 'uav_master_pipeline'
   | 'uav_ai_constructor'
   | 'uav_mavlink_bus'
   | 'uav_blade_flapping'
@@ -803,6 +805,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
       {/* 2. UAV & DRONES SUB-TABS (8 Systems) */}
       {activeCategory === 'uav_systems' && (
         <div className="bg-slate-900/90 backdrop-blur-md p-1.5 rounded-2xl border border-teal-900/40 flex items-center justify-start gap-1.5 overflow-x-auto shadow-lg">
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_master_pipeline')}
+            className={`flex items-center gap-2 px-4 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_master_pipeline'
+                ? 'bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400 text-slate-950 shadow-lg shadow-teal-500/30 ring-2 ring-teal-300'
+                : 'text-teal-300 hover:text-white hover:bg-teal-950/60 bg-slate-950/90 border border-teal-500/60'
+            }`}
+          >
+            <Sparkles className="w-4 h-4 text-teal-400 animate-pulse" />
+            <span>🌟 ЕДИНАЯ САПР БПЛА (Сквозной Цифровой Двойник PLM)</span>
+          </button>
+
           <button
             type="button"
             onClick={() => handleUAVSubTabSelect('uav_ai_constructor')}
@@ -1833,6 +1848,11 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
       {/* 2. UAV & DRONES VIEWS */}
       {activeCategory === 'uav_systems' && (
         <>
+          {activeUAVSubTab === 'uav_master_pipeline' && (
+            <UAVUnifiedMasterEngineeringPipelineModule
+              onNavigateToModule={(modId) => handleUAVSubTabSelect(modId as any)}
+            />
+          )}
           {activeUAVSubTab === 'uav_ai_constructor' && <UAVAIGenerativeConstructorStudio />}
           {activeUAVSubTab === 'uav_cad_mesh_dxf' && <UAVCADMeshGeneratorDXFModule />}
           {activeUAVSubTab === 'uav_hil_sil_autopilot' && <UAVHILSILAutopilotStudioModule />}
