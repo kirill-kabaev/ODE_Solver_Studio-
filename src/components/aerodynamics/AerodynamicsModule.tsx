@@ -95,6 +95,9 @@ import { UAVAIGenerativeConstructorStudio } from './uav/UAVAIGenerativeConstruct
 import { UAVMavlinkTelemetryBusModule } from './uav/UAVMavlinkTelemetryBusModule';
 import { UAVBladeFlappingRotorDynamicsModule } from './uav/UAVBladeFlappingRotorDynamicsModule';
 import { UAVParametricSparFEABucklingModule } from './uav/UAVParametricSparFEABucklingModule';
+import { UAVDeckLandingMotionCompModule } from './uav/UAVDeckLandingMotionCompModule';
+import { UAVGuidedGlideBombTrajectoryModule } from './uav/UAVGuidedGlideBombTrajectoryModule';
+import { UAVAvionicsEMCAntennaCoSiteModule } from './uav/UAVAvionicsEMCAntennaCoSiteModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -178,6 +181,9 @@ export type AeroSubTab =
   | 'uav_mavlink_bus'
   | 'uav_blade_flapping'
   | 'uav_spar_fea'
+  | 'uav_deck_landing'
+  | 'uav_glide_bomb'
+  | 'uav_emc_antenna'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -229,11 +235,11 @@ export const AERO_DOMAINS: DomainCategoryConfig[] = [
     title: 'БПЛА, Дроны & Рой',
     shortTitle: 'БПЛА & Дроны',
     icon: Radio,
-    tag: '42 Системы',
+    tag: '45 Систем',
     accentBorder: 'border-teal-500/50',
     activeBg: 'from-teal-950 via-slate-900 to-emerald-950',
     activeRing: 'ring-teal-400',
-    description: 'AI Генеративный Конструктор ЛА, MAVLink 2.0 / Micro-XRCE-DDS телеметрия, маховое движение лопастей & обдув лучей, параметрический FEA лонжерона и обшивки, HPM/ЭМИ СВЧ-перехват, адаптивное L1 парирование повреждений, крио-водородные LH2 PEMFC (120ч), машущее крыло, лазерная FSO-связь 100G, воздушный старт ИРПД, лазерная защита HEL, амфибии, ПРР ГСН, гиперзвук, соосные винты, экранопланы, HAPS, морфинг, привязной кабель, ORCA рой, био-захват, ОЭС KCF, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование Ланцетов',
+    description: 'AI Конструктор, посадка на качающуюся палубу LQP, баллистика УМПК, ЭМС & развязка антенн S21, MAVLink 2.0 / Micro-XRCE-DDS, маховое движение лопастей, FEA лонжерона, HPM перехват, L1 адаптивное управление, крио-водородные FC, машущее крыло, лазерная FSO связь, ИРПД, HEL защита, амфибии, ПРР, экранопланы, HAPS, морфинг, привязной кабель, ORCA, био-захват, LiDAR, VIO, Stealth, ПСС, BMS, РЭБ, DSMAC/TERCOM, радиолинк, Pro-Nav, VTOL, рой, OctoMap, шум, отказ моторов и пикирование',
     defaultSubTab: 'uav_ai_constructor',
   },
   {
@@ -361,6 +367,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
         'uav_hpm_counter_uas',
         'uav_l1_adaptive_control',
         'uav_hydrogen_cryo_fuelcell',
+        'uav_deck_landing',
+        'uav_glide_bomb',
+        'uav_emc_antenna',
       ];
 
       if (uavSubTabs.includes(targetSubTab)) {
@@ -1412,6 +1421,45 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <Layers className="w-3.5 h-3.5 text-purple-400" />
             <span>📐 Параметрический FEA Лонжерона & Устойчивость Обшивки</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_deck_landing')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_deck_landing'
+                ? 'bg-gradient-to-r from-cyan-400 via-teal-500 to-emerald-500 text-slate-950 shadow-md font-black ring-1 ring-cyan-400/50'
+                : 'text-cyan-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-cyan-900/50'
+            }`}
+          >
+            <Anchor className="w-3.5 h-3.5 text-cyan-400" />
+            <span>⚓ Посадка на Палубу в Качку (LQP Wave Motion Predictor)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_glide_bomb')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_glide_bomb'
+                ? 'bg-gradient-to-r from-amber-400 via-rose-500 to-red-500 text-slate-950 shadow-md font-black ring-1 ring-amber-400/50'
+                : 'text-amber-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-amber-900/50'
+            }`}
+          >
+            <Rocket className="w-3.5 h-3.5 text-amber-400" />
+            <span>🎯 Аэробаллистика Планирующих Модулей УМПК (K=15, 75 км)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_emc_antenna')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_emc_antenna'
+                ? 'bg-gradient-to-r from-violet-400 via-indigo-500 to-purple-500 text-slate-950 shadow-md font-black ring-1 ring-indigo-400/50'
+                : 'text-indigo-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-indigo-900/50'
+            }`}
+          >
+            <Radio className="w-3.5 h-3.5 text-indigo-400" />
+            <span>📡 ЭМС Авионики & Взаимная Развязка Антенн (S21, GNSS L1/L2)</span>
+          </button>
         </div>
       )}
 
@@ -1558,6 +1606,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_mavlink_bus' && <UAVMavlinkTelemetryBusModule />}
           {activeUAVSubTab === 'uav_blade_flapping' && <UAVBladeFlappingRotorDynamicsModule />}
           {activeUAVSubTab === 'uav_spar_fea' && <UAVParametricSparFEABucklingModule />}
+          {activeUAVSubTab === 'uav_deck_landing' && <UAVDeckLandingMotionCompModule />}
+          {activeUAVSubTab === 'uav_glide_bomb' && <UAVGuidedGlideBombTrajectoryModule />}
+          {activeUAVSubTab === 'uav_emc_antenna' && <UAVAvionicsEMCAntennaCoSiteModule />}
         </>
       )}
 

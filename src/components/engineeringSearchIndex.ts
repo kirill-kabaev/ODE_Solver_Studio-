@@ -627,6 +627,60 @@ export const ENGINEERING_SEARCH_ITEMS: EngineeringSearchItem[] = [
       'fea', 'лонжерон', 'прочность', 'изгибающий момент', 'эпюра', 'нормальные напряжения', 'buckling', 'потеря устойчивости', 'обшивка', 'перегрузка'
     ],
   },
+  {
+    id: 'uav_deck_landing',
+    title: 'Посадка БПЛА на Качающуюся Палубу Корабля (LQP Wave Motion Predictor)',
+    shortTitle: 'Посадка на Палубу в Качку',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_deck_landing',
+    handbookTopicId: 'aero_cad_mdo',
+    iconName: 'Anchor',
+    badge: 'LQP Посадка на Палубу',
+    badgeColor: 'from-cyan-400 to-teal-400 text-slate-950',
+    description: 'Компенсация 6-DoF качки судна (Heave, Pitch, Roll) по спектру Пирсона-Московица, вычисление интервалов затишья волнения (Landing Quiescent Period) и расчет динамических касаний стойками шасси.',
+    formulaLatex: 'S(\\omega) = \\frac{A}{\\omega^5} \\exp\\left(-\\frac{B}{\\omega^4}\\right), \\quad z_{\\text{deck}}(t) = z_{\\text{cg}} - x_d \\sin\\theta + y_d \\sin\\phi',
+    keywords: [
+      'палуба', 'корабль', 'качка', 'lqp', 'quiescent', 'вертолет', 'посадка', 'пирсон-московиц', 'волна', 'волнение', 'судно', 'морской бпла'
+    ],
+  },
+  {
+    id: 'uav_glide_bomb',
+    title: 'Аэробаллистика Планирующих Модулей УМПК (Winged Glide Munition K=15, 75 км)',
+    shortTitle: 'УМПК Планирующая Бомба',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_glide_bomb',
+    handbookTopicId: 'aero_cad_mdo',
+    iconName: 'Rocket',
+    badge: 'УМПК Дальность 75 км',
+    badgeColor: 'from-amber-400 to-rose-400 text-slate-950',
+    description: 'Численное моделирование высотно-скоростной траектории сброса с Су-34/35 (H=12 км, M=0.95), динамика раскрытия крыла, аэродинамическое качество K=15, учет ветра и терминальное пикирование.',
+    formulaLatex: 'L_{\\text{glide}} = H \\cdot \\left(\\frac{C_L}{C_D}\\right)_{\\max} + \\frac{V_0^2}{2g} \\cdot K, \\quad C_D = C_{D0} + \\frac{C_L^2}{\\pi AR e}',
+    keywords: [
+      'умпк', 'бомба', 'планирующая', 'glide bomb', 'фаб-500', 'качество', 'дальность', 'сброс', 'крыло', 'баллистика', 'пикирование', 'gps', 'комета'
+    ],
+  },
+  {
+    id: 'uav_emc_antenna',
+    title: 'ЭМС Бортовой Авионики & Взаимная Развязка Антенн БПЛА (S21, GNSS L1/L2 Desense)',
+    shortTitle: 'ЭМС Авионики & Антенны',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_emc_antenna',
+    handbookTopicId: 'uav_navigation_ew',
+    iconName: 'Radio',
+    badge: 'ЭМС Развязка Антенн S21',
+    badgeColor: 'from-violet-400 to-indigo-400 text-white',
+    description: 'Матрица взаимовлияния антенн S21 (дБ), десенситизация навигационных приемников GNSS L1/L2 под воздействием VTX мощностью до 5 Вт, гармоники, ПАВ-фильтрация и экранирование углепластиком (CFRP).',
+    formulaLatex: 'S_{21} = 20 \\log_{10}\\left(\\frac{\\lambda}{4\\pi d}\\right) - A_{\\text{shield}} - A_{\\text{pol}}, \\quad C/N_0 = P_{\\text{sat}} - N_{\\text{eff}} + 10\\log_{10}(B)',
+    keywords: [
+      'эмс', 'emc', 'антенна', 'развязка', 's21', 'vtx', 'видеопередатчик', 'десенситизация', 'gnss', 'gps', 'шумовой фон', 'фильтр', 'пав', 'saw', 'rtk'
+    ],
+  },
 
   // ============================================================================
   // 2. ОБЩАЯ АЭРОДИНАМИКА И ФУНДАМЕНТАЛЬНЫЕ СОЛВЕРЫ (GENERAL AERO)
