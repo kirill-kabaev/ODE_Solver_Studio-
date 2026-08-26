@@ -42,6 +42,8 @@ import {
   FolderGit2,
   Printer,
   FileDown,
+  Network,
+  ShieldCheck,
 } from 'lucide-react';
 import {
   ResponsiveContainer,
@@ -62,6 +64,9 @@ import {
   PolarRadiusAxis,
   Radar,
 } from 'recharts';
+import { UAVMDOParetoOptimizer, ParetoCandidate } from './pipeline/UAVMDOParetoOptimizer';
+import { UAVAirfoilPolarDatabase, AirfoilSpec, UAV_AIRFOIL_LIBRARY } from './pipeline/UAVAirfoilPolarDatabase';
+import { UAVAirworthinessAuditPanel } from './pipeline/UAVAirworthinessAuditPanel';
 
 export type PipelineStageId =
   | 'stage1_concept'
@@ -442,6 +447,7 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
   // Selected Drone Project / Digital Twin Configuration
   const [selectedArchetypeId, setSelectedArchetypeId] = useState<string>('recon_wing_longrange');
   const [projectName, setProjectName] = useState<string>('БПЛА «Око-Стратос» Mk-IV');
+  const [selectedAirfoilId, setSelectedAirfoilId] = useState<string>('mh60');
 
   // Core Digital Twin State (shared variables across all pipeline steps)
   const [wingspan_m, setWingspanM] = useState<number>(2.4);
@@ -479,6 +485,22 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
   const [isRotating, setIsRotating] = useState<boolean>(true);
   const rotationAngleRef = useRef<number>(0);
 
+  const selectedAirfoil = useMemo(() => {
+    return UAV_AIRFOIL_LIBRARY.find((a) => a.id === selectedAirfoilId) || UAV_AIRFOIL_LIBRARY[0];
+  }, [selectedAirfoilId]);
+
+  // Apply Pareto optimal candidate to Digital Twin
+  const handleApplyParetoCandidate = (candidate: ParetoCandidate) => {
+    setWingspanM(candidate.wingspan_m);
+    setChordRootM(candidate.chordRoot_m);
+    setChordTipM(candidate.chordTip_m);
+    setSweepDeg(candidate.sweep_deg);
+    setBatteryCapMah(candidate.batteryCap_mAh);
+    setBatteryMassKg((candidate.batteryCap_mAh / 1000) * 0.085);
+    const wingArea = candidate.wingspan_m * ((candidate.chordRoot_m + candidate.chordTip_m) / 2);
+    setStructuralMassKg(1.1 + wingArea * 1.6 + candidate.wingspan_m * 0.4);
+  };
+
   // Apply archetype preset
   const handleSelectArchetype = (archId: string) => {
     const arch = UAV_ARCHETYPES.find((a) => a.id === archId);
@@ -498,18 +520,21 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
 
     // derive chords and masses
     if (arch.scheme === 'flying_wing') {
+      setSelectedAirfoilId('mh60');
       setChordRootM(0.48);
       setChordTipM(0.20);
       setSweepDeg(20);
       setBatteryMassKg(arch.mtow_kg * 0.35);
       setStructuralMassKg(arch.mtow_kg * 0.38);
     } else if (arch.scheme === 'vtol_quadplane') {
+      setSelectedAirfoilId('selig_s1223');
       setChordRootM(0.38);
       setChordTipM(0.26);
       setSweepDeg(4);
       setBatteryMassKg(arch.mtow_kg * 0.40);
       setStructuralMassKg(arch.mtow_kg * 0.35);
     } else {
+      setSelectedAirfoilId('clark_y');
       setChordRootM(0.32);
       setChordTipM(0.22);
       setSweepDeg(10);
@@ -555,13 +580,13 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
 
     // Drag: Cd = Cd0 + Cl^2 / (pi * AR * e)
     const e_oswald = 0.82;
-    const Cd0 = 0.022; // low drag composite
+    const Cd0 = selectedAirfoil.cd0; // calibrated from airfoil DB
     const C_Di = Math.pow(C_L_cruise, 2) / (Math.PI * aspectRatio * e_oswald);
     const Cd_total = Cd0 + C_Di;
     const liftToDragRatio = C_L_cruise / Math.max(0.001, Cd_total);
 
     // Stall Speed
-    const Cl_max = 1.35;
+    const Cl_max = selectedAirfoil.cl_max;
     const V_stall_ms = Math.sqrt((2 * weight_N) / (rho * wingArea_m2 * Cl_max));
     const V_stall_kmh = V_stall_ms * 3.6;
 
@@ -637,6 +662,7 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
     motorKv,
     propDiameter_in,
     propPitch_in,
+    selectedAirfoil,
   ]);
 
   // Radar chart performance comparison data
@@ -1199,6 +1225,17 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
                   </div>
                 </div>
               </div>
+
+              {/* MDO Pareto Front Multi-Objective Optimization Tool */}
+              <div className="pt-2">
+                <UAVMDOParetoOptimizer
+                  currentWingspan={wingspan_m}
+                  currentMtow={digitalTwinMetrics.totalMass}
+                  currentPayload={payload_kg}
+                  currentCruiseSpeed={cruiseSpeed_kmh}
+                  onApplyCandidate={handleApplyParetoCandidate}
+                />
+              </div>
             </div>
           )}
 
@@ -1285,19 +1322,12 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
                 </div>
               </div>
 
-              {/* Polar curve preview */}
-              <div className="h-44 w-full bg-slate-950 rounded-xl p-2 border border-slate-800">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={polarCurveData} margin={{ top: 5, right: 20, left: 0, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
-                    <XAxis dataKey="alpha_deg" stroke="#64748b" tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                    <YAxis yAxisId="left" stroke="#64748b" tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                    <YAxis yAxisId="right" orientation="right" stroke="#64748b" tick={{ fontSize: 10, fill: '#94a3b8' }} />
-                    <Tooltip contentStyle={{ backgroundColor: '#020617', borderColor: '#334155', fontSize: '10px' }} />
-                    <Line yAxisId="left" type="monotone" dataKey="C_L" name="Коэф. C_L" stroke="#38bdf8" strokeWidth={2} dot={false} />
-                    <Line yAxisId="right" type="monotone" dataKey="LD_ratio" name="Качество L/D" stroke="#34d399" strokeWidth={2} dot={false} />
-                  </LineChart>
-                </ResponsiveContainer>
+              {/* Airfoil Library & Polar Database */}
+              <div className="pt-2">
+                <UAVAirfoilPolarDatabase
+                  selectedAirfoilId={selectedAirfoilId}
+                  onSelectAirfoil={(af) => setSelectedAirfoilId(af.id)}
+                />
               </div>
             </div>
           )}
@@ -1637,6 +1667,28 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
                     Спецификация BOM &rarr;
                   </button>
                 </div>
+              </div>
+
+              {/* Airworthiness Certification & Compliance Audit */}
+              <div className="pt-2">
+                <UAVAirworthinessAuditPanel
+                  projectName={projectName}
+                  mtow_kg={digitalTwinMetrics.totalMass}
+                  payload_kg={payload_kg}
+                  batteryMass_kg={batteryMass_kg}
+                  structuralMass_kg={structuralMass_kg}
+                  avionicsMass_kg={avionicsMass_kg}
+                  wingspan_m={wingspan_m}
+                  wingArea_m2={digitalTwinMetrics.wingArea_m2}
+                  staticMargin_percent={digitalTwinMetrics.staticMargin_percent}
+                  liftToDragRatio={digitalTwinMetrics.liftToDragRatio}
+                  stallSpeed_kmh={digitalTwinMetrics.V_stall_kmh}
+                  cruiseSpeed_kmh={cruiseSpeed_kmh}
+                  thrustToWeightRatio={digitalTwinMetrics.thrustToWeightRatio}
+                  endurance_min={digitalTwinMetrics.calculatedEndurance_min}
+                  range_km={digitalTwinMetrics.calculatedRange_km}
+                  rcs_m2={digitalTwinMetrics.baseRcs}
+                />
               </div>
             </div>
           )}
