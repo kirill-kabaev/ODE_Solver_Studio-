@@ -27,6 +27,7 @@ import {
   CornerDownLeft,
   Filter,
   CheckCircle2,
+  GitFork,
 } from 'lucide-react';
 import {
   ENGINEERING_SEARCH_ITEMS,
@@ -67,6 +68,7 @@ const ICONS_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
   BookOpen,
   Sparkles,
   AlertTriangle,
+  GitFork,
 };
 
 const POPULAR_QUICK_TAGS = [

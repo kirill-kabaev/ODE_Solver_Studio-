@@ -27,9 +27,11 @@ import {
   Filter,
   FileText,
   Scale,
+  GitFork,
 } from 'lucide-react';
 import { MathText } from './MathView';
 import { AerodynamicsModule, AeroDomainCategory, AeroSubTab } from './aerodynamics/AerodynamicsModule';
+import { UAVVisualDependencyGraphModule } from './aerodynamics/UAVVisualDependencyGraphModule';
 import { EngineeringHandbookModal, HandbookTopicId } from './EngineeringHandbookModal';
 import { FutureRoadmapModal } from './FutureRoadmapModal';
 import { NvidiaHardwareEnforcerBar } from './NvidiaHardwareEnforcerBar';
@@ -42,7 +44,7 @@ import { GostReportGeneratorModal } from './aerodynamics/GostReportGeneratorModa
 import { MaterialsDatabaseModal } from './aerodynamics/MaterialsDatabaseModal';
 import { RealtimeSanityCheckBadge } from './aerodynamics/RealtimeSanityCheckBadge';
 
-export type EngineeringDomain = 'aero' | 'space' | 'eda';
+export type EngineeringDomain = 'aero' | 'graph' | 'space' | 'eda';
 
 export const EngineeringStudio: React.FC = () => {
   const [activeDomain, setActiveDomain] = useState<EngineeringDomain>('aero');
@@ -122,6 +124,9 @@ export const EngineeringStudio: React.FC = () => {
   };
 
   const getActiveTopic = (): { topicId: HandbookTopicId; label: string } => {
+    if (activeDomain === 'graph') {
+      return { topicId: 'aero_cad_mdo', label: 'Схема Связей БПЛА' };
+    }
     if (activeDomain === 'space') {
       return { topicId: 'space_gnc', label: 'Космос & GNC' };
     }
@@ -389,7 +394,7 @@ export const EngineeringStudio: React.FC = () => {
         </div>
 
         {/* Domain Navigation Tabs */}
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-2 border-t border-slate-800/80 pt-4">
+        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 border-t border-slate-800/80 pt-4">
           <button
             onClick={() => setActiveDomain('aero')}
             className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left cursor-pointer ${
@@ -411,6 +416,26 @@ export const EngineeringStudio: React.FC = () => {
           </button>
 
           <button
+            onClick={() => setActiveDomain('graph')}
+            className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left cursor-pointer ${
+              activeDomain === 'graph'
+                ? 'bg-teal-950/60 border-teal-500/60 text-white shadow-lg shadow-teal-950/50 ring-1 ring-teal-400/40'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+            }`}
+          >
+            <div className={`p-2 rounded-lg ${activeDomain === 'graph' ? 'bg-teal-500 text-slate-950 font-bold' : 'bg-slate-800 text-slate-400'}`}>
+              <GitFork className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="text-xs font-bold flex items-center gap-1.5">
+                <span>2. Визуальная схема связей</span>
+                {activeDomain === 'graph' && <span className="w-1.5 h-1.5 rounded-full bg-teal-400" />}
+              </div>
+              <div className="text-[11px] text-slate-400 line-clamp-1">D3.js граф связей узлов БПЛА, Якобиан, 6-DoF</div>
+            </div>
+          </button>
+
+          <button
             onClick={() => setActiveDomain('space')}
             className={`flex items-center gap-3 p-3 rounded-xl border transition-all text-left cursor-pointer ${
               activeDomain === 'space'
@@ -423,7 +448,7 @@ export const EngineeringStudio: React.FC = () => {
             </div>
             <div>
               <div className="text-xs font-bold flex items-center gap-1.5">
-                <span>2. Космология и GNC</span>
+                <span>3. Космология и GNC</span>
                 {activeDomain === 'space' && <span className="w-1.5 h-1.5 rounded-full bg-indigo-400" />}
               </div>
               <div className="text-[11px] text-slate-400 line-clamp-1">Орбиты Ламберта, TVC, Калман, Теплозащита</div>
@@ -443,7 +468,7 @@ export const EngineeringStudio: React.FC = () => {
             </div>
             <div>
               <div className="text-xs font-bold flex items-center gap-1.5">
-                <span>3. EDA, Чипы и Авионика</span>
+                <span>4. EDA, Чипы и Авионика</span>
                 {activeDomain === 'eda' && <span className="w-1.5 h-1.5 rounded-full bg-purple-400" />}
               </div>
               <div className="text-[11px] text-slate-400 line-clamp-1">Place & Route, Максвелл, TMR, Rad-Hard</div>
@@ -491,6 +516,7 @@ export const EngineeringStudio: React.FC = () => {
           navigationKey={navigationKey}
         />
       )}
+      {activeDomain === 'graph' && <UAVVisualDependencyGraphModule />}
       {activeDomain === 'space' && <OrbitalGNCModule />}
       {activeDomain === 'eda' && <MicroelectronicsEDAModule />}
 

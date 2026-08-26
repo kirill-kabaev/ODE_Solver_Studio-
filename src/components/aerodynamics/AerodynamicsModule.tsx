@@ -119,6 +119,7 @@ import { UAVAcousticArrayPassiveDirectionFindingModule } from './uav/UAVAcoustic
 import { UAVDecentralizedSwarmCoSLAMModule } from './uav/UAVDecentralizedSwarmCoSLAMModule';
 import { UAVBioInsectFlappingLEVStudioModule } from './uav/UAVBioInsectFlappingLEVStudioModule';
 import { UAVUnifiedMasterEngineeringPipelineModule } from './uav/UAVUnifiedMasterEngineeringPipelineModule';
+import { UAVVisualDependencyGraphModule } from './UAVVisualDependencyGraphModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -199,6 +200,7 @@ export type AeroSubTab =
   | 'uav_mhd_plasma'
   | 'uav_acoustic_cloaking'
   | 'uav_master_pipeline'
+  | 'uav_visual_graph'
   | 'uav_ai_constructor'
   | 'uav_mavlink_bus'
   | 'uav_blade_flapping'
@@ -816,6 +818,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           >
             <Sparkles className="w-4 h-4 text-teal-400 animate-pulse" />
             <span>🌟 ЕДИНАЯ САПР БПЛА (Сквозной Цифровой Двойник PLM)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_visual_graph')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_visual_graph'
+                ? 'bg-gradient-to-r from-teal-400 via-emerald-400 to-cyan-400 text-slate-950 shadow-lg shadow-teal-500/30 ring-2 ring-teal-300'
+                : 'text-teal-300 hover:text-white hover:bg-teal-950/60 bg-slate-950/90 border border-teal-500/60'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-teal-400 animate-pulse" />
+            <span>🌐 Схема Связей Узлов (D3.js Граф)</span>
           </button>
 
           <button
@@ -1853,6 +1868,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
               onNavigateToModule={(modId) => handleUAVSubTabSelect(modId as any)}
             />
           )}
+          {activeUAVSubTab === 'uav_visual_graph' && <UAVVisualDependencyGraphModule />}
           {activeUAVSubTab === 'uav_ai_constructor' && <UAVAIGenerativeConstructorStudio />}
           {activeUAVSubTab === 'uav_cad_mesh_dxf' && <UAVCADMeshGeneratorDXFModule />}
           {activeUAVSubTab === 'uav_hil_sil_autopilot' && <UAVHILSILAutopilotStudioModule />}
