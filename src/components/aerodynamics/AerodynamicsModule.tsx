@@ -110,6 +110,10 @@ import { UAVCADMeshGeneratorDXFModule } from './uav/UAVCADMeshGeneratorDXFModule
 import { UAVHILSILAutopilotStudioModule } from './uav/UAVHILSILAutopilotStudioModule';
 import { UAVAIGenerativeDesignAeroModule } from './uav/UAVAIGenerativeDesignAeroModule';
 import { UAVAutomatedReportBOMModule } from './uav/UAVAutomatedReportBOMModule';
+import { UAVHeavyLifterTetheredHVDCModule } from './uav/UAVHeavyLifterTetheredHVDCModule';
+import { UAVTailsitterSlipstreamAeroModule } from './uav/UAVTailsitterSlipstreamAeroModule';
+import { UAVStealthRCSCoatingStudioModule } from './uav/UAVStealthRCSCoatingStudioModule';
+import { UAVTransMediumAmphibiousSubmersibleModule } from './uav/UAVTransMediumAmphibiousSubmersibleModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -206,6 +210,10 @@ export type AeroSubTab =
   | 'uav_hil_sil_autopilot'
   | 'uav_ai_generative_design'
   | 'uav_automated_report_bom'
+  | 'uav_heavy_lifter_tethered'
+  | 'uav_tailsitter_slipstream'
+  | 'uav_stealth_rcs_studio'
+  | 'uav_trans_medium_amphibious'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -850,6 +858,58 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           >
             <FileText className="w-3.5 h-3.5 text-amber-400" />
             <span>📊 [Направление D] Отчеты Летной Годности & BOM</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_heavy_lifter_tethered')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_heavy_lifter_tethered'
+                ? 'bg-gradient-to-r from-sky-400 via-cyan-500 to-blue-600 text-slate-950 shadow-md font-black ring-1 ring-sky-400/50'
+                : 'text-sky-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-sky-900/50'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5 text-sky-400" />
+            <span>⚡ [#97] Привязной БПЛА & HVDC 1000V</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_tailsitter_slipstream')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_tailsitter_slipstream'
+                ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-red-500 text-slate-950 shadow-md font-black ring-1 ring-amber-400/50'
+                : 'text-amber-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-amber-900/50'
+            }`}
+          >
+            <Plane className="w-3.5 h-3.5 text-amber-400 rotate-45" />
+            <span>📐 [#98] Тейлситтеры VTOL & Обдув Элевонов</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_stealth_rcs_studio')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_stealth_rcs_studio'
+                ? 'bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 text-white shadow-md font-black ring-1 ring-indigo-400/50'
+                : 'text-indigo-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-indigo-900/50'
+            }`}
+          >
+            <Shield className="w-3.5 h-3.5 text-indigo-400" />
+            <span>🛡️ [#99] Стелс-Оптимизация ЭПР & RAM</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_trans_medium_amphibious')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_trans_medium_amphibious'
+                ? 'bg-gradient-to-r from-cyan-400 via-teal-500 to-emerald-500 text-slate-950 shadow-md font-black ring-1 ring-cyan-400/50'
+                : 'text-cyan-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-cyan-900/50'
+            }`}
+          >
+            <Waves className="w-3.5 h-3.5 text-cyan-400" />
+            <span>🌊 [#100] Транссредовые БПЛА-Амфибии</span>
           </button>
 
           <button
@@ -1718,6 +1778,10 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_hil_sil_autopilot' && <UAVHILSILAutopilotStudioModule />}
           {activeUAVSubTab === 'uav_ai_generative_design' && <UAVAIGenerativeDesignAeroModule />}
           {activeUAVSubTab === 'uav_automated_report_bom' && <UAVAutomatedReportBOMModule />}
+          {activeUAVSubTab === 'uav_heavy_lifter_tethered' && <UAVHeavyLifterTetheredHVDCModule />}
+          {activeUAVSubTab === 'uav_tailsitter_slipstream' && <UAVTailsitterSlipstreamAeroModule />}
+          {activeUAVSubTab === 'uav_stealth_rcs_studio' && <UAVStealthRCSCoatingStudioModule />}
+          {activeUAVSubTab === 'uav_trans_medium_amphibious' && <UAVTransMediumAmphibiousSubmersibleModule />}
           {activeUAVSubTab === 'uav_studio' && <UAVDroneStudioModule />}
           {activeUAVSubTab === 'uav_ew_nav' && <UAVNavigationEWModule />}
           {activeUAVSubTab === 'uav_rf_link' && <UAVRadioLinkRelayModule />}
