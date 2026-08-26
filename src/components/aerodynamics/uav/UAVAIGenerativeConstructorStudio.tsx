@@ -1271,6 +1271,28 @@ endsolid uav_motor_mount_bracket`;
             Аэросъемочный Планер (320 км)
           </button>
         </div>
+
+        {/* 4 Strategic Roadmaps Summary Bar */}
+        <div className="mt-3 p-2.5 rounded-xl bg-slate-950/80 border border-teal-500/30 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <span className="font-bold text-white flex items-center gap-1.5 font-mono text-[11px]">
+            <Sparkles className="w-3.5 h-3.5 text-teal-400" />
+            Стратегические модули (Направления A, B, C, D):
+          </span>
+          <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono">
+            <span className="px-2 py-0.5 rounded bg-cyan-950/70 border border-cyan-500/40 text-cyan-300">
+              A: CAD/CFD & DXF (Готово)
+            </span>
+            <span className="px-2 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40 text-emerald-300">
+              B: HIL/SIL & MAVLink (Готово)
+            </span>
+            <span className="px-2 py-0.5 rounded bg-indigo-950/70 border border-indigo-500/40 text-indigo-300">
+              C: AI Оптимизация & PINN (Готово)
+            </span>
+            <span className="px-2 py-0.5 rounded bg-amber-950/70 border border-amber-500/40 text-amber-300">
+              D: Отчеты & BOM Смета (Готово)
+            </span>
+          </div>
+        </div>
       </div>
 
       {/* Navigation Sub-Tabs */}

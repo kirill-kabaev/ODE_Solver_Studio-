@@ -106,6 +106,10 @@ import { UAVVisionGeoRegistrationGPSDeniedModule } from './uav/UAVVisionGeoRegis
 import { UAVFiberOpticSpoolTetherDynamicsModule } from './uav/UAVFiberOpticSpoolTetherDynamicsModule';
 import { UAVVTOLGustAlleviationControlModule } from './uav/UAVVTOLGustAlleviationControlModule';
 import { UAVMunitionBaySeparationAeroModule } from './uav/UAVMunitionBaySeparationAeroModule';
+import { UAVCADMeshGeneratorDXFModule } from './uav/UAVCADMeshGeneratorDXFModule';
+import { UAVHILSILAutopilotStudioModule } from './uav/UAVHILSILAutopilotStudioModule';
+import { UAVAIGenerativeDesignAeroModule } from './uav/UAVAIGenerativeDesignAeroModule';
+import { UAVAutomatedReportBOMModule } from './uav/UAVAutomatedReportBOMModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -198,6 +202,10 @@ export type AeroSubTab =
   | 'uav_fiber_optic'
   | 'uav_gust_alleviation'
   | 'uav_munition_bay'
+  | 'uav_cad_mesh_dxf'
+  | 'uav_hil_sil_autopilot'
+  | 'uav_ai_generative_design'
+  | 'uav_automated_report_bom'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -790,6 +798,58 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           >
             <Sparkles className="w-3.5 h-3.5 text-teal-400 animate-pulse" />
             <span>✨ AI Конструктор БПЛА (MDO, 3D CAD, ЧПУ & HIL)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_cad_mesh_dxf')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_cad_mesh_dxf'
+                ? 'bg-gradient-to-r from-cyan-400 via-sky-500 to-blue-500 text-slate-950 shadow-md font-black ring-1 ring-cyan-400/50'
+                : 'text-cyan-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-cyan-900/50'
+            }`}
+          >
+            <Box className="w-3.5 h-3.5 text-cyan-400" />
+            <span>📐 [Направление A] CAD/CFD Сетка & DXF Раскрой ЧПУ</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_hil_sil_autopilot')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_hil_sil_autopilot'
+                ? 'bg-gradient-to-r from-emerald-400 via-teal-500 to-green-500 text-slate-950 shadow-md font-black ring-1 ring-emerald-400/50'
+                : 'text-emerald-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-emerald-900/50'
+            }`}
+          >
+            <Radio className="w-3.5 h-3.5 text-emerald-400" />
+            <span>📡 [Направление B] HIL/SIL Стенд & MAVLink v2</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_ai_generative_design')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_ai_generative_design'
+                ? 'bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-500 text-white shadow-md font-black ring-1 ring-indigo-400/50'
+                : 'text-indigo-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-indigo-900/50'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+            <span>🤖 [Направление C] AI Оптимизация & PINN Нейро-CFD</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_automated_report_bom')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_automated_report_bom'
+                ? 'bg-gradient-to-r from-amber-400 via-orange-500 to-yellow-500 text-slate-950 shadow-md font-black ring-1 ring-amber-400/50'
+                : 'text-amber-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-amber-900/50'
+            }`}
+          >
+            <FileText className="w-3.5 h-3.5 text-amber-400" />
+            <span>📊 [Направление D] Отчеты Летной Годности & BOM</span>
           </button>
 
           <button
@@ -1654,6 +1714,10 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
       {activeCategory === 'uav_systems' && (
         <>
           {activeUAVSubTab === 'uav_ai_constructor' && <UAVAIGenerativeConstructorStudio />}
+          {activeUAVSubTab === 'uav_cad_mesh_dxf' && <UAVCADMeshGeneratorDXFModule />}
+          {activeUAVSubTab === 'uav_hil_sil_autopilot' && <UAVHILSILAutopilotStudioModule />}
+          {activeUAVSubTab === 'uav_ai_generative_design' && <UAVAIGenerativeDesignAeroModule />}
+          {activeUAVSubTab === 'uav_automated_report_bom' && <UAVAutomatedReportBOMModule />}
           {activeUAVSubTab === 'uav_studio' && <UAVDroneStudioModule />}
           {activeUAVSubTab === 'uav_ew_nav' && <UAVNavigationEWModule />}
           {activeUAVSubTab === 'uav_rf_link' && <UAVRadioLinkRelayModule />}
