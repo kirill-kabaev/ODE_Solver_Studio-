@@ -43,6 +43,12 @@ import {
   BookOpen,
   Maximize2,
   FileCode2,
+  Activity,
+  Network,
+  Atom,
+  Globe,
+  Radio,
+  Database,
 } from 'lucide-react';
 import { MathView, MathText } from './MathView';
 
@@ -1222,6 +1228,404 @@ export const INITIAL_ROADMAP_FEATURES: RoadmapFeatureItem[] = [
     targetMilestone: 'Обучающий Модуль & Понятность',
     mathBasis: '\\text{Score} = \\frac{\\text{Payload} \\times \\text{Range}}{\\text{Cost} \\times \\text{EmptyMass}} \\times \\text{StabilityBonus}',
   },
+
+  // ==========================================
+  // РАЗДЕЛ V: ПЕРСПЕКТИВНЫЕ НАПРАВЛЕНИЯ РАЗВИТИЯ (FUTURE HORIZONS & ADVANCED R&D)
+  // ==========================================
+  {
+    id: 'feat_rnd_pinn_deep_neural_cfd_surrogate',
+    title: '75. Физически-Информированные Нейросети (PINN) & AI-Суррогатное CFD 3D-Моделирование',
+    category: 'Аэродинамика',
+    vehicleClass: 'universal',
+    vehicleClassLabel: 'AI & Нейро-CFD',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Суррогатный решатель нестационарных уравнений Навье-Стокса на базе Physics-Informed Neural Networks (PINN) и DeepONet. Мгновенное (за 20 миллисекунд вместо часов на суперкомпьютере) предсказание 3D полей давления Cp, срыва пограничного слоя и вихревых следов произвольных планеров.',
+    engineeringImpact: 'Позволяет в реальном времени при перемещении ползунков геометрии крыла видеть точное CFD-обтекание и распределение сил без ожидания сеточных расчетов.',
+    autoDetected: false,
+    defaultStatus: 'in_progress',
+    targetMilestone: 'Нейро-Аэродинамика & AI-CAE',
+    mathBasis: '\\mathcal{L}_{\\text{PINN}} = \\|\\rho(\\mathbf{u}\\cdot\\nabla)\\mathbf{u} + \\nabla p - \\mu\\nabla^2\\mathbf{u}\\|^2 + \\lambda_{\\text{bc}}\\|\\mathbf{u}_{\\text{wall}}\\|^2',
+  },
+  {
+    id: 'feat_rnd_hil_sil_hardware_autopilot_bus',
+    title: '76. Аппаратный HIL/SIL Стенд в Браузере (WebSerial / MAVLink v2 Live Flight Telemetry & In-Loop Test)',
+    category: 'Космос & Авионика',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / HIL Авионика',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Прямое подключение физического автопилота (Pixhawk, SpeedyBee, CUAV, Matek) через WebSerial / WebUSB по протоколу MAVLink v2. Замкнутый контур Hardware-in-the-Loop (HIL): браузерная 6-DoF аэродинамическая модель транслирует данные IMU/GPS/барометра в полетник, а полетник отдает положения рулей и тягу моторов.',
+    engineeringImpact: 'Обеспечивает 100% валидацию прошивки и отказоустойчивости дрона на столе перед реальным запуском в поле.',
+    autoDetected: false,
+    defaultStatus: 'in_progress',
+    targetMilestone: 'HIL/SIL Авионика',
+    mathBasis: '\\mathbf{y}_{\\text{sensor}}(t) = \\mathbf{h}(\\mathbf{x}_{\\text{6DoF}}(t)) + \\mathbf{w}(t), \\quad \\mathbf{u}_{\\text{actuator}} = \\text{MAVLink}(\\text{SERVO\\_OUTPUT\\_RAW})',
+  },
+  {
+    id: 'feat_rnd_swarm_ai_distributed_flocking',
+    title: '77. Роевой Интеллект & Динамическая Аэродинамика Группы БПЛА (Swarm Formation Aerodynamic Drag Reduction)',
+    category: 'Динамика & СУ',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Роевой Интеллект',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Моделирование координированного полета роя из 10–100 беспилотников с алгоритмами Рейнольдса (Boids Flocking), децентрализованным избеганием столкновений (APF / CBF) и использованием скоса потока от впереди летящих дронов (V-формация перелетных птиц) для снижения расхода энергии на 18–25%.',
+    engineeringImpact: 'Позволяет проектировать миссии группового барражирования, ретрансляции связи и согласованного поиска с увеличенной дальностью полета.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Роевая Робототехника',
+    mathBasis: '\\mathbf{F}_{\\text{flock}} = w_1 \\mathbf{F}_{\\text{align}} + w_2 \\mathbf{F}_{\\text{cohere}} + w_3 \\mathbf{F}_{\\text{separate}}, \\quad \\Delta C_{Di} = -\\sigma(d_x, d_y) C_{L,\\text{lead}}',
+  },
+  {
+    id: 'feat_rnd_multiphysics_aeroelastic_flutter_solver',
+    title: '78. Мультифизический Анализ Аэроупругости & Динамического Флаттера (Fluid-Structure Interaction FSI)',
+    category: 'Прочность & Вес',
+    vehicleClass: 'airliner',
+    vehicleClassLabel: 'Прочность & Аэроупругость',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Связанный нелинейный расчет взаимодействия упругих колебаний лонжерона и обшивки с нестационарным обтеканием (FSI). Построение $V-g-\\omega$ графиков дивергенции, реверса элеронов и критической скорости изгибно-крутильного флаттера $V_{\\text{flutter}}$ для композитных крыльев большого удлинения.',
+    engineeringImpact: 'Исключает катастрофическое разрушение крыла в воздухе при разгоне до предельных скоростей.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Мультифизика & FSI',
+    mathBasis: '\\mathbf{M} \\ddot{\\mathbf{q}} + \\mathbf{C} \\dot{\\mathbf{q}} + \\mathbf{K} \\mathbf{q} = \\frac{1}{2} \\rho V^2 \\mathbf{Q}_{\\text{aero}}(k, M) \\mathbf{q}',
+  },
+  {
+    id: 'feat_rnd_acoustic_noise_footprint_opt',
+    title: '79. Акустическая Сигнатура, Шум Винтов & Малозаметность (Aeroacoustics Ffowcs Williams-Hawkings Solver)',
+    category: 'Двигатели & Пропульсия',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Акустика & Стелс',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Расчет акустического давления и диаграммы направленности шума воздушных винтов и струй двигателей на основе волнового уравнения Фоукса Вильямса-Хокингса (FW-H). Оптимизация формы законцовок лопастей (тороидальные, серповидные) для снижения уровня звукового давления на местности ($<45\\text{ дБА}$ на 100 м).',
+    engineeringImpact: 'Критично для городских аэротакси (eVTOL / UAM) и разведывательных БПЛА скрытного наблюдения.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Акустика & Стелс',
+    mathBasis: 'p\'(\\mathbf{x}, t) = \\frac{1}{4\\pi} \\frac{\\partial}{\\partial t} \\int \\left[ \\frac{\\rho_0 v_n}{r |1-M_r|} \\right] dS + \\frac{1}{4\\pi c_0} \\frac{\\partial}{\\partial t} \\int \\left[ \\frac{l_r}{r |1-M_r|} \\right] dS',
+  },
+  {
+    id: 'feat_rnd_space_hybrid_aerospike_reentry_aerothermodynamics',
+    title: '80. Гиперзвуковая Аэротермодинамика & Расчет Клиновоздушных РД (Aerospike & Hypersonic Re-Entry $M=5\\dots25$)',
+    category: 'Космос & Авионика',
+    vehicleClass: 'rocket_space',
+    vehicleClassLabel: 'Гиперзвук & Космос',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Моделирование обтекания спускаемых аппаратов и суборбитальных ступеней при гиперзвуковых скоростях ($M=5\\dots25$) с учетом диссоциации и ионизации воздуха (модель Парка), расчет радиационного и конвективного теплового потока, а также расчет профиля клиновоздушного сопла (Aerospike) с саморегулирующимся расширением.',
+    engineeringImpact: 'Обеспечивает расчет многоразовых аэрокосмических систем и надежный подбор теплозащитных экранов (ТЗП) для возвращения с орбиты.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Космонавтика & Гиперзвук',
+    mathBasis: 'q_{\\text{conv}} = \\frac{C}{\\sqrt{R_{\\text{nose}}}} \\left(\\frac{\\rho}{\\rho_0}\\right)^{0.5} \\left(\\frac{V}{10^4}\\right)^{3.15} \\quad (\\text{Фэй-Ридделл})',
+  },
+  {
+    id: 'feat_rnd_digital_twin_predictive_telemetry_health',
+    title: '81. Цифровой Двойник в Эксплуатации & Предиктивная Аналитика Ресурса (Digital Twin Fleet Health & Predictive Maintenance)',
+    category: 'Инженерная Полезность & САПР',
+    vehicleClass: 'app_platform',
+    vehicleClassLabel: 'Цифровой Двойник & IoT',
+    priority: 'p2_medium',
+    priorityLabel: 'P2: Средний приоритет',
+    description: 'Сквозная синхронизация расчетной модели ЛА с телеметрией реального полета из логов (.BIN / .TLOG): накопление усталостных повреждений планера (правило Пальмгрена-Майнера), деградация емкости LiPo/Li-Ion ячеек АКБ, вибрационный спектральный анализ подшипников моторов и прогноз остаточного ресурса RUL (Remaining Useful Life).',
+    engineeringImpact: 'Превращает проектную САПР в пожизненную систему мониторинга флота беспилотников, исключая отказы в воздухе.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Цифровой Двойник & IoT',
+    mathBasis: 'D_{\\text{fatigue}} = \\sum_{i=1}^k \\frac{n_i}{N_i} \\ge 1.0 \\implies \\text{Structural Failure Risk}',
+  },
+  {
+    id: 'feat_rnd_bionic_topology_lattice_optimization',
+    title: '82. Бионическая Топологическая Оптимизация & Генерация Легких Сетчатых Структур (Lattice / Gyroid Infill CAD)',
+    category: 'Прочность & Вес',
+    vehicleClass: 'universal',
+    vehicleClassLabel: 'Бионика & Аддитивное Производство',
+    priority: 'p2_medium',
+    priorityLabel: 'P2: Средний приоритет',
+    description: 'Генеративный алгоритм удаления ненагруженного материала из силовых нервюр, шпангоутов и кронштейнов подвеса (SIMP Topology Optimization) с заполнением внутренностей трижды периодическими минимальными поверхностями (TPMS Gyroid / Schwarz D). Снижение массы деталей на 35–50% при сохранении жесткости.',
+    engineeringImpact: 'Позволяет печатать сверхлегкие силовые элементы дронов из титана (SLM) и высокопрочного карбон-наполненного полиамида (SLS).',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Аддитивные САПР-Технологии',
+    mathBasis: '\\min_{\\boldsymbol{\\rho}} \\mathbf{u}^T \\mathbf{K}(\\boldsymbol{\\rho}) \\mathbf{u} \\quad \\text{s.t.} \\quad \\sum \\rho_e V_e \\le V^*, \\, \\rho_e \\in [0, 1]',
+  },
+  {
+    id: 'feat_rnd_hybrid_hydrogen_fuel_cell_powertrain',
+    title: '83. Гибридные и Водородные Силовые Установки (Hydrogen Fuel Cell & Hybrid-Electric Powertrain Solver)',
+    category: 'Двигатели & Пропульсия',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Водород & Гибриды',
+    priority: 'p2_medium',
+    priorityLabel: 'P2: Средний приоритет',
+    description: 'Термодинамический и электрохимический расчет гибридных силовых установок (ГСУ): генератор на базе ДВС + буферная батарея, а также водородных топливных элементов (PEMFC) с композитными баллонами 350/700 бар. Расчет кривой поляризации, теплоотвода и достижение времени полета БПЛА свыше 8–12 часов.',
+    engineeringImpact: 'Обеспечивает создание сверхдальних беспилотных комплексов непрерывного мониторинга трубопроводов и лесных массивов.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Перспективная Энергетика',
+    mathBasis: 'V_{\\text{cell}} = E_{\\text{Nernst}} - \\Delta V_{\\text{act}} - \\Delta V_{\\text{ohmic}} - \\Delta V_{\\text{conc}}, \\quad m_{\\text{H2}} = \\frac{I \\cdot t}{2 F}',
+  },
+  {
+    id: 'feat_rnd_evtol_transition_vortex_ring_state',
+    title: '84. Динамика Переходных Режимов eVTOL & Вихревое Кольцо (Tiltrotor Transition & Vortex Ring State VRS)',
+    category: 'Динамика & СУ',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'eVTOL / Конвертопланы',
+    priority: 'p2_medium',
+    priorityLabel: 'P2: Средний приоритет',
+    description: 'Моделирование сложнейшей фазы перехода конвертопланов и eVTOL из вертикального зависания в горизонтальный самолетный полет при повороте моторов $\\theta_{\\text{tilt}} = 90^\\circ \\to 0^\\circ$. Предотвращение попадания несущих винтов в опасный режим вихревого кольца (VRS) при быстром снижении.',
+    engineeringImpact: 'Критически важно для аэродинамической безопасности нового поколения беспилотных конвертопланов и грузовых VTOL-дронов.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'eVTOL & Конвертопланы',
+    mathBasis: 'v_i^4 + 2 V_z v_i^3 + (V_z^2 + V_x^2) v_i^2 - v_h^4 = 0, \\quad \\text{VRS Risk if } 0.5 v_h \\le -V_z \\le 1.5 v_h',
+  },
+  {
+    id: 'feat_rnd_atmospheric_boundary_layer_terrain_cfd',
+    title: '85. Атмосферная Турбулентность, Рельеф Местности & Городские Каньоны (Urban Canyon & Microburst CFD)',
+    category: 'Аэродинамика',
+    vehicleClass: 'universal',
+    vehicleClassLabel: 'Атмосфера & Городской Полет',
+    priority: 'p3_rnd',
+    priorityLabel: 'P3: Перспективно & R&D',
+    description: 'Интеграция 3D-моделей рельефа местности (DEM/GeoTIFF) и городской застройки с расчетом микроклимата: сдвиг ветра у земли, термические восходящие потоки, спутные следы от зданий и модели турбулентности Драйдена/фон Кармана для БПЛА доставки.',
+    engineeringImpact: 'Позволяет планировать безопасные маршруты низковысотной аэронавигации дронов в плотной городской среде.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Гео-CFD & Городская Авиация',
+    mathBasis: '\\Phi_u(\\Omega) = \\sigma_u^2 \\frac{2 L_u}{\\pi} \\frac{1}{1 + (L_u \\Omega)^2} \\quad (\\text{Спектр Драйдена})',
+  },
+  {
+    id: 'feat_rnd_quantum_inspired_combinatorial_fleet_router',
+    title: '86. Квантово-Вдохновленный Маршрутизатор Флота БПЛА (Quantum Annealing Multi-Vehicle Mission Solver)',
+    category: 'Инженерная Полезность & САПР',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Логистика & Маршруты',
+    priority: 'p3_rnd',
+    priorityLabel: 'P3: Перспективно & R&D',
+    description: 'Решение задачи маршрутизации разнородного парка БПЛА (Vehicle Routing Problem with Time Windows & Energy Limits) с помощью симуляции квантового отжига (QUBO / Simulated Quantum Annealing) с учетом расхода энергии на ветер и ограничений полетных зон No-Fly Zones.',
+    engineeringImpact: 'Оптимизирует логистику доставки и картографирования десятками дронов одновременно с минимальным суммарным расходом АКБ.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Квантовая Оптимизация & Логистика',
+    mathBasis: '\\min \\sum_{i,j} c_{ij} x_{ij} + \\lambda \\sum_k \\left(E_{\\text{req},k} - E_{\\text{cap},k}\\right)^2, \\quad x_{ij} \\in \\{0, 1\\}',
+  },
+  {
+    id: 'feat_rnd_augmented_reality_windtunnel_telemetry',
+    title: '87. Дополненная Реальность (WebXR AR / VR) для Натурных Испытаний & Виртуальная Аэротруба',
+    category: 'Визуальное Восприятие & 3D Графика',
+    vehicleClass: 'universal',
+    vehicleClassLabel: 'WebXR / AR Инженерия',
+    priority: 'p3_rnd',
+    priorityLabel: 'P3: Перспективно & R&D',
+    description: 'Проекция расчетных линий тока CFD и эпюр напряжений прямо на реальный физический планер через камеру смартфона, планшета или AR-очки (Apple Vision Pro, Meta Quest 3) по технологии WebXR. Наложение реальной телеметрии датчиков давления на 3D-модель вживую.',
+    engineeringImpact: 'Стирает границу между виртуальным расчетом и натурным макетом в цехе или на аэродроме.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'AR/VR Инженерия',
+    mathBasis: '\\mathbf{T}_{\\text{AR}} = \\text{PoseEstimation}(\\text{CameraFrame}, \\text{AprilTag} \\cup \\text{FeatureMesh})',
+  },
+  {
+    id: 'feat_rnd_autonomous_aerodynamic_evolution_genetic_lab',
+    title: '88. Автономная Эволюционная Лаборатория Профилей (Self-Evolving Supercritical & Low-Re Airfoils)',
+    category: 'Аэродинамика',
+    vehicleClass: 'universal',
+    vehicleClassLabel: 'Генеративный ИИ & Профили',
+    priority: 'p3_rnd',
+    priorityLabel: 'P3: Перспективно & R&D',
+    description: 'Автономный ИИ-генератор, самостоятельно изобретающий новые нестандартные аэродинамические профили под экстремальные ТЗ (сверхнизкие $Re < 30,000$, ламинарные профили с отодвинутым градиентом давления, сверхкритические профили без скачков уплотнения). Прямая генерация параметров CST (Class-Shape Transformation).',
+    engineeringImpact: 'Находит аэродинамические формы с качеством $L/D$ на 15–20% выше классических профилей NACA и Selig.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Нейро-Аэродинамика & AI-CAE',
+    mathBasis: '\\zeta(\\psi) = C_{N2}^{N1}(\\psi) \\sum_{i=0}^n A_i S_i(\\psi) + \\psi \\Delta\\zeta_{te} \\quad (\\text{CST Параметризация})',
+  },
+
+  // ==========================================
+  // РАЗДЕЛ VI: СТРАТЕГИЧЕСКИЕ НАПРАВЛЕНИЯ A, B, C, D И ПРОРЫВНЫЕ БПЛА ТЕХНОЛОГИИ (#89–#100)
+  // ==========================================
+  {
+    id: 'feat_dir_a_cad_step_stl_cfd_mesh_importer',
+    title: '89. [Направление A] Импорт/Экспорт 3D CAD Геометрии (STEP, IGES, STL, OBJ) & Автогенератор Сетки для VLM/CFD',
+    category: 'Инженерная Полезность & САПР',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / CAD & Сетки',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Встроенный веб-конвертер и парсер твердотельных форматов CAD (STEP AP214/AP242, IGES, STL, OBJ, glTF). Автоматическая триангуляция и генерация структурированных поверхностных сеток (VLM Vortex Lattice Panels, Panel Method BEM) с экспортом геометрии и распределений давления в OpenFOAM, Ansys, SolidWorks и FreeCAD.',
+    engineeringImpact: 'Позволяет загрузить готовую 3D-модель корпуса беспилотника из CAD-пакета и за секунды получить аэродинамические поля без ручного ввода геометрии.',
+    autoDetected: false,
+    defaultStatus: 'in_progress',
+    targetMilestone: 'Направление A: CAD/CFD Интеграция',
+    mathBasis: '\\nabla^2 \\Phi = 0, \\quad \\sum_{j=1}^N A_{ij} \\mu_j = -\\mathbf{V}_\\infty \\cdot \\mathbf{n}_i \\quad (\\text{Панельный метод 3D})',
+  },
+  {
+    id: 'feat_dir_a_cad_parametric_airframe_export_dxf_step',
+    title: '90. [Направление A] Параметрический Генератор Лонжеронов, Нервюр & Экспорт в DXF/STEP для ЧПУ и Лазера',
+    category: 'Прочность & Вес',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / ЧПУ Производство',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Автоматическая нарезка крыла и фюзеляжа БПЛА на силовой каркас: корневые и концевые нервюры с облегчениями, пазы под карбоновые трубки-лонжероны, стрингеры и замки обшивки. Экспорт чертежей разверток 1:1 в формат DXF для лазерной/фрезерной резки фанеры, бальзы и углепластика.',
+    engineeringImpact: 'Сокращает цикл от математического расчета крыла до готовой нарезки силового набора для сборки прототипа с дней до 5 минут.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Направление A: CAD/CFD Интеграция',
+    mathBasis: 'I_x = \\int y^2 dA, \\quad \\sigma_{\\text{bend}} = \\frac{M_z(y) \\cdot z}{I_z}, \\quad \\tau_{\\text{shear}} = \\frac{Q_y \\cdot S_z}{I_z \\cdot b}',
+  },
+  {
+    id: 'feat_dir_b_hil_sil_sitl_autopilot_in_loop',
+    title: '91. [Направление B] Аппаратно-Программная Интеграция HIL / SIL (SITL ArduPilot, PX4, Betaflight & WebSerial)',
+    category: 'Динамика & СУ',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / HIL-SIL Симуляция',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Полноценный симулятор Software-in-the-Loop (SIL) и Hardware-in-the-Loop (HIL): трансляция виртуальных показаний гироскопов, акселерометров, магнитометров и GPS по протоколу MAVLink v2 / WebSockets в прошивки ArduPilot SITL / PX4 Gazebo, с приемом управляющих сигналов моторов PWM/DShot в реальном времени.',
+    engineeringImpact: 'Позволяет всесторонне тестировать автопилот, сценарии обрыва связи и аварийные возвраты (RTL) без риска разбить физический дрон.',
+    autoDetected: false,
+    defaultStatus: 'in_progress',
+    targetMilestone: 'Направление B: HIL/SIL Интеграция',
+    mathBasis: '\\dot{\\mathbf{x}} = \\mathbf{f}(\\mathbf{x}, \\mathbf{u}_{\\text{PWM}}), \\quad \\mathbf{z}_{\\text{IMU}} = \\mathbf{C}\\mathbf{x} + \\mathbf{b}_{\\text{gyro}} + \\boldsymbol{\\eta}_{\\text{noise}}',
+  },
+  {
+    id: 'feat_dir_b_autocode_firmware_generator_cpp',
+    title: '92. [Направление B] Генератор C++ Исходного Кода & Конфигов Автопилота (Auto-code C++/Ino & Mixer Matrix)',
+    category: 'Космос & Авионика',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Автокод C++',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Автоматическая компиляция рассчитанных аэродинамических матриц моментов, коэффициентов регуляторов (PID, LQR, SMC) и калибровочных таблиц фильтра Калмана в готовый исходный C++ код и конфигурационные файлы (.param, .json) для полетных стеков ArduPilot, PX4, iNav и Betaflight.',
+    engineeringImpact: 'Устраняет человеческий фактор при ручном переносе расчетных коэффициентов в конфигураторы автопилотов.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Направление B: HIL/SIL Интеграция',
+    mathBasis: '\\mathbf{u}_{\\text{motor}} = \\mathbf{B}^{\\dagger} \\begin{bmatrix} \\tau_x \\\\ \\tau_y \\\\ \\tau_z \\\\ T_{\\text{total}} \\end{bmatrix}, \\quad \\mathbf{B}^{\\dagger} = \\mathbf{B}^T (\\mathbf{B}\\mathbf{B}^T)^{-1}',
+  },
+  {
+    id: 'feat_dir_c_generative_ai_bayesian_uav_opt',
+    title: '93. [Направление C] AI/ML Ассистент Оптимизации Планера (Generative Aero Design & Bayesian Optimization)',
+    category: 'Аэродинамика',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Generative AI',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Генеративный ИИ-ассистент на базе байесовской оптимизации (Gaussian Process Regression) и генетических алгоритмов (NSGA-III). Автоматический подбор оптимального размаха крыла, крутки $\\varepsilon(y)$, профиля и положения ЦТ под целевое ТЗ: максимальная дальность при ветре 12 м/с, минимальная масса или минимальная ЭПР.',
+    engineeringImpact: 'Находит нетривиальные конфигурации планеров с увеличением продолжительности полета БПЛА на 25–40% за считанные секунды.',
+    autoDetected: false,
+    defaultStatus: 'in_progress',
+    targetMilestone: 'Направление C: AI Оптимизация',
+    mathBasis: '\\mathbf{x}^* = \\arg\\max_{\\mathbf{x}} \\text{EI}(\\mathbf{x}) = \\mathbb{E}\\left[\\max(0, f(\\mathbf{x}) - f(\\mathbf{x}^+))\\right] \\quad (\\text{Expected Improvement})',
+  },
+  {
+    id: 'feat_dir_c_ml_surrogate_flight_envelope_rl_evasion',
+    title: '94. [Направление C] Нейросетевое Обучение с Подкреплением (RL) для Противозенитного Маневрирования БПЛА',
+    category: 'Динамика & СУ',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / RL Маневрирование',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Адаптивный автопилот на базе Deep Reinforcement Learning (PPO / SAC): обучение агента выполнению предельных противозенитных маневров (Barrel Roll, Split-S, змейка) с учетом динамических ограничений по сваливанию крыла и допустимой перегрузке $N_y \\le 8g$.',
+    engineeringImpact: 'Обеспечивает автономное выживание БПЛА в зонах активного огневого воздействия без вмешательства оператора.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Направление C: AI Оптимизация',
+    mathBasis: 'J(\\pi_\\theta) = \\mathbb{E}_{\\tau \\sim \\pi_\\theta}\\left[\\sum_{t=0}^T \\gamma^t r(s_t, a_t) - \\alpha \\mathcal{D}_{\\text{stall}}(s_t)\\right]',
+  },
+  {
+    id: 'feat_dir_d_automated_pdf_latex_engineering_report',
+    title: '95. [Направление D] Автоматическая Генерация Инженерных Отчетов (Automated PDF / LaTeX Technical Dossier)',
+    category: 'Инженерная Полезность & САПР',
+    vehicleClass: 'universal',
+    vehicleClassLabel: 'Документация / ГОСТ & MIL-STD',
+    priority: 'p0_urgent',
+    priorityLabel: 'P0: Срочно & Критично',
+    description: 'Генератор официального научно-технического отчета и паспорта летной годности БПЛА в 1 клик. Автоматическая верстка в формате PDF / LaTeX со всеми расчетными графиками (поляры, флаттер, диаграммы устойчивости), таблицами ТТХ, сводкой центровок и ссылками на отраслевые стандарты (ГОСТ В, MIL-STD-1797, STANAG 4671).',
+    engineeringImpact: 'Экономит сотни часов работы инженеров на ручное оформление документации для сертификации и защиты аванпроекта перед заказчиком.',
+    autoDetected: false,
+    defaultStatus: 'in_progress',
+    targetMilestone: 'Направление D: Авто-Отчеты',
+    mathBasis: '\\text{Dossier} = \\text{CompileLaTeX}\\left(\\mathcal{M}_{\\text{aero}}, \\mathcal{P}_{\\text{propulsion}}, \\mathcal{S}_{\\text{stability}}, \\mathcal{E}_{\\text{avionics}}\\right)',
+  },
+  {
+    id: 'feat_dir_d_interactive_bom_cost_assembly_exporter',
+    title: '96. [Направление D] Интерактивная Ведомость Материалов (BOM), Смета Расходов & Технологическая Карта Сборки',
+    category: 'Инженерная Полезность & САПР',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Серийное Производство',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Автоматическое формирование полной спецификации изделия (Bill of Materials): вес, марки карбона/смолы, площадь раскроя ткани, перечень покупных компонентов (сервоприводы, ESC, двигатели, видеопередатчики, разъемы XT60/SMA) с расчетом себестоимости серии (1, 10, 100, 1000 шт.) и экспорт в Excel/CSV/JSON.',
+    engineeringImpact: 'Позволяет мгновенно оценить коммерческую рентабельность и плановую трудоемкость серийного выпуска дронов.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Направление D: Авто-Отчеты',
+    mathBasis: 'C_{\\text{unit}}(N) = \\frac{C_{\\text{NRE}}}{N} + \\sum_{i} c_{\\text{raw},i} + \\sum_{j} c_{\\text{cots},j} + t_{\\text{mfg}} \\cdot R_{\\text{labor}}',
+  },
+  {
+    id: 'feat_uav_heavy_cargo_tethered_heavy_lifter',
+    title: '97. Тяжелые Грузовые БПЛА & Привязные Энергетические Платформы (Heavy Lift Tethered Quad-Octocopter & High-Voltage DC 1000V)',
+    category: 'Двигатели & Пропульсия',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Тяжелые Грузы',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Расчет тяжелых мультироторных и коаксиальных платформ грузоподъемностью 50–300 кг: подбор соосных ВМГ большого диаметра ($28\\dots 45$ дюймов), высоковольтного бортового питания (HVDC 800–1000 В с привязным кабелем от наземного генератора) и круглосуточное зависание без ограничения по АКБ.',
+    engineeringImpact: 'Критично для создания ретрансляторов связи, систем пожаротушения высотных зданий и тяжелой логистики.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Тяжелые БПЛА & Энергетика',
+    mathBasis: 'P_{\\text{cable\\_loss}} = I^2 R = \\left(\\frac{P_{\\text{hover}}}{V_{\\text{tether}}}\\right)^2 \\frac{\\rho_{\\text{Cu}} L_{\\text{cable}}}{S_{\\text{wire}}}',
+  },
+  {
+    id: 'feat_uav_hybrid_vtol_tailsitter_aerodynamics',
+    title: '98. Беспилотники Схемы Тейлситтер (Tailsitter VTOL & Hover-to-Level Flight Pitch Maneuver)',
+    category: 'Аэродинамика',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Тейлситтеры',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Аэродинамический расчет беспилотников вертикального взлета с опорой на хвост (Tailsitter, летающее крыло с обдуваемыми элевонами). Расчет обдува крыла струями винтов на нулевой скорости полета, устойчивости при боковом ветре до 15 м/с и плавного перехода в горизонт без поворотных поворотных механизмов моторов.',
+    engineeringImpact: 'Максимальная весовая отдача и надежность планера за счет полного отсутствия тяжелых поворотных шарниров и сервоприводов поворота крыла.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'eVTOL & Конвертопланы',
+    mathBasis: 'V_{\\text{slipstream}} = \\sqrt{V_\\infty^2 + \\frac{2 T}{\\rho A_{\\text{disk}}}}, \\quad L_{\\text{elevon}} = \\frac{1}{2} \\rho V_{\\text{slipstream}}^2 S_e C_{L\\delta} \\delta_e',
+  },
+  {
+    id: 'feat_uav_stealth_radar_cross_section_po_solver',
+    title: '99. Радиолокационная Заметность БПЛА (RCS / ЭПР Физическая Оптика & Экранирование Двигателей)',
+    category: 'Космос & Авионика',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Стелс & ЭПР',
+    priority: 'p1_high',
+    priorityLabel: 'P1: Высокий приоритет',
+    description: 'Расчет эффективной поверхности рассеяния (ЭПР, $\\sigma$) планера БПЛА методами физической оптики (Physical Optics PO) и физической теории дифракции (PTD). Анализ влияния S-образных воздухозаборников, скоса кромок фюзеляжа и радиопоглощающих композитных покрытий на дальность обнаружения РЛС ПВО.',
+    engineeringImpact: 'Позволяет проектировать малозаметные беспилотные летательные аппараты с ЭПР менее $0.005\\text{ м}^2$ (уровень птицы).',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Акустика & Стелс',
+    mathBasis: '\\sigma(\\theta, \\phi) = \\frac{4\\pi}{\\lambda^2} \\left| \\iint_S (\\mathbf{n} \\cdot \\mathbf{e}_r) e^{i 2 k \\mathbf{r} \\cdot \\mathbf{e}_r} dS \\right|^2 \\quad (\\text{Physical Optics})',
+  },
+  {
+    id: 'feat_uav_underwater_aerial_transmedium_drone',
+    title: '100. Транссредовые БПЛА-Амфибии (Aerial-Aquatic Trans-Medium Drone & Hydro-Aero Dynamics)',
+    category: 'Аэродинамика',
+    vehicleClass: 'uav',
+    vehicleClassLabel: 'БПЛА / Транссредовые Амфибии',
+    priority: 'p2_medium',
+    priorityLabel: 'P2: Средний приоритет',
+    description: 'Моделирование уникальных беспилотных аппаратов, способных летать в воздухе, погружаться под воду на глубину до 30 м и снова взлетать с водной глади. Расчет гидродинамического сопротивления в несжимаемой воде (плотность в 800 раз выше воздуха), динамики выхода через границу раздела сред и смены шага/оборотов герметичных ВМГ.',
+    engineeringImpact: 'Открывает новую эру океанографических исследований, инспекции гидротехнических сооружений и скрытного приводнения.',
+    autoDetected: false,
+    defaultStatus: 'planned',
+    targetMilestone: 'Транссредовая Гидро-Аэродинамика',
+    mathBasis: 'F_{\\text{hydro}} = \\frac{1}{2} \\rho_{\\text{water}} V_{\\text{sub}}^2 S C_{D,\\text{hydro}} + \\left(m_{\\text{drone}} g - \\rho_{\\text{water}} g V_{\\text{displaced}}\\right)',
+  },
 ];
 
 interface FutureRoadmapModalProps {
@@ -1267,7 +1671,7 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
   const [selectedVehicleClass, setSelectedVehicleClass] = useState<VehicleClass>('all');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [activeTab, setActiveTab] = useState<'matrix' | 'ux_visual_ecosystem' | 'cad_constructor' | 'features_list' | 'add_feature'>('matrix');
+  const [activeTab, setActiveTab] = useState<'matrix' | 'ux_visual_ecosystem' | 'cad_constructor' | 'future_horizons' | 'features_list' | 'add_feature'>('matrix');
 
   // New feature form state
   const [newTitle, setNewTitle] = useState('');
@@ -1717,6 +2121,18 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
             >
               <Sparkles className="w-3.5 h-3.5" />
               <span>🛠️ 3D САПР & ИИ (4 Фазы)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('future_horizons')}
+              className={`flex items-center gap-1.5 px-3 py-1 rounded-lg transition-colors cursor-pointer ${
+                activeTab === 'future_horizons'
+                  ? 'bg-gradient-to-r from-emerald-400 via-cyan-400 to-indigo-500 text-slate-950 font-bold shadow-md'
+                  : 'text-emerald-400 hover:text-emerald-200 bg-emerald-500/10 border border-emerald-500/20'
+              }`}
+            >
+              <Atom className="w-3.5 h-3.5" />
+              <span>🚀 БПЛА, Направления A-B-C-D & R&D (#75–#100)</span>
             </button>
             <button
               type="button"
@@ -2901,6 +3317,352 @@ export const FutureRoadmapModal: React.FC<FutureRoadmapModalProps> = ({ isOpen, 
                   className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-rose-500 text-slate-950 font-bold text-xs hover:from-amber-400 hover:to-rose-400 cursor-pointer shadow-lg shadow-amber-950/40"
                 >
                   <span>Открыть задачи САПР (#41–#50)</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* TAB 4: STRATEGIC FUTURE HORIZONS & DEEP R&D (#75–#100) */}
+          {activeTab === 'future_horizons' && (
+            <div className="space-y-6 animate-fadeIn font-mono">
+              {/* Header Hero Banner */}
+              <div className="p-5 sm:p-6 rounded-3xl bg-gradient-to-r from-emerald-950/90 via-slate-900 to-indigo-950/90 border border-emerald-500/40 shadow-2xl space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex items-center gap-3.5">
+                    <div className="p-3 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
+                      <Atom className="w-7 h-7" />
+                    </div>
+                    <div>
+                      <h3 className="text-base sm:text-xl font-black text-white flex items-center gap-2">
+                        <span>Стратегические Горизонты & Направления Развития БПЛА</span>
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          26 Deep R&D Фич (#75–#100)
+                        </span>
+                      </h3>
+                      <p className="text-xs text-slate-300 font-sans mt-0.5 max-w-3xl">
+                        Ключевые направления эволюции инженерной платформы: 4 флагманских вектора (A: CAD/CFD Сетки, B: HIL/SIL Симуляция, C: AI Оптимизация, D: Авто-Отчеты PDF/LaTeX) и передовые технологии тяжелых, стелс и транссредовых беспилотных систем.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSelectedPriority('all');
+                        setSelectedVehicleClass('all');
+                        setSelectedCategory('all');
+                        setActiveTab('features_list');
+                      }}
+                      className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-400 to-cyan-400 text-slate-950 font-bold text-xs hover:from-emerald-300 hover:to-cyan-300 transition-all flex items-center gap-1.5 cursor-pointer shadow-lg shadow-emerald-950/50"
+                    >
+                      <CheckSquare className="w-3.5 h-3.5" />
+                      <span>Открыть все 100 задач в Списке</span>
+                    </button>
+                  </div>
+                </div>
+
+                {/* 4 CORE STRATEGIC DIRECTIONS (A, B, C, D) BANNER */}
+                <div className="space-y-2 pt-1">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300 flex items-center gap-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>4 Ключевых Направления Развития Платформы:</span>
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-sans">
+                      Флагманские инженерные модули (#89–#96)
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    {/* Direction A */}
+                    <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-cyan-500/40 hover:border-cyan-400 transition-all space-y-2 group shadow-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-cyan-300 font-bold text-xs">
+                          <Layers className="w-4 h-4 text-cyan-400" />
+                          <span>Направление A</span>
+                        </div>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                          CAD & CFD
+                        </span>
+                      </div>
+                      <div className="text-[11px] font-bold text-white font-sans">
+                        Импорт/Экспорт CAD & CFD Геометрии
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-sans leading-relaxed">
+                        Парсинг STEP, IGES, STL, OBJ; автогенерация панельных сеток VLM и экспорт силового набора (лонжероны/нервюры) в DXF для ЧПУ и лазера.
+                      </p>
+                      <div className="text-[9px] text-cyan-400 font-mono font-bold pt-1 border-t border-slate-800">
+                        Фичи #89, #90
+                      </div>
+                    </div>
+
+                    {/* Direction B */}
+                    <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-emerald-500/40 hover:border-emerald-400 transition-all space-y-2 group shadow-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-emerald-300 font-bold text-xs">
+                          <Radio className="w-4 h-4 text-emerald-400" />
+                          <span>Направление B</span>
+                        </div>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          HIL / SIL
+                        </span>
+                      </div>
+                      <div className="text-[11px] font-bold text-white font-sans">
+                        Аппаратно-Программная Интеграция
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-sans leading-relaxed">
+                        SITL & HIL с ArduPilot/PX4/Betaflight через WebSerial (MAVLink v2) и автогенератор C++ кода микшеров и регуляторов автопилота.
+                      </p>
+                      <div className="text-[9px] text-emerald-400 font-mono font-bold pt-1 border-t border-slate-800">
+                        Фичи #76, #91, #92
+                      </div>
+                    </div>
+
+                    {/* Direction C */}
+                    <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-indigo-500/40 hover:border-indigo-400 transition-all space-y-2 group shadow-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-indigo-300 font-bold text-xs">
+                          <Cpu className="w-4 h-4 text-indigo-400" />
+                          <span>Направление C</span>
+                        </div>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                          Generative AI
+                        </span>
+                      </div>
+                      <div className="text-[11px] font-bold text-white font-sans">
+                        AI / ML Ассистент Оптимизации
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-sans leading-relaxed">
+                        Байесовская оптимизация формы крыла (NSGA-III, CST), PINN нейро-CFD решатель (20 мс) и Deep RL агент противозенитного маневрирования.
+                      </p>
+                      <div className="text-[9px] text-indigo-400 font-mono font-bold pt-1 border-t border-slate-800">
+                        Фичи #75, #88, #93, #94
+                      </div>
+                    </div>
+
+                    {/* Direction D */}
+                    <div className="p-3.5 rounded-2xl bg-slate-950/90 border border-amber-500/40 hover:border-amber-400 transition-all space-y-2 group shadow-lg">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2 text-amber-300 font-bold text-xs">
+                          <FileCode2 className="w-4 h-4 text-amber-400" />
+                          <span>Направление D</span>
+                        </div>
+                        <span className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                          Reports & BOM
+                        </span>
+                      </div>
+                      <div className="text-[11px] font-bold text-white font-sans">
+                        Генерация Комплексных Отчетов
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-sans leading-relaxed">
+                        Автоматическая верстка научных PDF/LaTeX отчетов летной годности по ГОСТ/MIL-STD и интерактивная ведомость материалов BOM со сметой себестоимости.
+                      </p>
+                      <div className="text-[9px] text-amber-400 font-mono font-bold pt-1 border-t border-slate-800">
+                        Фичи #95, #96
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 6 Advanced R&D Clusters Grid */}
+                <div className="space-y-2 pt-2 border-t border-emerald-500/30">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+                    <Atom className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>Специализированные Технологические Кластеры БПЛА и Космоса:</span>
+                  </span>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {/* Cluster 1: Swarm & Flocking */}
+                    <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 hover:border-indigo-500/40 transition-all space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-indigo-300 flex items-center gap-1.5">
+                          <Network className="w-3.5 h-3.5 text-indigo-400" />
+                          <span>Роевой Интеллект & Квантовая Логистика</span>
+                        </span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-indigo-500/20 text-indigo-300">#77, #86</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-sans">
+                        Полет группы в V-формации (-25% расхода энергии) и квантово-вдохновленный маршрутизатор флота QUBO.
+                      </p>
+                    </div>
+
+                    {/* Cluster 2: Heavy Lifters & Tailsitters */}
+                    <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 hover:border-emerald-500/40 transition-all space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-emerald-300 flex items-center gap-1.5">
+                          <Flame className="w-3.5 h-3.5 text-emerald-400" />
+                          <span>Тяжелые Грузовые БПЛА & Тейлситтеры</span>
+                        </span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300">#97, #98</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-sans">
+                        Привязные высоковольтные HVDC 1000V платформы (до 300 кг) и бессервоприводные Tailsitter VTOL с обдувом элевонов.
+                      </p>
+                    </div>
+
+                    {/* Cluster 3: Stealth RCS & Amphibious Transmedium */}
+                    <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 hover:border-purple-500/40 transition-all space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-purple-300 flex items-center gap-1.5">
+                          <Eye className="w-3.5 h-3.5 text-purple-400" />
+                          <span>Стелс ЭПР & Транссредовые Амфибии</span>
+                        </span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300">#99, #100</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-sans">
+                        Расчет радиолокационной заметности (PO/PTD) и гидро-аэродинамика беспилотников воздух-вода.
+                      </p>
+                    </div>
+
+                    {/* Cluster 4: FSI Flutter & Bionic Gyroids */}
+                    <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 hover:border-cyan-500/40 transition-all space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-cyan-300 flex items-center gap-1.5">
+                          <Activity className="w-3.5 h-3.5 text-cyan-400" />
+                          <span>Флаттер FSI & Бионика Gyroid</span>
+                        </span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300">#78, #82</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-sans">
+                        Аэроупругий динамический флаттер (V-g-ω) и SIMP топологическая оптимизация с гироидными сетками.
+                      </p>
+                    </div>
+
+                    {/* Cluster 5: Hydrogen & Aeroacoustics */}
+                    <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 hover:border-amber-500/40 transition-all space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-amber-300 flex items-center gap-1.5">
+                          <Flame className="w-3.5 h-3.5 text-amber-400" />
+                          <span>Водородные Элементы & FW-H Шум</span>
+                        </span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">#79, #83, #84</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-sans">
+                        Водородные PEMFC топливные элементы, аэроакустический шум винтов Фокса Вильямса и режим вихревого кольца eVTOL.
+                      </p>
+                    </div>
+
+                    {/* Cluster 6: Space, Digital Twin & WebXR AR */}
+                    <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800 hover:border-rose-500/40 transition-all space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs font-bold text-rose-300 flex items-center gap-1.5">
+                          <Globe className="w-3.5 h-3.5 text-rose-400" />
+                          <span>Космос, IoT Twin & WebXR AR</span>
+                        </span>
+                        <span className="text-[9px] px-1.5 py-0.5 rounded bg-rose-500/20 text-rose-300">#80, #81, #85, #87</span>
+                      </div>
+                      <p className="text-[10px] text-slate-400 font-sans">
+                        Гиперзвук M=5..25, предиктивная усталость планера по полетным логам и WebXR аэротруба.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Detailed 26 R&D & Direction Features Grid */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-emerald-400" />
+                    <span>Детализированный Реестр Задач Направлений A-B-C-D и Deep R&D (#75–#100)</span>
+                  </h4>
+                  <span className="text-xs text-slate-400">
+                    Интерактивные статусы и формульный аппарат
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+                  {allFeatures.filter((f) => {
+                    const idNum = parseInt(f.id.replace(/\D/g, ''), 10) || 0;
+                    return (idNum >= 75 && idNum <= 100) || f.id.startsWith('feat_dir_') || f.id.startsWith('feat_uav_') || f.id.startsWith('feat_rnd_');
+                  }).map((f) => {
+                    const status = featureStatuses[f.id] || 'planned';
+                    return (
+                      <div
+                        key={f.id}
+                        className={`p-4 rounded-2xl border transition-all flex flex-col justify-between space-y-2.5 bg-slate-950/90 ${
+                          status === 'completed'
+                            ? 'border-emerald-500/50 bg-emerald-950/10'
+                            : status === 'in_progress'
+                            ? 'border-amber-500/50 bg-amber-950/10'
+                            : 'border-slate-800 hover:border-emerald-500/30'
+                        }`}
+                      >
+                        <div className="space-y-1.5">
+                          <div className="flex items-start justify-between gap-2">
+                            <span className="text-xs font-bold text-white font-sans">{f.title}</span>
+                            <div className="flex items-center gap-1.5 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => handleToggleStatus(f.id)}
+                                className={`px-2 py-0.5 rounded-md text-[10px] font-mono font-bold cursor-pointer transition-colors ${
+                                  status === 'completed'
+                                    ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                                    : status === 'in_progress'
+                                    ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
+                                    : 'bg-slate-800 text-slate-400 border border-slate-700'
+                                }`}
+                              >
+                                {status === 'completed' ? 'ГОТОВО' : status === 'in_progress' ? 'В РАБОТЕ' : 'ПЛАН'}
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="px-2 py-0.2 rounded-full bg-slate-800 text-slate-300 text-[9px] font-mono">
+                              {f.vehicleClassLabel}
+                            </span>
+                            <span className="px-2 py-0.2 rounded-full bg-indigo-950/60 text-indigo-300 border border-indigo-800/60 text-[9px] font-mono">
+                              {f.category}
+                            </span>
+                            <span className="px-2 py-0.2 rounded-full bg-emerald-950/60 text-emerald-300 border border-emerald-800/60 text-[9px] font-mono">
+                              {f.targetMilestone}
+                            </span>
+                          </div>
+
+                          <p className="text-[11px] text-slate-300 font-sans leading-relaxed">
+                            {f.description}
+                          </p>
+                        </div>
+
+                        <div className="space-y-1.5 pt-2 border-t border-slate-800/80">
+                          <div className="text-[10px] text-emerald-400 font-sans">
+                            <strong>🎯 Польза для инженера:</strong> {f.engineeringImpact}
+                          </div>
+                          {f.mathBasis && (
+                            <div className="text-[10px] font-mono text-indigo-300 pt-1 border-t border-slate-800">
+                              <span className="font-bold text-indigo-400">📐 Мат. базис: </span>
+                              <MathText text={f.mathBasis} />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Bottom Navigation Switcher */}
+              <div className="p-4 rounded-2xl bg-slate-950 border border-slate-800 flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <h4 className="text-xs font-bold text-white">Все 100 инженерных задач зафиксированы в архитектуре</h4>
+                  <p className="text-[11px] text-slate-400 font-sans">
+                    Перейдите в общий реестр задач для сквозного поиска, фильтрации по приоритетам P0/P1/P2/P3 и добавления собственных фич.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSelectedCategory('all');
+                    setSelectedVehicleClass('all');
+                    setActiveTab('features_list');
+                  }}
+                  className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-400 to-indigo-500 text-slate-950 font-bold text-xs hover:from-emerald-300 hover:to-indigo-400 cursor-pointer shadow-lg shadow-emerald-950/40"
+                >
+                  <span>Открыть полный реестр задач (#1–#100)</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
