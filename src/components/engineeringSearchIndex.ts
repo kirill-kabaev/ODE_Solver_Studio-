@@ -445,6 +445,60 @@ export const ENGINEERING_SEARCH_ITEMS: EngineeringSearchItem[] = [
       'тяговооруженность', 'аккумулятор', 'бпла'
     ],
   },
+  {
+    id: 'uav_dynamic_soaring',
+    title: 'Динамический Парящий Полет БПЛА (Wind Shear Albatross Cycle)',
+    shortTitle: 'Динамическое Парение БПЛА',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_dynamic_soaring',
+    handbookTopicId: 'aero_cad_mdo',
+    iconName: 'Wind',
+    badge: 'Сдвиг Ветра 0-Расход',
+    badgeColor: 'from-sky-400 to-teal-400 text-slate-950',
+    description: 'Бестопливный автономный полет БПЛА в атмосферном градиенте ветра (Wind Shear dU/dz): 4-фазный цикл Рэлея (Downwind dive, Bottom turn, Upwind climb, Top turn) с извлечением кинетической энергии.',
+    formulaLatex: '\\frac{dE}{dt} = -m V_a \\left(\\frac{dW}{dz} \\dot{z}\\right) \\cos(\\psi)',
+    keywords: [
+      'парение', 'динамический полет', 'градиент ветра', 'сдвиг ветра', 'альбатрос', 'рэлей', 'планер', 'бестопливный'
+    ],
+  },
+  {
+    id: 'uav_laser_power_beaming',
+    title: 'Беспроводная Лазерная Передача Энергии & Зарядка БПЛА в Полете',
+    shortTitle: 'Лазерная Зарядка БПЛА',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_laser_power_beaming',
+    handbookTopicId: 'bem_propulsion',
+    iconName: 'Zap',
+    badge: 'Лазерная Подпитка',
+    badgeColor: 'from-amber-400 to-orange-400 text-slate-950',
+    description: 'Непрерывное беспосадочное электропитание БПЛА на дистанциях до 2.5 км: волоконный лазер 1070 нм, GaAs матрица с КПД 52%, FSM слежение с точностью до мкрад, тепловой баланс.',
+    formulaLatex: 'P_{\\text{elec}} = P_{\\text{laser}} \\cdot e^{-\\alpha R} \\cdot \\eta_{\\text{interception}} \\cdot \\eta_{\\text{GaAs}}',
+    keywords: [
+      'лазер', 'беспроводная зарядка', 'laser beaming', 'gaas', 'фотоэлементы', 'подзарядка в полете', 'турбулентность', 'fsm'
+    ],
+  },
+  {
+    id: 'uav_miniature_sar',
+    title: 'Миниатюрная РЛС с Синтезированной Апертурой (Miniature FMCW SAR & InSAR)',
+    shortTitle: 'Бортовой SAR & InSAR Радар',
+    group: 'uav_systems',
+    domain: 'aero',
+    category: 'uav_systems',
+    subTab: 'uav_miniature_sar',
+    handbookTopicId: 'aero_cad_mdo',
+    iconName: 'Scan',
+    badge: 'SAR Радар 11 см',
+    badgeColor: 'from-emerald-400 to-teal-400 text-slate-950',
+    description: 'Всепогодная радиолокационная съемка сквозь облака и листву: Ka-диапазон 24 ГГц, ЛЧМ девиация 1.2 ГГц, независимое от дальности азимутальное разрешение delta_az = La / 2 и цифровая интерферометрия высоты рельефа InSAR.',
+    formulaLatex: '\\delta r = \\frac{c}{2B}, \\quad \\delta r_{\\text{az}} = \\frac{L_a}{2}, \\quad z_{2\\pi} = \\frac{\\lambda R_0 \\sin\\theta}{2 B_\\perp}',
+    keywords: [
+      'sar', 'рсa', 'радар', 'синтезированная апертура', 'интерферометрия', 'insar', 'fmcw', 'лчм', 'радиолокация', 'рельеф'
+    ],
+  },
 
   // ============================================================================
   // 2. ОБЩАЯ АЭРОДИНАМИКА И ФУНДАМЕНТАЛЬНЫЕ СОЛВЕРЫ (GENERAL AERO)

@@ -37,6 +37,7 @@ import {
   ShieldCheck,
   Droplets,
   Fan,
+  Scan,
 } from 'lucide-react';
 import { VortexLatticeModule } from './VortexLatticeModule';
 import { BladeElementMomentumModule } from './bem/BladeElementMomentumModule';
@@ -81,6 +82,9 @@ import { UAVHydrogenCryoFuelCellModule } from './uav/UAVHydrogenCryoFuelCellModu
 import { UAVCoaxialDuctedFanVectoredThrustModule } from './uav/UAVCoaxialDuctedFanVectoredThrustModule';
 import { UAVQuantumGravimetricAnomalyNavModule } from './uav/UAVQuantumGravimetricAnomalyNavModule';
 import { UAVPlasmaActuatorFlowControlModule } from './uav/UAVPlasmaActuatorFlowControlModule';
+import { UAVDynamicSoaringWindGradientModule } from './uav/UAVDynamicSoaringWindGradientModule';
+import { UAVWirelessLaserPowerBeamingModule } from './uav/UAVWirelessLaserPowerBeamingModule';
+import { UAVMiniatureSARInterferometryModule } from './uav/UAVMiniatureSARInterferometryModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
 import { WingFEAStructuralStudio } from './physics/WingFEAStructuralStudio';
@@ -154,6 +158,9 @@ export type AeroSubTab =
   | 'uav_ducted_fan_thrust_vector'
   | 'uav_quantum_gravimetric_nav'
   | 'uav_plasma_actuator_flow'
+  | 'uav_dynamic_soaring'
+  | 'uav_laser_power_beaming'
+  | 'uav_miniature_sar'
   | 'rocket_staging_optimizer'
   | 'pde_acoustic_wave'
   | 'wing_fea_structural'
@@ -1258,6 +1265,45 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             <Zap className="w-3.5 h-3.5 text-purple-400" />
             <span>⚡ Плазменное Управление Пограничным Слоем (DBD Actuator Stall Delay)</span>
           </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_dynamic_soaring')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_dynamic_soaring'
+                ? 'bg-gradient-to-r from-sky-400 via-cyan-500 to-teal-400 text-slate-950 shadow-md font-black ring-1 ring-sky-400/50'
+                : 'text-sky-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-sky-900/50'
+            }`}
+          >
+            <Wind className="w-3.5 h-3.5 text-sky-400" />
+            <span>🌊 Динамический Парящий Полет БПЛА (Wind Shear Albatross Cycle)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_laser_power_beaming')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_laser_power_beaming'
+                ? 'bg-gradient-to-r from-amber-400 via-yellow-500 to-orange-400 text-slate-950 shadow-md font-black ring-1 ring-amber-400/50'
+                : 'text-amber-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-amber-900/50'
+            }`}
+          >
+            <Zap className="w-3.5 h-3.5 text-amber-400" />
+            <span>⚡ Лазерная Передача Энергии & Зарядка БПЛА в Полете (GaAs PV)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_miniature_sar')}
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_miniature_sar'
+                ? 'bg-gradient-to-r from-emerald-400 via-teal-500 to-cyan-400 text-slate-950 shadow-md font-black ring-1 ring-emerald-400/50'
+                : 'text-emerald-300 hover:text-white hover:bg-slate-800 bg-slate-950/60 border border-emerald-900/50'
+            }`}
+          >
+            <Scan className="w-3.5 h-3.5 text-emerald-400" />
+            <span>📡 Миниатюрная РЛС с Синтезированной Апертурой (SAR & InSAR)</span>
+          </button>
         </div>
       )}
 
@@ -1394,6 +1440,9 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           {activeUAVSubTab === 'uav_ducted_fan_thrust_vector' && <UAVCoaxialDuctedFanVectoredThrustModule />}
           {activeUAVSubTab === 'uav_quantum_gravimetric_nav' && <UAVQuantumGravimetricAnomalyNavModule />}
           {activeUAVSubTab === 'uav_plasma_actuator_flow' && <UAVPlasmaActuatorFlowControlModule />}
+          {activeUAVSubTab === 'uav_dynamic_soaring' && <UAVDynamicSoaringWindGradientModule />}
+          {activeUAVSubTab === 'uav_laser_power_beaming' && <UAVWirelessLaserPowerBeamingModule />}
+          {activeUAVSubTab === 'uav_miniature_sar' && <UAVMiniatureSARInterferometryModule />}
         </>
       )}
 
