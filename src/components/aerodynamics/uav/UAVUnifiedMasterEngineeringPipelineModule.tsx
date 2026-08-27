@@ -74,6 +74,7 @@ import { UAVFlightDynamicsSimulationPanel } from './pipeline/UAVFlightDynamicsSi
 import { UAVDigitalTwinHub, DigitalTwinBusState } from './pipeline/UAVDigitalTwinHub';
 import { UAVEngineeringArtifactsExporter } from './pipeline/UAVEngineeringArtifactsExporter';
 import { UAVHILMissionSimulator } from './pipeline/UAVHILMissionSimulator';
+import { UAVDesignTradeOffAdvisor } from './pipeline/UAVDesignTradeOffAdvisor';
 
 export type PipelineStageId =
   | 'stage1_concept'
@@ -506,6 +507,20 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
     setBatteryMassKg((candidate.batteryCap_mAh / 1000) * 0.085);
     const wingArea = candidate.wingspan_m * ((candidate.chordRoot_m + candidate.chordTip_m) / 2);
     setStructuralMassKg(1.1 + wingArea * 1.6 + candidate.wingspan_m * 0.4);
+  };
+
+  // Apply Trade-Off Recommended Action to Digital Twin
+  const handleApplyTradeOffFix = (paramKey: string, newValue: number) => {
+    if (paramKey === 'wingspan_m') {
+      setWingspanM(newValue);
+    } else if (paramKey === 'cruiseSpeed_kmh') {
+      setCruiseSpeedKmh(newValue);
+    } else if (paramKey === 'batteryCap_mAh') {
+      setBatteryCapMah(newValue);
+      setBatteryMassKg((newValue / 1000) * 0.085);
+    } else if (paramKey === 'payload_kg') {
+      setPayloadXM(0.12);
+    }
   };
 
   // Apply archetype preset
@@ -1330,6 +1345,15 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
                   currentPayload={payload_kg}
                   currentCruiseSpeed={cruiseSpeed_kmh}
                   onApplyCandidate={handleApplyParetoCandidate}
+                />
+              </div>
+
+              {/* Intelligent Design Trade-Off & Conflict Matrix Advisor */}
+              <div className="pt-2">
+                <UAVDesignTradeOffAdvisor
+                  busState={digitalTwinBusState}
+                  onApplyFix={handleApplyTradeOffFix}
+                  onNavigateToStage={(stageId) => setActiveStage(stageId as PipelineStageId)}
                 />
               </div>
             </div>
