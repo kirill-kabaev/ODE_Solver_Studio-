@@ -577,6 +577,134 @@ app.post("/api/paper/generate-ai", async (req, res) => {
   }
 });
 
+// AI 3D UAV Constructor Synthesizer Endpoint
+app.post("/api/uav/ai-synthesize-3d", async (req, res) => {
+  try {
+    const { missionPrompt, architecture, targetRangeKm, targetPayloadKg, targetSpeedKmh } = req.body;
+    const ai = getAI();
+
+    const systemPrompt = `Ты — ведущий генеральный конструктор беспилотных авиационных систем (ОКБ Сухого / Lockheed Skunk Works / Baykar Tech).
+Твоя задача — сгенерировать полную параметрическую 3D спецификацию БПЛА по техническому заданию пользователя.
+
+Требования к ответу:
+- Строго валидный JSON без markdown оберток.
+- Физически корректные аэродинамические и весовые балансы.
+- Корректное расположение компонентов вдоль оси X (нос X=0... корма X=L) и Z/Y.
+- Центр тяжести X_cg должен обеспечивать положительный запас статической устойчивости SM = (X_np - X_cg) / MAC = 8% ... 18%.
+
+Схема JSON:
+{
+  "name": "Название БПЛА",
+  "architecture": "flying_wing" | "conventional" | "twin_boom" | "vtol_quadplane" | "canard" | "tandem" | "x_wing_munition",
+  "description": "Краткое инженерное описание проекта",
+  "tacticalRole": "Разведчик / Ударный / Доставка / Мониторинг / Перехватчик",
+  "dimensions": {
+    "wingspan_m": 2.4,
+    "rootChord_m": 0.38,
+    "tipChord_m": 0.18,
+    "sweep_deg": 12.0,
+    "dihedral_deg": 2.5,
+    "washout_deg": -2.0,
+    "fuselageLength_m": 1.45,
+    "fuselageWidth_m": 0.22,
+    "fuselageHeight_m": 0.20,
+    "tailSpan_m": 0.65,
+    "vTailAngle_deg": 110,
+    "airfoil": "MH60" | "NACA2412" | "NACA4415" | "ClarkY" | "Selig1223"
+  },
+  "mass": {
+    "dryMass_kg": 3.2,
+    "payloadMass_kg": 1.5,
+    "batteryMass_kg": 1.8,
+    "totalMass_kg": 6.5
+  },
+  "propulsion": {
+    "type": "single_pusher" | "single_tractor" | "twin_tractor" | "vtol_quad_pusher" | "micro_turbojet",
+    "motorModel": "T-Motor MN5008 KV340",
+    "propellerSize": "18x6.5 Carbon",
+    "batteryConfig": "6S 22000mAh LiPo",
+    "cruisePower_W": 210,
+    "maxThrust_kg": 5.8
+  },
+  "aerodynamics": {
+    "liftToDragRatio": 16.5,
+    "c_d0": 0.021,
+    "oswald_e": 0.88,
+    "stallSpeed_kmh": 42.0,
+    "cruiseSpeed_kmh": 85.0,
+    "maxSpeed_kmh": 140.0,
+    "staticMargin_percent": 12.4,
+    "x_cg_m": 0.42,
+    "x_np_m": 0.48
+  },
+  "performance": {
+    "flightTime_min": 150,
+    "range_km": 180,
+    "ceiling_m": 4500,
+    "payloadType": "Гиростабилизированный подвес 4K/IR + лазерный дальномер"
+  },
+  "components": [
+    { "name": "Оптико-электронная станция", "category": "payload", "x_m": 0.08, "y_m": 0, "z_m": -0.06, "mass_kg": 0.75 },
+    { "name": "Полетный контроллер PX4 Cube", "category": "avionics", "x_m": 0.38, "y_m": 0, "z_m": 0.02, "mass_kg": 0.18 },
+    { "name": "АКБ 6S 22000mAh", "category": "battery", "x_m": 0.32, "y_m": 0, "z_m": -0.01, "mass_kg": 1.80 },
+    { "name": "Маршевый двигатель BLDC", "category": "propulsion", "x_m": 1.35, "y_m": 0, "z_m": 0.04, "mass_kg": 0.35 }
+  ],
+  "structuralMaterials": {
+    "skin": "Углепластик T700 200 г/м² + Rohacell сэндвич",
+    "spars": "Карбоновые пултрузионные трубы D=18мм",
+    "ribs": "Авиационная фанера 2.0мм / 3D-печать PETG"
+  }
+}`;
+
+    const promptContext = `
+ТЕХНИЧЕСКОЕ ЗАДАНИЕ НА 3D СИНТЕЗ БПЛА:
+- Описание миссии / Запрос: ${missionPrompt || "Высокоэффективный многоцелевой БПЛА дальнего радиуса действия"}
+- Архитектура: ${architecture || "любая оптимальная под задачу"}
+- Целевая дальность: ${targetRangeKm ? targetRangeKm + " км" : "авто"}
+- Масса полезной нагрузки: ${targetPayloadKg ? targetPayloadKg + " кг" : "авто"}
+- Крейсерская скорость: ${targetSpeedKmh ? targetSpeedKmh + " км/ч" : "авто"}
+`;
+
+    const candidateModels = ["gemini-3.7-flash", "gemini-3.1-flash-lite"];
+    let responseText: string | null = null;
+    let lastError: any = null;
+
+    for (const modelName of candidateModels) {
+      try {
+        const result = await ai.models.generateContent({
+          model: modelName,
+          contents: promptContext,
+          config: {
+            systemInstruction: systemPrompt,
+            responseMimeType: "application/json",
+          },
+        });
+
+        if (result.text) {
+          responseText = result.text;
+          break;
+        }
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`[3D UAV AI Synthesizer] Model ${modelName} failed:`, err?.message || err);
+      }
+    }
+
+    if (!responseText) {
+      throw lastError || new Error("Не удалось сгенерировать 3D БПЛА через AI.");
+    }
+
+    const parsed = JSON.parse(responseText);
+    return res.json({ success: true, config: parsed });
+  } catch (err: any) {
+    console.error("3D UAV AI Synthesizer Error:", err);
+    return res.status(500).json({
+      success: false,
+      error: err.message || "Ошибка при AI-синтезе 3D конфигурации БПЛА.",
+    });
+  }
+});
+
 // Vite / static file middleware
 async function setupViteOrStatic() {
   if (process.env.NODE_ENV !== "production") {
