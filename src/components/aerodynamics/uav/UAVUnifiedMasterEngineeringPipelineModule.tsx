@@ -71,6 +71,7 @@ import { UAVFlightEnvelopeDiagram } from './pipeline/UAVFlightEnvelopeDiagram';
 import { UAVPropulsionBEMAnalyzer } from './pipeline/UAVPropulsionBEMAnalyzer';
 import { UAVEWLinkBudgetCalculator } from './pipeline/UAVEWLinkBudgetCalculator';
 import { UAVFlightDynamicsSimulationPanel } from './pipeline/UAVFlightDynamicsSimulationPanel';
+import { UAVDigitalTwinHub, DigitalTwinBusState } from './pipeline/UAVDigitalTwinHub';
 
 export type PipelineStageId =
   | 'stage1_concept'
@@ -1002,6 +1003,85 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
     return <Compass {...props} />;
   }
 
+  // Master Digital Twin Bus State Assembly
+  const digitalTwinBusState: DigitalTwinBusState = useMemo(() => {
+    const rho = 1.225;
+    const v_s1_ms = Math.sqrt((2 * digitalTwinMetrics.totalMass * 9.81) / (rho * digitalTwinMetrics.wingArea_m2 * selectedAirfoil.cl_max));
+    const v_a_kmh = v_s1_ms * Math.sqrt(3.8) * 3.6;
+    const v_dive_kmh = cruiseSpeed_kmh * 1.55;
+    const v_flutter_kmh = v_dive_kmh * 1.25;
+
+    const nominalVoltage = batteryCells * 3.7;
+    const cruiseCurrent_A = digitalTwinMetrics.electricalPowerCruise_W / Math.max(1, nominalVoltage);
+
+    const rfFrequency_MHz = 868;
+    const txPower_W = 1.0;
+    const h_tx = 15;
+    const h_rx = 500;
+    const radioHorizon_km = 3.57 * (Math.sqrt(h_tx) + Math.sqrt(h_rx));
+    const ewJammingSafeRange_km = 12.5;
+
+    return {
+      wingspan_m,
+      chordRoot_m,
+      chordTip_m,
+      sweep_deg,
+      wingArea_m2: digitalTwinMetrics.wingArea_m2,
+      aspectRatio: digitalTwinMetrics.aspectRatio,
+      taperRatio: digitalTwinMetrics.taperRatio,
+      mac_m: digitalTwinMetrics.mac_m,
+      payload_kg,
+      batteryMass_kg,
+      avionicsMass_kg,
+      structuralMass_kg,
+      totalMass_kg: digitalTwinMetrics.totalMass,
+      x_cg_m: digitalTwinMetrics.x_cg_m,
+      x_np_m: digitalTwinMetrics.x_np_m,
+      staticMargin_percent: digitalTwinMetrics.staticMargin_percent,
+      isStable: digitalTwinMetrics.isStable,
+      airfoil: selectedAirfoil,
+      cl_cruise: digitalTwinMetrics.C_L_cruise,
+      cd_total: digitalTwinMetrics.Cd_total,
+      liftToDragRatio: digitalTwinMetrics.liftToDragRatio,
+      v_stall_kmh: digitalTwinMetrics.V_stall_kmh,
+      thrustRequired_N: digitalTwinMetrics.thrustRequired_N,
+      batteryCells,
+      batteryCap_mAh,
+      motorKv,
+      propDiameter_in,
+      propPitch_in,
+      cruiseSpeed_kmh,
+      cruiseCurrent_A,
+      flightTime_min: digitalTwinMetrics.calculatedEndurance_min,
+      calculatedRange_km: digitalTwinMetrics.calculatedRange_km,
+      maxG_limit: 3.8,
+      v_a_kmh,
+      v_dive_kmh,
+      v_flutter_kmh,
+      rfFrequency_MHz,
+      txPower_W,
+      radioHorizon_km,
+      ewJammingSafeRange_km,
+    };
+  }, [
+    wingspan_m,
+    chordRoot_m,
+    chordTip_m,
+    sweep_deg,
+    digitalTwinMetrics,
+    selectedAirfoil,
+    payload_kg,
+    batteryMass_kg,
+    avionicsMass_kg,
+    structuralMass_kg,
+    batteryCells,
+    batteryCap_mAh,
+    motorKv,
+    propDiameter_in,
+    propPitch_in,
+    cruiseSpeed_kmh,
+  ]);
+
   return (
     <div className="w-full bg-slate-950 text-slate-100 rounded-3xl border border-teal-500/40 p-4 md:p-6 shadow-2xl font-sans space-y-6">
       {/* Top Banner: Master System Title */}
@@ -1055,6 +1135,16 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
           </button>
         </div>
       </div>
+
+      {/* One-Click Digital Twin Master Engineering State Bus */}
+      <UAVDigitalTwinHub
+        busState={digitalTwinBusState}
+        onUpdateBusParam={(key, val) => {
+          if (key === 'wingspan_m') setWingspanM(val);
+          if (key === 'cruiseSpeed_kmh') setCruiseSpeedKmh(val);
+        }}
+        onNavigateToStage={(stageId) => setActiveStage(stageId as PipelineStageId)}
+      />
 
       {/* Archetype Quick Switcher */}
       <div className="space-y-2">
