@@ -67,6 +67,10 @@ import {
 import { UAVMDOParetoOptimizer, ParetoCandidate } from './pipeline/UAVMDOParetoOptimizer';
 import { UAVAirfoilPolarDatabase, AirfoilSpec, UAV_AIRFOIL_LIBRARY } from './pipeline/UAVAirfoilPolarDatabase';
 import { UAVAirworthinessAuditPanel } from './pipeline/UAVAirworthinessAuditPanel';
+import { UAVFlightEnvelopeDiagram } from './pipeline/UAVFlightEnvelopeDiagram';
+import { UAVPropulsionBEMAnalyzer } from './pipeline/UAVPropulsionBEMAnalyzer';
+import { UAVEWLinkBudgetCalculator } from './pipeline/UAVEWLinkBudgetCalculator';
+import { UAVFlightDynamicsSimulationPanel } from './pipeline/UAVFlightDynamicsSimulationPanel';
 
 export type PipelineStageId =
   | 'stage1_concept'
@@ -1427,6 +1431,17 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
                   </span>
                 </div>
               </div>
+
+              {/* Flight Envelope V-n Diagram & Gust Margins */}
+              <div className="pt-2">
+                <UAVFlightEnvelopeDiagram
+                  mtow_kg={digitalTwinMetrics.totalMass}
+                  wingArea_m2={digitalTwinMetrics.wingArea_m2}
+                  wingspan_m={wingspan_m}
+                  cl_max={selectedAirfoil.cl_max}
+                  cruiseSpeed_kmh={cruiseSpeed_kmh}
+                />
+              </div>
             </div>
           )}
 
@@ -1530,6 +1545,20 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
                   </div>
                 </div>
               </div>
+
+              {/* Propulsion BEM & Thermal Dynamics */}
+              <div className="pt-2">
+                <UAVPropulsionBEMAnalyzer
+                  batteryCap_mAh={batteryCap_mAh}
+                  batteryS_count={batteryCells}
+                  motorKv={motorKv}
+                  propDiameter_in={propDiameter_in}
+                  propPitch_in={Math.round(propDiameter_in * 0.55)}
+                  cruiseSpeed_kmh={cruiseSpeed_kmh}
+                  cruiseThrustReq_N={digitalTwinMetrics.thrustRequired_N}
+                  mtow_kg={digitalTwinMetrics.totalMass}
+                />
+              </div>
             </div>
           )}
 
@@ -1576,6 +1605,14 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
                   </div>
                 </div>
               </div>
+
+              {/* C2 Link Budget & EW Jamming Resistance */}
+              <div className="pt-2">
+                <UAVEWLinkBudgetCalculator
+                  calculatedRange_km={digitalTwinMetrics.calculatedRange_km}
+                  altitude_m={500}
+                />
+              </div>
             </div>
           )}
 
@@ -1616,6 +1653,17 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
                     Перегрузка старта: n_x &le; 6.5 g
                   </div>
                 </div>
+              </div>
+
+              {/* 6-DoF Flight Dynamics, Dryden Gust & Stability */}
+              <div className="pt-2">
+                <UAVFlightDynamicsSimulationPanel
+                  staticMargin_percent={digitalTwinMetrics.staticMargin_percent}
+                  liftToDragRatio={digitalTwinMetrics.liftToDragRatio}
+                  wingspan_m={wingspan_m}
+                  cruiseSpeed_kmh={cruiseSpeed_kmh}
+                  mtow_kg={digitalTwinMetrics.totalMass}
+                />
               </div>
             </div>
           )}
