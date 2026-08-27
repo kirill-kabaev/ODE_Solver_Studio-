@@ -73,6 +73,7 @@ import { UAVEWLinkBudgetCalculator } from './pipeline/UAVEWLinkBudgetCalculator'
 import { UAVFlightDynamicsSimulationPanel } from './pipeline/UAVFlightDynamicsSimulationPanel';
 import { UAVDigitalTwinHub, DigitalTwinBusState } from './pipeline/UAVDigitalTwinHub';
 import { UAVEngineeringArtifactsExporter } from './pipeline/UAVEngineeringArtifactsExporter';
+import { UAVHILMissionSimulator } from './pipeline/UAVHILMissionSimulator';
 
 export type PipelineStageId =
   | 'stage1_concept'
@@ -1754,6 +1755,13 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
                   wingspan_m={wingspan_m}
                   cruiseSpeed_kmh={cruiseSpeed_kmh}
                   mtow_kg={digitalTwinMetrics.totalMass}
+                />
+              </div>
+
+              {/* Hardware-In-The-Loop (HIL) & Mission Flight Profile Simulator */}
+              <div className="pt-2">
+                <UAVHILMissionSimulator
+                  busState={digitalTwinBusState}
                 />
               </div>
             </div>
