@@ -75,6 +75,7 @@ import { UAVDigitalTwinHub, DigitalTwinBusState } from './pipeline/UAVDigitalTwi
 import { UAVEngineeringArtifactsExporter } from './pipeline/UAVEngineeringArtifactsExporter';
 import { UAVHILMissionSimulator } from './pipeline/UAVHILMissionSimulator';
 import { UAVDesignTradeOffAdvisor } from './pipeline/UAVDesignTradeOffAdvisor';
+import { UAVDesignRevisionComparator } from './pipeline/UAVDesignRevisionComparator';
 
 export type PipelineStageId =
   | 'stage1_concept'
@@ -521,6 +522,20 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
     } else if (paramKey === 'payload_kg') {
       setPayloadXM(0.12);
     }
+  };
+
+  // Apply a selected Revision snapshot to active state
+  const handleApplyRevision = (revState: Partial<DigitalTwinBusState>) => {
+    if (revState.wingspan_m !== undefined) setWingspanM(revState.wingspan_m);
+    if (revState.chordRoot_m !== undefined) setChordRootM(revState.chordRoot_m);
+    if (revState.chordTip_m !== undefined) setChordTipM(revState.chordTip_m);
+    if (revState.sweep_deg !== undefined) setSweepDeg(revState.sweep_deg);
+    if (revState.batteryCap_mAh !== undefined) {
+      setBatteryCapMah(revState.batteryCap_mAh);
+      setBatteryMassKg((revState.batteryCap_mAh / 1000) * 0.085);
+    }
+    if (revState.batteryCells !== undefined) setBatteryCells(revState.batteryCells);
+    if (revState.cruiseSpeed_kmh !== undefined) setCruiseSpeedKmh(revState.cruiseSpeed_kmh);
   };
 
   // Apply archetype preset
@@ -1354,6 +1369,14 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
                   busState={digitalTwinBusState}
                   onApplyFix={handleApplyTradeOffFix}
                   onNavigateToStage={(stageId) => setActiveStage(stageId as PipelineStageId)}
+                />
+              </div>
+
+              {/* Multi-Configuration Revision Comparator & A/B Matrix */}
+              <div className="pt-2">
+                <UAVDesignRevisionComparator
+                  currentBusState={digitalTwinBusState}
+                  onApplyRevision={handleApplyRevision}
                 />
               </div>
             </div>
