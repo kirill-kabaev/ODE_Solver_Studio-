@@ -77,6 +77,7 @@ import { UAVHILMissionSimulator } from './pipeline/UAVHILMissionSimulator';
 import { UAVDesignTradeOffAdvisor } from './pipeline/UAVDesignTradeOffAdvisor';
 import { UAVDesignRevisionComparator } from './pipeline/UAVDesignRevisionComparator';
 import { UAVFlightManualGenerator } from './pipeline/UAVFlightManualGenerator';
+import { UAV3DAeroMeshPressureVisualizer } from './pipeline/UAV3DAeroMeshPressureVisualizer';
 
 export type PipelineStageId =
   | 'stage1_concept'
@@ -1471,6 +1472,13 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
                 <UAVAirfoilPolarDatabase
                   selectedAirfoilId={selectedAirfoilId}
                   onSelectAirfoil={(af) => setSelectedAirfoilId(af.id)}
+                />
+              </div>
+
+              {/* Interactive 3D Aero Mesh & Surface Pressure / Stall Flow Visualizer */}
+              <div className="pt-2">
+                <UAV3DAeroMeshPressureVisualizer
+                  busState={digitalTwinBusState}
                 />
               </div>
             </div>
