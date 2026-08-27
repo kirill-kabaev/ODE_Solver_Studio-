@@ -72,6 +72,7 @@ import { UAVPropulsionBEMAnalyzer } from './pipeline/UAVPropulsionBEMAnalyzer';
 import { UAVEWLinkBudgetCalculator } from './pipeline/UAVEWLinkBudgetCalculator';
 import { UAVFlightDynamicsSimulationPanel } from './pipeline/UAVFlightDynamicsSimulationPanel';
 import { UAVDigitalTwinHub, DigitalTwinBusState } from './pipeline/UAVDigitalTwinHub';
+import { UAVEngineeringArtifactsExporter } from './pipeline/UAVEngineeringArtifactsExporter';
 
 export type PipelineStageId =
   | 'stage1_concept'
@@ -1805,6 +1806,13 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
                     Спецификация BOM &rarr;
                   </button>
                 </div>
+              </div>
+
+              {/* Engineering Artifacts Generator & Autopilot Exporter */}
+              <div className="pt-2">
+                <UAVEngineeringArtifactsExporter
+                  busState={digitalTwinBusState}
+                />
               </div>
 
               {/* Airworthiness Certification & Compliance Audit */}
