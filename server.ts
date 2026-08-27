@@ -224,7 +224,7 @@ ${cauchy?.x0 !== undefined && cauchy?.x0 !== "" ? `Начальные услов
 Пользовательские опции: ${JSON.stringify(options || {})}`;
 
     // Fast, modern and responsive Gemini models in optimal order
-    const candidateModels = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.5-pro"];
+    const candidateModels = ["gemini-3.7-flash", "gemini-3.1-flash-lite"];
     let responseText: string | null = null;
     let lastError: any = null;
 
@@ -358,6 +358,221 @@ ${cauchy?.x0 !== undefined && cauchy?.x0 !== "" ? `Начальные услов
     return res.status(500).json({
       success: false,
       error: err.message || "Ошибка при символьном решении дифференциального уравнения.",
+    });
+  }
+});
+
+// AI Scientific Paper Generator Endpoint
+app.post("/api/paper/generate-ai", async (req, res) => {
+  try {
+    const {
+      topicTitle,
+      focusArea,
+      userPrompt,
+      journalStandard,
+      rigorLevel,
+      language,
+      authorInfo,
+      busState,
+    } = req.body;
+
+    const ai = getAI();
+
+    const systemPrompt = `Ты — ведущий академический учёный в области аэрокосмической инженерии, аэродинамики БПЛА, систем автоматического управления и электродинамики (IEEE Fellow, AIAA Senior Member, Scopus Q1 Reviewer).
+Твоя задача — сгенерировать глубокую, строгую, рецензируемую научную статью высочайшего уровня (Scopus Q1 / IEEE Transactions / AIAA Journal / ВАК) на основе телеметрии цифрового двойника БПЛА и заданных параметров исследования.
+
+Требования к содержанию статьи:
+1. Заголовок (на английском и русском) должен быть научно строгим и отражать инновационный аспект.
+2. Abstract: структурированный (Background, Objective, Numerical/Experimental Methods, Quantitative Results, Engineering Significance).
+3. Keywords: 6-8 актуальных терминов на EN и RU.
+4. Introduction & State-of-the-Art: обзор литературы с отсылками к статьям [1]-[6], выявление научного пробела (research gap) и формулировка новизны.
+5. Mathematical Formulation: строгие формулы в LaTeX (напр. VLM, уравнения Навье-Стокса / Эйлера, Хельмбольд, BEM для винтов, L1-адаптивное управление, уравнения Максвелла для ЭПР, критерии устойчивости).
+6. Digital Twin Telemetry Analysis: подробный численный анализ с конкретными параметрами БПЛА (размах, удлинение, профиль, масса, $L/D$, скорость сваливания, запас устойчивости $SM$, энергетика).
+7. Results & Multiphysics Discussion: количественные выводы, сравнение с аналогами, оценка погрешностей и практических режимов полета.
+8. Conclusion & Future Research: четкие пункты новизны и направления дальнейших исследований.
+9. Библиография (BibReferences): 5-8 реальных высокорейтинговых источников с авторами, названиями журналов (AIAA, IEEE, Journal of Aircraft, Springer), годами и DOI.
+
+Ответ строго в формате JSON по схеме:
+{
+  "titleEn": "...",
+  "titleRu": "...",
+  "journalRecommended": "...",
+  "udcCode": "...",
+  "pacsCode": "...",
+  "doi": "10.1109/TAES.2026.xxxxxxx",
+  "keywordsEn": ["...", "..."],
+  "keywordsRu": ["...", "..."],
+  "abstractEn": "...",
+  "abstractRu": "...",
+  "introduction": "...",
+  "methodologySection": "...",
+  "digitalTwinAnalysis": "...",
+  "resultsDiscussion": "...",
+  "conclusion": "...",
+  "futureWork": "...",
+  "acknowledgments": "...",
+  "governingEquations": [
+    {
+      "label": "Название уравнения",
+      "latex": "LaTeX код без $",
+      "description": "Физико-математический смысл"
+    }
+  ],
+  "keyFindings": [
+    "Ключевой количественный результат 1",
+    "Ключевой количественный результат 2",
+    "Ключевой количественный результат 3"
+  ],
+  "bibReferences": [
+    {
+      "key": "citation_key",
+      "authors": "A. Author, B. Author",
+      "title": "Title of paper",
+      "journal": "IEEE Trans. on Aerospace...",
+      "year": 2024,
+      "volume": "60",
+      "pages": "112-125",
+      "doi": "10.1109/..."
+    }
+  ]
+}`;
+
+    const promptContext = `
+ПАРАМЕТРЫ ЦИФРОВОГО ДВОЙНИКА БПЛА:
+- Размах крыла b: ${busState?.wingspan_m ?? 2.1} м
+- Удлинение AR: ${busState?.aspectRatio ?? 7.5}
+- Стреловидность: ${busState?.sweep_deg ?? 18}°
+- Профиль крыла: ${busState?.airfoil?.name ?? "MH60"} (толщина ${busState?.airfoil?.thickness_percent ?? 10.1}%, кривизна ${busState?.airfoil?.camber_percent ?? 1.8}%)
+- Взлетная масса MTOW: ${busState?.totalMass_kg ?? 4.8} кг
+- Аэродинамическое качество L/D: ${busState?.liftToDragRatio ?? 14.8}
+- Крейсерская скорость: ${busState?.cruiseSpeed_kmh ?? 75} км/ч
+- Скорость сваливания: ${busState?.v_stall_kmh ?? 38} км/ч
+- Запас статической устойчивости SM: ${busState?.staticMargin_percent ?? 11.2}%
+- Емкость батареи: ${busState?.batteryCap_mAh ?? 16000} мАч (${busState?.batteryCells ?? 6}S)
+- Расчетная дальность: ${busState?.calculatedRange_km ?? 125} км
+- Время полета: ${busState?.flightTime_min ?? 110} мин
+- ЭПР (базовая): ${busState?.baseRcs ?? 0.045} м²
+
+ЗАДАЧА НАУЧНОГО ИССЛЕДОВАНИЯ:
+- Тема статьи: ${topicTitle || "Аэродинамическая и мультифизическая оптимизация БПЛА"}
+- Фокус исследования: ${focusArea || "Комплексная оптимизация планера и систем"}
+- Пользовательские уточнения: ${userPrompt || "Разработать целостную публикацию мирового уровня"}
+- Целевой стандарт журнала: ${journalStandard || "ieee"}
+- Академический уровень: ${rigorLevel || "journal_q1"}
+- Язык публикации: ${language || "en"}
+- Автор: ${authorInfo?.primaryAuthor || "Dr. Alexander V. Sokolov"} (${authorInfo?.affiliation || "National Aerospace Research University"})
+`;
+
+    const candidateModels = ["gemini-3.7-flash", "gemini-3.1-flash-lite"];
+    let responseText: string | null = null;
+    let lastError: any = null;
+
+    for (const modelName of candidateModels) {
+      try {
+        const result = await ai.models.generateContent({
+          model: modelName,
+          contents: promptContext,
+          config: {
+            systemInstruction: systemPrompt,
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: Type.OBJECT,
+              properties: {
+                titleEn: { type: Type.STRING },
+                titleRu: { type: Type.STRING },
+                journalRecommended: { type: Type.STRING },
+                udcCode: { type: Type.STRING },
+                pacsCode: { type: Type.STRING },
+                doi: { type: Type.STRING },
+                keywordsEn: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING },
+                },
+                keywordsRu: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING },
+                },
+                abstractEn: { type: Type.STRING },
+                abstractRu: { type: Type.STRING },
+                introduction: { type: Type.STRING },
+                methodologySection: { type: Type.STRING },
+                digitalTwinAnalysis: { type: Type.STRING },
+                resultsDiscussion: { type: Type.STRING },
+                conclusion: { type: Type.STRING },
+                futureWork: { type: Type.STRING },
+                acknowledgments: { type: Type.STRING },
+                governingEquations: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      label: { type: Type.STRING },
+                      latex: { type: Type.STRING },
+                      description: { type: Type.STRING },
+                    },
+                    required: ["label", "latex", "description"],
+                  },
+                },
+                keyFindings: {
+                  type: Type.ARRAY,
+                  items: { type: Type.STRING },
+                },
+                bibReferences: {
+                  type: Type.ARRAY,
+                  items: {
+                    type: Type.OBJECT,
+                    properties: {
+                      key: { type: Type.STRING },
+                      authors: { type: Type.STRING },
+                      title: { type: Type.STRING },
+                      journal: { type: Type.STRING },
+                      year: { type: Type.INTEGER },
+                      volume: { type: Type.STRING },
+                      pages: { type: Type.STRING },
+                      doi: { type: Type.STRING },
+                    },
+                    required: ["key", "authors", "title", "journal", "year", "doi"],
+                  },
+                },
+              },
+              required: [
+                "titleEn",
+                "titleRu",
+                "abstractEn",
+                "abstractRu",
+                "introduction",
+                "methodologySection",
+                "digitalTwinAnalysis",
+                "resultsDiscussion",
+                "conclusion",
+                "governingEquations",
+                "bibReferences",
+              ],
+            },
+          },
+        });
+
+        if (result.text) {
+          responseText = result.text;
+          break;
+        }
+      } catch (err: any) {
+        lastError = err;
+        console.warn(`[Paper AI Generator] Model ${modelName} failed:`, err?.message || err);
+      }
+    }
+
+    if (!responseText) {
+      throw lastError || new Error("Не удалось сгенерировать научную статью через AI сервис.");
+    }
+
+    const parsed = JSON.parse(responseText);
+    return res.json({ success: true, paper: parsed });
+  } catch (err: any) {
+    console.error("Scientific Paper AI Generator Error:", err);
+    return res.status(500).json({
+      success: false,
+      error: err.message || "Ошибка при AI-генерации научной статьи.",
     });
   }
 });
