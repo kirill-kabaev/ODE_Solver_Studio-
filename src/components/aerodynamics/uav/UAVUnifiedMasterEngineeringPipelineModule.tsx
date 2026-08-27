@@ -76,6 +76,7 @@ import { UAVEngineeringArtifactsExporter } from './pipeline/UAVEngineeringArtifa
 import { UAVHILMissionSimulator } from './pipeline/UAVHILMissionSimulator';
 import { UAVDesignTradeOffAdvisor } from './pipeline/UAVDesignTradeOffAdvisor';
 import { UAVDesignRevisionComparator } from './pipeline/UAVDesignRevisionComparator';
+import { UAVFlightManualGenerator } from './pipeline/UAVFlightManualGenerator';
 
 export type PipelineStageId =
   | 'stage1_concept'
@@ -1889,6 +1890,13 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
                   endurance_min={digitalTwinMetrics.calculatedEndurance_min}
                   range_km={digitalTwinMetrics.calculatedRange_km}
                   rcs_m2={digitalTwinMetrics.baseRcs}
+                />
+              </div>
+
+              {/* Automated Flight Manual & POH Generator (STANAG / FAA compliant) */}
+              <div className="pt-2">
+                <UAVFlightManualGenerator
+                  busState={digitalTwinBusState}
                 />
               </div>
             </div>
