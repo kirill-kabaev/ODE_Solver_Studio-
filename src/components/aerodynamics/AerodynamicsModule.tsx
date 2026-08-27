@@ -119,6 +119,7 @@ import { UAVAcousticArrayPassiveDirectionFindingModule } from './uav/UAVAcoustic
 import { UAVDecentralizedSwarmCoSLAMModule } from './uav/UAVDecentralizedSwarmCoSLAMModule';
 import { UAVBioInsectFlappingLEVStudioModule } from './uav/UAVBioInsectFlappingLEVStudioModule';
 import { UAVUnifiedMasterEngineeringPipelineModule } from './uav/UAVUnifiedMasterEngineeringPipelineModule';
+import { UAVScientificPaperGeneratorModule } from './uav/UAVScientificPaperGeneratorModule';
 import { UAVVisualDependencyGraphModule } from './UAVVisualDependencyGraphModule';
 import { RocketStagingTrajectoryOptimizer } from './space/RocketStagingTrajectoryOptimizer';
 import { PDEAcousticWaveStudio } from './physics/PDEAcousticWaveStudio';
@@ -200,6 +201,7 @@ export type AeroSubTab =
   | 'uav_mhd_plasma'
   | 'uav_acoustic_cloaking'
   | 'uav_master_pipeline'
+  | 'uav_scientific_paper_generator'
   | 'uav_visual_graph'
   | 'uav_ai_constructor'
   | 'uav_mavlink_bus'
@@ -831,6 +833,19 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
           >
             <Sparkles className="w-3.5 h-3.5 text-teal-400 animate-pulse" />
             <span>🌐 Схема Связей Узлов (D3.js Граф)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleUAVSubTabSelect('uav_scientific_paper_generator')}
+            className={`flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-black transition-all cursor-pointer whitespace-nowrap ${
+              activeUAVSubTab === 'uav_scientific_paper_generator'
+                ? 'bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 text-slate-950 shadow-lg shadow-emerald-500/30 ring-2 ring-emerald-300'
+                : 'text-emerald-300 hover:text-white hover:bg-emerald-950/60 bg-slate-950/90 border border-emerald-500/60'
+            }`}
+          >
+            <BookOpen className="w-4 h-4 text-emerald-400 animate-pulse" />
+            <span>📑 ГЕНЕРАТОР НАУЧНЫХ СТАТЕЙ (IEEE, AIAA, ВАК, Scopus Q1)</span>
           </button>
 
           <button
@@ -1869,6 +1884,7 @@ export const AerodynamicsModule: React.FC<AerodynamicsModuleProps> = ({
             />
           )}
           {activeUAVSubTab === 'uav_visual_graph' && <UAVVisualDependencyGraphModule />}
+          {activeUAVSubTab === 'uav_scientific_paper_generator' && <UAVScientificPaperGeneratorModule />}
           {activeUAVSubTab === 'uav_ai_constructor' && <UAVAIGenerativeConstructorStudio />}
           {activeUAVSubTab === 'uav_cad_mesh_dxf' && <UAVCADMeshGeneratorDXFModule />}
           {activeUAVSubTab === 'uav_hil_sil_autopilot' && <UAVHILSILAutopilotStudioModule />}

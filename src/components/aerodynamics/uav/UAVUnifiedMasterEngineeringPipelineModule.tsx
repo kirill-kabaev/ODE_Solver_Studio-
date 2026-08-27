@@ -78,6 +78,7 @@ import { UAVDesignTradeOffAdvisor } from './pipeline/UAVDesignTradeOffAdvisor';
 import { UAVDesignRevisionComparator } from './pipeline/UAVDesignRevisionComparator';
 import { UAVFlightManualGenerator } from './pipeline/UAVFlightManualGenerator';
 import { UAV3DAeroMeshPressureVisualizer } from './pipeline/UAV3DAeroMeshPressureVisualizer';
+import { UAVScientificPaperGenerator } from './pipeline/UAVScientificPaperGenerator';
 
 export type PipelineStageId =
   | 'stage1_concept'
@@ -443,6 +444,14 @@ const PIPELINE_CONNECTED_MODULES: Record<PipelineStageId, ConnectedModuleInfo[]>
       description: 'Генерация инженерного паспорта БПЛА, ведомости покупных изделий и калькуляции стоимости.',
       badge: '#BOM-PLM-Doc',
       color: 'amber',
+    },
+    {
+      id: 'uav_scientific_paper_generator',
+      name: 'Генератор Научных Статей (IEEE / Scopus Q1 / ВАК)',
+      category: 'Академические Публикации',
+      description: 'Синтез рецензируемых статей, формул LaTeX, таблиц валидации и BibTeX библиографий.',
+      badge: '#IEEE-Scopus-Q1',
+      color: 'teal',
     },
   ],
 };
@@ -1904,6 +1913,13 @@ export const UAVUnifiedMasterEngineeringPipelineModule: React.FC<Props> = ({ onN
               {/* Automated Flight Manual & POH Generator (STANAG / FAA compliant) */}
               <div className="pt-2">
                 <UAVFlightManualGenerator
+                  busState={digitalTwinBusState}
+                />
+              </div>
+
+              {/* Automated Scientific Paper & Journal Article Synthesis (IEEE / AIAA / ВАК / Scopus Q1) */}
+              <div className="pt-2">
+                <UAVScientificPaperGenerator
                   busState={digitalTwinBusState}
                 />
               </div>
